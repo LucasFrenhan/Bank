@@ -1,0 +1,3 @@
+# Contexto de build contém apenas o Dockerfile
+*
+!Dockerfile

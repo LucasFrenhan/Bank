@@ -50,12 +50,16 @@ depois do `start_app`.
 
 ## Cenário 3 — Telemetria (US3, FR-004, SC-004)
 
+Os payloads usam o horário atual (`NOW`/`END`), para os itens caírem na janela de tempo
+exibida pela interface. Cada `curl` deve responder `{}` (HTTP 200).
+
 Enviar um trace de teste via OTLP/HTTP:
 
 ```bash
+NOW=$(date +%s)000000000; END=$(( $(date +%s) + 1 ))000000000
 curl -s -X POST http://localhost:4318/v1/traces \
   -H "Content-Type: application/json" \
-  -d '{"resourceSpans":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"quickstart"}}]},"scopeSpans":[{"spans":[{"traceId":"5b8efff798038103d269b633813fc60c","spanId":"eee19b7ec3c1b174","name":"teste-quickstart","kind":1,"startTimeUnixNano":"1700000000000000000","endTimeUnixNano":"1700000001000000000"}]}]}]}'
+  -d '{"resourceSpans":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"quickstart"}}]},"scopeSpans":[{"spans":[{"traceId":"5b8efff798038103d269b633813fc60c","spanId":"eee19b7ec3c1b174","name":"teste-quickstart","kind":1,"startTimeUnixNano":"'"$NOW"'","endTimeUnixNano":"'"$END"'"}]}]}]}'
 ```
 
 **Esperado**: em até 10s, o trace `teste-quickstart` do serviço `quickstart` aparece em
@@ -66,7 +70,7 @@ Enviar um log correlacionado ao trace:
 ```bash
 curl -s -X POST http://localhost:4318/v1/logs \
   -H "Content-Type: application/json" \
-  -d '{"resourceLogs":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"quickstart"}}]},"scopeLogs":[{"logRecords":[{"timeUnixNano":"1700000000500000000","severityNumber":9,"severityText":"Information","body":{"stringValue":"log de teste do quickstart"},"traceId":"5b8efff798038103d269b633813fc60c","spanId":"eee19b7ec3c1b174"}]}]}]}'
+  -d '{"resourceLogs":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"quickstart"}}]},"scopeLogs":[{"logRecords":[{"timeUnixNano":"'"$NOW"'","severityNumber":9,"severityText":"Information","body":{"stringValue":"log de teste do quickstart"},"traceId":"5b8efff798038103d269b633813fc60c","spanId":"eee19b7ec3c1b174"}]}]}]}'
 ```
 
 **Esperado**: o log aparece em *Structured logs* e, ao abri-lo, está vinculado ao trace
@@ -75,7 +79,6 @@ curl -s -X POST http://localhost:4318/v1/logs \
 Enviar uma métrica (contador):
 
 ```bash
-NOW=$(date +%s)000000000
 curl -s -X POST http://localhost:4318/v1/metrics \
   -H "Content-Type: application/json" \
   -d '{"resourceMetrics":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"quickstart"}}]},"scopeMetrics":[{"scope":{"name":"quickstart"},"metrics":[{"name":"quickstart.requisicoes","unit":"1","sum":{"aggregationTemporality":2,"isMonotonic":true,"dataPoints":[{"asInt":"1","startTimeUnixNano":"'"$NOW"'","timeUnixNano":"'"$NOW"'"}]}}]}]}]}'

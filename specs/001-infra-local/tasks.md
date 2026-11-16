@@ -114,22 +114,22 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
 
 **Independent Test**: [quickstart.md — Cenário 3](quickstart.md#cenário-3--telemetria-us3-fr-004-sc-004).
 
-- [ ] T010 [US3] Inspecionar a imagem `mcr.microsoft.com/dotnet/aspire-dashboard:13.6.5`
+- [x] T010 [US3] Inspecionar a imagem `mcr.microsoft.com/dotnet/aspire-dashboard:13.6.5`
   para descobrir ferramentas disponíveis para healthcheck (`curl`, `wget`, `bash`, `sh`)
   e registrar o resultado em `specs/001-infra-local/research.md` (seção R3)
-- [ ] T011 [US3] Adicionar o serviço `aspire-dashboard` em `docker-compose.yml`: imagem
+- [x] T011 [US3] Adicionar o serviço `aspire-dashboard` em `docker-compose.yml`: imagem
   `mcr.microsoft.com/dotnet/aspire-dashboard:13.6.5`;
   `DASHBOARD__FRONTEND__AUTHMODE=Unsecured` e `DASHBOARD__OTLP__AUTHMODE=Unsecured`;
   portas `127.0.0.1:${ASPIRE_DASHBOARD_PORT:-18888}:18888`,
   `127.0.0.1:${OTLP_GRPC_PORT:-4317}:18889` e `127.0.0.1:${OTLP_HTTP_PORT:-4318}:18890`;
   sem volume e sem `depends_on` (R1, R4, R7)
-- [ ] T012 [US3] Adicionar healthcheck ao `aspire-dashboard` em `docker-compose.yml`
+- [x] T012 [US3] Adicionar healthcheck ao `aspire-dashboard` em `docker-compose.yml`
   conforme o resultado de T010 (ordem de preferência do R3); se a imagem não tiver
   ferramenta de checagem, criar `docker/aspire-dashboard/Dockerfile` (`FROM` a tag
   fixada + apenas a ferramenta), apontar o serviço para esse build e registrar o motivo em
   `specs/001-infra-local/plan.md` (Complexity Tracking). Dispensar o healthcheck não é
   permitido (constituição, FR-005, SC-003)
-- [ ] T013 [US3] Executar o Cenário 3 do `quickstart.md` para traces, logs e métricas via
+- [x] T013 [US3] Executar o Cenário 3 do `quickstart.md` para traces, logs e métricas via
   OTLP/HTTP e confirmar visualização na UI em ≤ 10s (SC-004)
 
 **Checkpoint**: telemetria pronta para a API (issue #3)

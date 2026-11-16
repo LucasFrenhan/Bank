@@ -18,7 +18,7 @@ fiquem saudáveis.
 
 **Language/Version**: YAML (Compose Specification, Docker Compose v2); sem código de aplicação
 
-**Primary Dependencies**: `postgres:18.7-alpine`, `rabbitmq:4.3.7-management-alpine`,
+**Primary Dependencies**: `postgres:18.7-alpine`, `rabbitmq:4.3.7-management-alpine`, `busybox:1.37.0-musl` (só para o healthcheck do dashboard),
 `mcr.microsoft.com/dotnet/aspire-dashboard:13.6.5` (ver [research.md](research.md#r2-versões-das-imagens-fr-012))
 
 **Storage**: volumes nomeados `postgres-data` e `rabbitmq-data`; telemetria em memória no dashboard
@@ -103,6 +103,8 @@ healthchecks aqui definidos.
 
 ## Complexity Tracking
 
-Nenhuma violação da constituição até o momento. Se a imagem do Aspire Dashboard não
-oferecer ferramenta para healthcheck (R3), o motivo da imagem derivada
-(`docker/aspire-dashboard/Dockerfile`) será registrado aqui durante a implementação.
+Nenhuma violação da constituição. Registro de complexidade adicional:
+
+| Item | Por que é necessário | Alternativa mais simples rejeitada porque |
+|------|----------------------|-------------------------------------------|
+| Imagem derivada `docker/aspire-dashboard/Dockerfile` (oficial + BusyBox estático) | A imagem oficial é distroless (T010): sem ferramenta, não há como declarar healthcheck, exigido pela constituição, FR-005 e SC-003 | Usar a imagem oficial sem healthcheck violaria a constituição; validar só manualmente pelo quickstart não impede regressões |

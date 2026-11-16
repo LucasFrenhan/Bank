@@ -26,7 +26,8 @@ Tags de imagem consultadas nos registries oficiais (Docker Hub e MCR) em 2026-11
 | --- | --- | --- |
 | PostgreSQL | `postgres:18.7-alpine` | Última minor estável da major 18; a 19 ainda está em RC (`19rc2`). |
 | RabbitMQ | `rabbitmq:4.3.7-management-alpine` | Última patch da 4.3; a 4.4.0 acabou de sair (`.0`) e é evitada no início do projeto. Inclui o plugin de Management. |
-| Aspire Dashboard | `mcr.microsoft.com/dotnet/aspire-dashboard:13.6.5` | Última versão estável publicada. |
+| Aspire Dashboard | `mcr.microsoft.com/dotnet/aspire-dashboard:13.6.5` (base da imagem derivada `bank/aspire-dashboard:13.6.5`, ver R3) | Última versão estável publicada. |
+| BusyBox (apenas o binário, para healthcheck) | `busybox:1.37.0-musl` | Binário estático; só é copiado para a imagem derivada do dashboard (R3). |
 
 - **Rationale**: tags com versão completa garantem o mesmo ambiente em todas as máquinas;
   variantes `alpine` reduzem download e tempo de subida (SC-002).
@@ -51,6 +52,13 @@ Tags de imagem consultadas nos registries oficiais (Docker Hub e MCR) em 2026-11
      [Complexity Tracking](plan.md#complexity-tracking). Validar a saúde só manualmente
      **não** é aceitável: a constituição exige healthcheck em toda a infraestrutura, assim
      como o FR-005 e o SC-003.
+- **Resultado da inspeção (T010, 2026-11-16)**: a imagem `aspire-dashboard:13.6.5` é
+  distroless — sem `sh`, `bash`, `curl`, `wget` e sem `dotnet` no `PATH` (entrypoint
+  `/app/Aspire.Dashboard`). Alternativas 1 e 2 descartadas; adotada a alternativa 3:
+  `docker/aspire-dashboard/Dockerfile` copia o binário estático do BusyBox
+  (`busybox:1.37.0-musl`) para `/usr/local/bin/busybox`, e o healthcheck executa
+  `busybox wget -q -O /dev/null http://localhost:18888/health`. O endpoint `/health`
+  responde 200 sem autenticação (`/` responde 302).
 - **Parâmetros comuns**: `interval: 5s`, `timeout: 5s`, `retries: 12`, `start_period`
   de 10s (Postgres/Dashboard) e 30s (RabbitMQ, que demora mais a subir). Com isso, a
   falha é declarada em no máximo ~70–90s, coerente com o SC-002 (≤ 60s em condições
