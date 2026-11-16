@@ -94,13 +94,13 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
 
 **Independent Test**: [quickstart.md — Cenário 2](quickstart.md#cenário-2--saúde-dos-serviços-us2-fr-005-sc-003).
 
-- [ ] T007 [US2] Adicionar healthcheck ao `postgres` em `docker-compose.yml`:
+- [x] T007 [US2] Adicionar healthcheck ao `postgres` em `docker-compose.yml`:
   `pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}`, `interval: 5s`, `timeout: 5s`,
   `retries: 12`, `start_period: 10s` (R3)
-- [ ] T008 [US2] Adicionar healthcheck ao `rabbitmq` em `docker-compose.yml`:
+- [x] T008 [US2] Adicionar healthcheck ao `rabbitmq` em `docker-compose.yml`:
   `rabbitmq-diagnostics -q check_port_connectivity`, `interval: 5s`, `timeout: 5s`,
   `retries: 12`, `start_period: 30s` (R3)
-- [ ] T009 [US2] Executar o Cenário 2 do `quickstart.md` (incluindo `stop_app`/`start_app`
+- [x] T009 [US2] Executar o Cenário 2 do `quickstart.md` (incluindo `stop_app`/`start_app`
   do RabbitMQ) e medir o tempo de `docker compose up -d --wait` com imagens em cache
   (SC-002: ≤ 60s)
 
