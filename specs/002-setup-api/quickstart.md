@@ -106,7 +106,7 @@ do PR também falha. Descartar a branch.
 
 ## Cenário 8 — Onboarding (SC-001)
 
-A partir de um clone limpo, seguir apenas a seção "Backend (API)" do README e cronometrar
+A partir de um clone limpo, seguir apenas a seção "Backend (API)" do guia `docs/desenvolvimento.md` e cronometrar
 até `GET /health` responder `Healthy`.
 
 **Esperado**: ≤ 10 minutos, sem contar downloads (SDK, pacotes NuGet e imagens).

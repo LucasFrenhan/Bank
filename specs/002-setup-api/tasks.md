@@ -239,7 +239,7 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 - [x] T034 Fazer push da branch, confirmar `ci / build-test` e `infra-local` verdes e abrir
   o PR com `Closes #3`; validar o SC-005 no CI com um PR rascunho a partir de
   `tmp/sc005-violacao` (CI vermelho), fechado sem merge e com a branch apagada (R9)
-- [ ] T035 Após o merge, adicionar `build-test` como check obrigatório da proteção da
+- [x] T035 Após o merge, adicionar `build-test` como check obrigatório da proteção da
   `main` (FR-014)
 
 ---
