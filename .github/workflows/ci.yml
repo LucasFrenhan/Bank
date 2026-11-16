@@ -1,0 +1,38 @@
+# Pipeline geral do backend (specs/002-setup-api, research R10).
+# Sem filtro de paths: o job "build-test" é o check obrigatório da main.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: build-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Instalar SDK do .NET (global.json)
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore src/backend/Bank.slnx
+
+      - name: Build
+        run: dotnet build src/backend/Bank.slnx --no-restore -c Release
+
+      - name: Testes (unitários, integração e arquitetura)
+        run: dotnet test src/backend/Bank.slnx --no-build -c Release
