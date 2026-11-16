@@ -214,9 +214,9 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 **Independent Test**: [quickstart — Cenário 7](quickstart.md#cenário-7--violação-de-camada-us5-sc-005).
 
-- [ ] T029 [US5] Criar `backend/tests/Bank.ArchitectureTests/LayerDependencyTests.cs`
+- [x] T029 [US5] Criar `backend/tests/Bank.ArchitectureTests/LayerDependencyTests.cs`
   com as 4 regras do R9 (uma por teste), carregando os assemblies pelos tipos marcadores
-- [ ] T030 [US5] Executar o Cenário 7 do `quickstart.md`: violação proposital em
+- [x] T030 [US5] Executar o Cenário 7 do `quickstart.md`: violação proposital em
   `Bank.Api.Endpoints` → teste falha localmente; reverter
 
 **Checkpoint**: todas as histórias funcionais e verificadas
