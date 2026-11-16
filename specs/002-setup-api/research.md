@@ -46,6 +46,7 @@ publicadas há poucos dias.
 
 | Pacote | Versão | Projeto | Justificativa |
 | --- | --- | --- | --- |
+| `Microsoft.Extensions.DependencyInjection.Abstractions` | 10.0.15 | Application, Infrastructure | `IServiceCollection` para as extensões `AddApplication()`/`AddInfrastructure()` sem acoplar essas camadas ao framework do ASP.NET Core (identificado na implementação). |
 | `Microsoft.AspNetCore.OpenApi` | 10.0.15 | Api | Geração nativa do documento OpenAPI (FR-003, issue #3). |
 | `Scalar.AspNetCore` | 2.21.0 | Api | UI interativa em `/scalar/v1` (FR-004, issue #3). A 3.0.0 saiu hoje (major nova) e é evitada. |
 | `OpenTelemetry.Extensions.Hosting` | 1.21.0 | Api | Integração do SDK OpenTelemetry com o host (FR-006). |

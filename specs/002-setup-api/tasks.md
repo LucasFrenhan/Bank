@@ -34,24 +34,24 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 **Purpose**: SDK, build comum e solução com os 7 projetos
 
-- [ ] T001 [P] Criar `global.json` na raiz com `"sdk": { "version": "10.0.400", "rollForward": "latestPatch" }` (R1)
-- [ ] T002 [P] Criar `backend/Directory.Build.props`: `TargetFramework net10.0`,
+- [x] T001 [P] Criar `global.json` na raiz com `"sdk": { "version": "10.0.400", "rollForward": "latestPatch" }` (R1)
+- [x] T002 [P] Criar `backend/Directory.Build.props`: `TargetFramework net10.0`,
   `Nullable enable`, `ImplicitUsings enable`, `TreatWarningsAsErrors true`,
   `AnalysisLevel latest-recommended`, `InvariantGlobalization true` (R2)
-- [ ] T003 [P] Criar `backend/Directory.Packages.props` com
+- [x] T003 [P] Criar `backend/Directory.Packages.props` com
   `ManagePackageVersionsCentrally` e exatamente as versões da tabela do R3
   (`Microsoft.AspNetCore.OpenApi` 10.0.15, `Scalar.AspNetCore` 2.21.0, `OpenTelemetry.*`
   1.21.0, `xunit.v3` 4.0.3, `xunit.runner.visualstudio` 4.0.1, `Microsoft.NET.Test.Sdk`
   18.12.0, `Microsoft.AspNetCore.Mvc.Testing` 10.0.15, `TngTech.ArchUnitNET` 0.13.5,
   `OpenTelemetry.Exporter.InMemory` 1.21.0)
-- [ ] T004 Criar `backend/Bank.slnx` e os projetos `Bank.Domain`, `Bank.Application`,
+- [x] T004 Criar `backend/Bank.slnx` e os projetos `Bank.Domain`, `Bank.Application`,
   `Bank.Infrastructure` (classlib), `Bank.Api` (web), `Bank.UnitTests`,
   `Bank.IntegrationTests` e `Bank.ArchitectureTests` (xUnit v3), com as referências da
   tabela do R2 (Api → Application e Infrastructure; Infrastructure → Application e Domain;
   Application → Domain; testes conforme R2); os `.csproj` de teste são escritos à mão
   (o template `xunit3` não vem com o SDK); remover arquivos de exemplo dos templates
   (depende de T001–T003)
-- [ ] T005 Executar `dotnet build backend/Bank.slnx` e confirmar build sem avisos
+- [x] T005 Executar `dotnet build backend/Bank.slnx` e confirmar build sem avisos
 
 ---
 
@@ -59,16 +59,16 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 **Purpose**: composição das camadas, fábrica de testes e CI
 
-- [ ] T006 [P] Criar `backend/src/Bank.Domain/DomainAssemblyMarker.cs`,
+- [x] T006 [P] Criar `backend/src/Bank.Domain/DomainAssemblyMarker.cs`,
   `backend/src/Bank.Application/DependencyInjection.cs` (`AddApplication()`) e
   `backend/src/Bank.Infrastructure/DependencyInjection.cs` (`AddInfrastructure()`), ainda
   sem registros (R2, R9 — evitam regras "vazias")
-- [ ] T007 Criar `backend/src/Bank.Api/Program.cs` como raiz de composição mínima
+- [x] T007 Criar `backend/src/Bank.Api/Program.cs` como raiz de composição mínima
   (`AddApplication()`, `AddInfrastructure()`), terminando com `public partial class Program;`
   para uso pelo `WebApplicationFactory`
-- [ ] T008 [P] Criar `backend/tests/Bank.IntegrationTests/BankApiFactory.cs`
+- [x] T008 [P] Criar `backend/tests/Bank.IntegrationTests/BankApiFactory.cs`
   (`WebApplicationFactory<Program>` com ambiente `Testing`)
-- [ ] T009 [P] Criar `.github/workflows/ci.yml` (R10): `pull_request` e `push` para `main`
+- [x] T009 [P] Criar `.github/workflows/ci.yml` (R10): `pull_request` e `push` para `main`
   sem filtro de paths; job `build-test`; `actions/checkout@v7`; `actions/setup-dotnet@v6`
   com `global-json-file: global.json`; `dotnet restore`, `dotnet build --no-restore -c
   Release` e `dotnet test --no-build -c Release` em `src/backend/Bank.slnx`
