@@ -1,0 +1,20 @@
+# =========================================================
+# Bank — ambiente de infraestrutura local
+#
+# Contrato (portas, endpoints, credenciais e comandos):
+#   specs/001-infra-local/contracts/ambiente-local.md
+#
+# Subir:  docker compose up -d --wait
+# Parar:  docker compose down        (mantém os dados)
+# Reset:  docker compose down -v     (apaga os dados)
+#
+# Configuração opcional via .env (ver .env.example). Portas publicadas só em 127.0.0.1.
+# =========================================================
+
+name: bank
+
+services: {}
+
+volumes:
+  postgres-data:
+  rabbitmq-data:
