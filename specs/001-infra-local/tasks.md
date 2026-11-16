@@ -34,14 +34,14 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
 
 **Purpose**: arquivos base do ambiente
 
-- [ ] T001 [P] Criar `.env.example` na raiz com todas as variáveis e padrões de
+- [x] T001 [P] Criar `.env.example` na raiz com todas as variáveis e padrões de
   [data-model.md](data-model.md#configuração-local): `POSTGRES_USER=bank`,
   `POSTGRES_PASSWORD=bank_dev_password`, `POSTGRES_DB=bank`, `POSTGRES_PORT=5432`,
   `RABBITMQ_USER=bank`, `RABBITMQ_PASSWORD=bank_dev_password`, `RABBITMQ_VHOST=bank`,
   `RABBITMQ_AMQP_PORT=5672`, `RABBITMQ_MANAGEMENT_PORT=15672`,
   `ASPIRE_DASHBOARD_PORT=18888`, `OTLP_GRPC_PORT=4317`, `OTLP_HTTP_PORT=4318`, com
   comentário de que os valores são "exclusivamente para desenvolvimento local" (FR-010)
-- [ ] T002 [P] Criar `docker-compose.yml` na raiz com `name: bank`, os volumes nomeados
+- [x] T002 [P] Criar `docker-compose.yml` na raiz com `name: bank`, os volumes nomeados
   de nível superior `postgres-data` e `rabbitmq-data`, e comentário de cabeçalho apontando
   para `specs/001-infra-local/contracts/ambiente-local.md`
 
@@ -51,7 +51,7 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
 
 **Purpose**: verificação automatizada que acompanha todas as histórias (Princípio VII, R8)
 
-- [ ] T003 [P] Criar `.github/workflows/infra-local.yml`: gatilho em `pull_request` e
+- [x] T003 [P] Criar `.github/workflows/infra-local.yml`: gatilho em `pull_request` e
   `push` para `main` com filtro de paths (`docker-compose.yml`, `.env.example`,
   `.github/workflows/infra-local.yml`); passos `docker compose config -q`,
   `docker compose up -d --wait --wait-timeout 120`, `docker compose ps`; em falha,
@@ -68,19 +68,19 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
 
 **Independent Test**: [quickstart.md — Cenário 1](quickstart.md#cenário-1--subida-com-um-comando-us1-fr-001003-sc-001-sc-002).
 
-- [ ] T004 [US1] Adicionar o serviço `postgres` em `docker-compose.yml`: imagem
+- [x] T004 [US1] Adicionar o serviço `postgres` em `docker-compose.yml`: imagem
   `postgres:18.7-alpine` (tag fixa, FR-012); `POSTGRES_USER`, `POSTGRES_PASSWORD` e
   `POSTGRES_DB` lidos do `.env` com padrão (`${POSTGRES_USER:-bank}` etc.); porta
   `127.0.0.1:${POSTGRES_PORT:-5432}:5432`; volume `postgres-data:/var/lib/postgresql`
   (**não** `/var/lib/postgresql/data` — mudança do PostgreSQL 18, R5)
-- [ ] T005 [US1] Adicionar o serviço `rabbitmq` em `docker-compose.yml`: imagem
+- [x] T005 [US1] Adicionar o serviço `rabbitmq` em `docker-compose.yml`: imagem
   `rabbitmq:4.3.7-management-alpine`; `hostname: rabbitmq` fixo ("Obrigatório e fixo para
   o RabbitMQ", R5); `RABBITMQ_DEFAULT_USER`, `RABBITMQ_DEFAULT_PASS` e
   `RABBITMQ_DEFAULT_VHOST` a partir de `RABBITMQ_USER`, `RABBITMQ_PASSWORD` e
   `RABBITMQ_VHOST` com padrão; portas `127.0.0.1:${RABBITMQ_AMQP_PORT:-5672}:5672` e
   `127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672`; volume
   `rabbitmq-data:/var/lib/rabbitmq` (depende de T004: mesmo arquivo)
-- [ ] T006 [US1] Executar o Cenário 1 do `quickstart.md` (sem `.env` e com `.env` copiado
+- [x] T006 [US1] Executar o Cenário 1 do `quickstart.md` (sem `.env` e com `.env` copiado
   do exemplo) e confirmar banco `bank` e vhost `bank` acessíveis com as credenciais do
   contrato
 

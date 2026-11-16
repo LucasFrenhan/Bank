@@ -13,7 +13,34 @@
 
 name: bank
 
-services: {}
+services:
+  postgres:
+    image: postgres:18.7-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bank_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-bank}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # PostgreSQL 18+: o volume fica em /var/lib/postgresql (não em .../data) — research R5
+      - postgres-data:/var/lib/postgresql
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:4.3.7-management-alpine
+    # Hostname fixo: o nome do nó (e o diretório de dados) deriva dele — research R5
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-bank}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-bank_dev_password}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-bank}
+    ports:
+      - "127.0.0.1:${RABBITMQ_AMQP_PORT:-5672}:5672"
+      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
 
 volumes:
   postgres-data:
