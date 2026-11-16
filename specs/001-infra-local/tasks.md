@@ -142,7 +142,7 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
 
 **Independent Test**: [quickstart.md — Cenário 4](quickstart.md#cenário-4--persistência-e-reset-us4-fr-007-fr-008-sc-005).
 
-- [ ] T014 [US4] Executar o Cenário 4 do `quickstart.md`: tabela e fila `smoke` sobrevivem
+- [x] T014 [US4] Executar o Cenário 4 do `quickstart.md`: tabela e fila `smoke` sobrevivem
   a `docker compose down` + `up`, recriação de contêiner (`up -d --force-recreate --wait`)
   incluída, e desaparecem após `docker compose down -v`; corrigir montagens em
   `docker-compose.yml` se algum dado se perder
@@ -155,15 +155,15 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
 
 **Purpose**: documentação, casos de borda e entrega
 
-- [ ] T015 [P] Adicionar a seção "Ambiente local" ao `README.md` (FR-011): pré-requisitos,
+- [x] T015 [P] Adicionar a seção "Ambiente local" ao `README.md` (FR-011): pré-requisitos,
   `cp .env.example .env` (opcional), subir (`docker compose up -d --wait`), ver estado,
   parar, reset (`docker compose down -v`), tabela de serviços com portas, URLs e
   credenciais padrão, e link para `specs/001-infra-local/contracts/ambiente-local.md`;
   remover do status do README a menção de que as instruções da issue #2 estão pendentes
-- [ ] T016 Executar o Cenário 5 do `quickstart.md` (sem `.env`, porta ocupada com
+- [x] T016 Executar o Cenário 5 do `quickstart.md` (sem `.env`, porta ocupada com
   sobrescrita no `.env`, subida repetida, dashboard parado, imagem indisponível e
   onboarding cronometrado pelo README — SC-001)
-- [ ] T017 Conferir que `docker compose config` não contém tags flutuantes nem `latest`
+- [x] T017 Conferir que `docker compose config` não contém tags flutuantes nem `latest`
   (FR-012) e que `.env` não aparece em `git status` (FR-010); sincronizar
   `specs/001-infra-local/contracts/ambiente-local.md` e `research.md` com qualquer ajuste
   feito na implementação
