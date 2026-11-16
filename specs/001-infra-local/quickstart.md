@@ -127,5 +127,5 @@ docker compose exec postgres psql -U bank -d bank -c "select * from smoke;"
   inexistente para um serviço (por exemplo `postgres:0.0-inexistente`) e subir → a falha
   cita o serviço e a imagem que não puderam ser obtidos.
 - **Onboarding (SC-001)**: a partir de um clone limpo, seguir apenas a seção "Ambiente
-  local" do README e cronometrar até todos os serviços estarem `(healthy)` (≤ 10 min, sem
+  local" do guia `docs/desenvolvimento.md` e cronometrar até todos os serviços estarem `(healthy)` (≤ 10 min, sem
   contar download de imagens).

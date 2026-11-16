@@ -224,7 +224,7 @@ Não há entidades de negócio nesta feature.
 ### Measurable Outcomes
 
 - **SC-001**: Uma pessoa desenvolvedora coloca a API em execução, a partir de um clone
-  limpo e seguindo apenas o README, em até 10 minutos (desconsiderando downloads).
+  limpo e seguindo apenas a documentação do projeto (`docs/desenvolvimento.md`), em até 10 minutos (desconsiderando downloads).
 - **SC-002**: 100% dos endpoints publicados aparecem na documentação interativa e podem ser
   executados a partir dela.
 - **SC-003**: Uma requisição feita à API tem trace, logs correlacionados e métricas

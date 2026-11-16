@@ -93,7 +93,7 @@ specs/001-infra-local/
 ├── .github/
 │   └── workflows/
 │       └── infra-local.yml      # valida o Compose e exige serviços healthy
-└── README.md                    # nova seção "Ambiente local" (FR-011)
+└── README.md                    # nova seção "Ambiente local" (FR-011; movida para docs/desenvolvimento.md na issue #11)
 ```
 
 **Structure Decision**: o `docker-compose.yml` fica na raiz (nome exigido pela issue #2 e
