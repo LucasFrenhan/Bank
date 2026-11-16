@@ -1,6 +1,6 @@
 # Contrato: Ambiente Local
 
-**Feature**: [../spec.md](../spec.md) | **Versão do contrato**: 1.0.0
+**Feature**: [../spec.md](../spec.md) | **Versão do contrato**: 1.1.0 (1.1.0: serviço `api`, spec 002 — mudança compatível)
 
 Este é o contrato que o ambiente local oferece às aplicações do projeto (API, workers) e
 às pessoas desenvolvedoras. Specs futuras dependem destes nomes, portas e endpoints;
@@ -20,6 +20,7 @@ somente em `127.0.0.1`.
 | Aspire Dashboard (UI) | `http://localhost:18888` | `http://aspire-dashboard:18888` | `18888` | sem autenticação |
 | OTLP/gRPC | `http://localhost:4317` | `http://aspire-dashboard:18889` | `4317` | sem autenticação |
 | OTLP/HTTP | `http://localhost:4318` | `http://aspire-dashboard:18890` | `4318` | sem autenticação |
+| API do Bank ([spec 002](../../002-setup-api/contracts/api-base.md)) | `http://localhost:8080` | `http://api:8080` | `8080` (`API_PORT`) | sem autenticação |
 
 ## Strings de conexão de referência
 
@@ -46,6 +47,8 @@ OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 
 ## Garantias
 
+- O serviço `api` inicia somente após `postgres` e `rabbitmq` estarem `healthy` e após o
+  `aspire-dashboard` ter iniciado (o coletor não bloqueia a API).
 - Todo serviço possui healthcheck; serviços futuros podem depender deles com
   `condition: service_healthy`.
 - Dados do PostgreSQL e do RabbitMQ persistem entre reinícios até o reset.

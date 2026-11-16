@@ -1,8 +1,9 @@
 # =========================================================
 # Bank — ambiente de infraestrutura local
 #
-# Contrato (portas, endpoints, credenciais e comandos):
+# Contratos (portas, endpoints, credenciais e comandos):
 #   specs/001-infra-local/contracts/ambiente-local.md
+#   specs/002-setup-api/contracts/api-base.md (serviço api)
 #
 # Subir:  docker compose up -d --wait
 # Parar:  docker compose down        (mantém os dados)
@@ -72,6 +73,31 @@ services:
     # Telemetria fica só em memória (sem volume) e o serviço não depende de outros — R1, R4
     healthcheck:
       test: ["CMD", "/usr/local/bin/busybox", "wget", "-q", "-O", "/dev/null", "http://localhost:18888/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  api:
+    # API do Bank — specs/002-setup-api (research R8)
+    build: ./src/backend
+    image: bank/api:local
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+    ports:
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      # O coletor não bloqueia a API: sem ele, a telemetria é descartada (SC-006)
+      aspire-dashboard:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/health"]
       interval: 5s
       timeout: 5s
       retries: 12

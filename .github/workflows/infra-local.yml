@@ -9,6 +9,8 @@ on:
       - docker-compose.yml
       - .env.example
       - docker/**
+      - src/backend/**
+      - global.json
       - .github/workflows/infra-local.yml
   push:
     branches: [main]
@@ -16,6 +18,8 @@ on:
       - docker-compose.yml
       - .env.example
       - docker/**
+      - src/backend/**
+      - global.json
       - .github/workflows/infra-local.yml
 
 permissions:
