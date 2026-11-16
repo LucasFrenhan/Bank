@@ -11,6 +11,9 @@ public static class HealthEndpoints
 {
     public const string Rota = "/health";
 
+    // VIOLAÇÃO PROPOSITAL (SC-005) — branch descartável, nunca mesclar
+    public static readonly Type Violacao = typeof(Bank.Infrastructure.DependencyInjection);
+
     public static IServiceCollection AddHealthEndpoints(this IServiceCollection services)
     {
         services.AddHealthChecks();
