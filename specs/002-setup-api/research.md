@@ -80,6 +80,9 @@ publicadas há poucos dias.
 - O `/health` é publicado no contrato, para atender o SC-002 ("100% dos endpoints
   publicados aparecem"). Somente os endpoints de teste de falhas (R7) usam
   `ExcludeFromDescription()`, pois não fazem parte do contrato.
+- O `/health` é um `MapGet` que consulta o `HealthCheckService` (mesma semântica do
+  `MapHealthChecks`: Healthy/Degraded → 200, Unhealthy → 503): o `MapHealthChecks` não é
+  um route handler e não entraria no documento OpenAPI (identificado na implementação).
 - O documento descreve respostas de erro com `ProducesProblem(...)` para que o formato
   `ProblemDetails` apareça no contrato (US2, cenário 3).
 
@@ -96,6 +99,9 @@ publicadas há poucos dias.
     nomeados (Princípio VI).
   - Filtro de traces: requisições a `/health`, `/openapi` e `/scalar` não geram spans
     (edge case de ruído); métricas continuam contabilizando-as.
+- **Intervalo das métricas**: o padrão do SDK é 60s, acima do SC-003 (10s). Em
+  `appsettings.Development.json`, `OTEL_METRIC_EXPORT_INTERVAL=5000`; fora de
+  desenvolvimento vale o padrão (identificado na implementação, T023).
 - **Ambiente `Testing`**: o `UseOtlpExporter()` não é registrado (não há coletor nos
   testes nem no CI); os testes de telemetria acrescentam o exportador em memória.
 - **Resiliência (FR-009, SC-006)**: o exportador OTLP usa processamento em lote em

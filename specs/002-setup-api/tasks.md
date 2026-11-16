@@ -152,22 +152,22 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 ### Tests for User Story 3
 
-- [ ] T020 [US3] Criar `backend/tests/Bank.IntegrationTests/TelemetryTests.cs` usando o
+- [x] T020 [US3] Criar `backend/tests/Bank.IntegrationTests/TelemetryTests.cs` usando o
   exportador em memória (`OpenTelemetry.Exporter.InMemory`, R3): uma requisição a
   `/nao-existe` exporta um span com rota/status e recurso `service.name = bank-api`; uma
   requisição a `/health` não exporta span (filtro, R5) (deve falhar antes de T021)
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Criar `backend/src/Bank.Api/Observability/TelemetryExtensions.cs`
+- [x] T021 [US3] Criar `backend/src/Bank.Api/Observability/TelemetryExtensions.cs`
   (R5): recurso `bank-api`; tracing AspNetCore (filtro `/health`, `/openapi`, `/scalar`) +
   HttpClient; métricas AspNetCore + HttpClient + meter `System.Runtime`; `WithLogging()`
   com `IncludeFormattedMessage` e `IncludeScopes`; `UseOtlpExporter()` exceto no ambiente
   `Testing`; registrar em `Program.cs`
-- [ ] T022 [US3] Ajustar `appsettings.json` para que os logs por requisição
+- [x] T022 [US3] Ajustar `appsettings.json` para que os logs por requisição
   (`Microsoft.AspNetCore.Hosting.Diagnostics`) saiam em `Information`, garantindo logs
   correlacionados por requisição sem registrar corpos ou cabeçalhos (Princípio VI)
-- [ ] T023 [US3] Executar o Cenário 5 do `quickstart.md` (traces, logs correlacionados,
+- [x] T023 [US3] Executar o Cenário 5 do `quickstart.md` (traces, logs correlacionados,
   métricas `http.server.request.duration` e `dotnet.*`; coletor parado → 20 respostas 200)
 
 **Checkpoint**: API observável
