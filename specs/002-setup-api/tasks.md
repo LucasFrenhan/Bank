@@ -182,11 +182,11 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 ### Tests for User Story 4
 
-- [ ] T024 [P] [US4] Criar
+- [x] T024 [P] [US4] Criar
   `backend/tests/Bank.UnitTests/ErrorHandling/ProblemDetailsTraceIdCustomizerTests.cs`:
   com `Activity` ativa, `traceId` = trace ID em 32 hex; sem `Activity`, usa
   `TraceIdentifier`
-- [ ] T025 [P] [US4] Criar `backend/tests/Bank.IntegrationTests/ErrorHandlingTests.cs`:
+- [x] T025 [P] [US4] Criar `backend/tests/Bank.IntegrationTests/ErrorHandlingTests.cs`:
   404 (rota inexistente), 405 (`POST /health`), 400 (`POST /__test/eco` com JSON
   malformado) e 500 (`GET /__test/falha`) com `application/problem+json`, `status`
   correto e `traceId` de 32 hex; o 500 não contém "segredo-interno", nome de exceção nem
@@ -194,14 +194,14 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 ### Implementation for User Story 4
 
-- [ ] T026 [US4] Criar `backend/src/Bank.Api/ErrorHandling/ProblemDetailsTraceIdCustomizer.cs`
+- [x] T026 [US4] Criar `backend/src/Bank.Api/ErrorHandling/ProblemDetailsTraceIdCustomizer.cs`
   e `ErrorHandlingExtensions.cs` (`AddProblemDetails` com o customizador,
   `RouteHandlerOptions.ThrowOnBadRequest = false`, `UseExceptionHandler()`,
   `UseStatusCodePages()`) e registrar em `Program.cs` antes dos endpoints (R6)
-- [ ] T027 [US4] Criar `backend/src/Bank.Api/Testing/TestEndpoints.cs`
+- [x] T027 [US4] Criar `backend/src/Bank.Api/Testing/TestEndpoints.cs`
   (`GET /__test/falha`, `POST /__test/eco`, `ExcludeFromDescription()`), mapeado em
   `Program.cs` somente no ambiente `Testing` (R7)
-- [ ] T028 [US4] Executar o Cenário 4 do `quickstart.md` e localizar no dashboard o
+- [x] T028 [US4] Executar o Cenário 4 do `quickstart.md` e localizar no dashboard o
   `traceId` de uma resposta de erro (US4, cenário 3)
 
 **Checkpoint**: padrão de erro estabelecido para todas as specs

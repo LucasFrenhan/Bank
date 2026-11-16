@@ -1,6 +1,8 @@
 using Bank.Api.Endpoints;
+using Bank.Api.ErrorHandling;
 using Bank.Api.Observability;
 using Bank.Api.OpenApi;
+using Bank.Api.Testing;
 using Bank.Application;
 using Bank.Infrastructure;
 
@@ -12,13 +14,17 @@ builder.AddTelemetria();
 builder.Services
     .AddApplication()
     .AddInfrastructure()
+    .AddTratamentoDeErros()
     .AddDocumentacaoApi()
     .AddHealthEndpoints();
 
 var app = builder.Build();
 
+app.UseTratamentoDeErros();
+
 app.MapDocumentacaoApi();
 app.MapHealthEndpoints();
+app.MapTestEndpoints();
 
 await app.RunAsync();
 
