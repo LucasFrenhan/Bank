@@ -6,8 +6,8 @@ especificação aprovada em `specs/` e só então é planejada, quebrada em tare
 implementada.
 
 > **Status:** fundação do projeto (milestone *Fundação, Arquitetura e Contratos —
-> SDD Core*). Instruções de execução serão adicionadas conforme as issues de
-> infraestrutura (#2) e de setup da API (#3) forem concluídas.
+> SDD Core*). O [ambiente local](#ambiente-local) já está disponível; as instruções da
+> API serão adicionadas com a issue de setup da API (#3).
 
 ## Constituição
 
@@ -41,9 +41,53 @@ Todo pull request é revisado quanto à conformidade com ela.
 ├── src/
 │   ├── backend/           # solução .NET 10 (Api, Application, Domain, Infrastructure, testes)
 │   └── frontend/          # aplicação React
+├── docker/                # imagens auxiliares do ambiente local
+├── docker-compose.yml     # ambiente local (PostgreSQL, RabbitMQ, Aspire Dashboard)
+├── .env.example           # configuração padrão do ambiente local
 ├── .specify/              # Spec Kit: constituição, templates e scripts
 └── .claude/               # comandos do Spec Kit para o Claude Code
 ```
+
+## Ambiente local
+
+Infraestrutura de apoio ao desenvolvimento, definida em
+[`specs/001-infra-local`](specs/001-infra-local/spec.md).
+
+**Pré-requisito:** Docker Desktop (Windows/macOS) ou Docker Engine (Linux) em execução,
+com Docker Compose v2.
+
+```bash
+# (opcional) personalizar portas e credenciais — sem .env, valem os mesmos padrões
+cp .env.example .env
+
+# subir e aguardar até todos os serviços estarem saudáveis
+docker compose up -d --wait
+
+# ver o estado (todos devem estar "(healthy)")
+docker compose ps
+
+# parar mantendo os dados
+docker compose down
+
+# reset: parar e apagar todos os dados
+docker compose down -v
+```
+
+| Serviço | Endereço | Credenciais padrão |
+| --- | --- | --- |
+| PostgreSQL | `localhost:5432`, banco `bank` | `bank` / `bank_dev_password` |
+| RabbitMQ (AMQP) | `localhost:5672`, vhost `bank` | `bank` / `bank_dev_password` |
+| RabbitMQ Management | <http://localhost:15672> | `bank` / `bank_dev_password` |
+| Aspire Dashboard (traces, métricas e logs) | <http://localhost:18888> | sem login |
+| OTLP gRPC / HTTP | `http://localhost:4317` / `http://localhost:4318` | sem autenticação |
+
+- As portas escutam apenas em `127.0.0.1` e podem ser alteradas no `.env`, por exemplo
+  `POSTGRES_PORT=55432` se a 5432 já estiver ocupada.
+- As credenciais são exclusivamente para desenvolvimento local.
+- A telemetria do Aspire Dashboard fica só em memória e é perdida ao reiniciar o contêiner.
+- Strings de conexão, endpoints e garantias do ambiente:
+  [contrato do ambiente local](specs/001-infra-local/contracts/ambiente-local.md).
+- Roteiro completo de validação: [quickstart](specs/001-infra-local/quickstart.md).
 
 ## Fluxo de desenvolvimento (SDD)
 
