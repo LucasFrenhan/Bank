@@ -127,17 +127,17 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 ### Tests for User Story 2
 
-- [ ] T017 [US2] Criar `backend/tests/Bank.IntegrationTests/OpenApiTests.cs`:
+- [x] T017 [US2] Criar `backend/tests/Bank.IntegrationTests/OpenApiTests.cs`:
   `/openapi/v1.json` → 200 com `/health` e sem `/__test`; `/scalar/v1` → 200 HTML; ambos →
   404 com a fábrica configurada para `Production` (deve falhar antes de T018)
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Criar `backend/src/Bank.Api/OpenApi/OpenApiExtensions.cs`
+- [x] T018 [US2] Criar `backend/src/Bank.Api/OpenApi/OpenApiExtensions.cs`
   (`AddOpenApi()`; `MapOpenApi()` + `MapScalarApiReference()` só quando
   `!IsProduction()`) e registrar em `Program.cs`; declarar no `/health` as respostas 200 e
   503 (R4)
-- [ ] T019 [US2] Executar o Cenário 3 do `quickstart.md`, incluindo executar `/health` pela
+- [x] T019 [US2] Executar o Cenário 3 do `quickstart.md`, incluindo executar `/health` pela
   UI do Scalar (SC-002)
 
 **Checkpoint**: contrato navegável

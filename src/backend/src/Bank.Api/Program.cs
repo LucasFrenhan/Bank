@@ -1,4 +1,5 @@
 using Bank.Api.Endpoints;
+using Bank.Api.OpenApi;
 using Bank.Application;
 using Bank.Infrastructure;
 
@@ -8,10 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddApplication()
     .AddInfrastructure()
+    .AddDocumentacaoApi()
     .AddHealthEndpoints();
 
 var app = builder.Build();
 
+app.MapDocumentacaoApi();
 app.MapHealthEndpoints();
 
 await app.RunAsync();
