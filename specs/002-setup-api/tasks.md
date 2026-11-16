@@ -236,7 +236,7 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
   testes), conferir que todos os pacotes de `Directory.Packages.props` estão
   justificados no R3 e cronometrar o onboarding a partir de um clone limpo seguindo só o
   README até o `/health` responder (SC-001: ≤ 10 min sem downloads)
-- [ ] T034 Fazer push da branch, confirmar `ci / build-test` e `infra-local` verdes e abrir
+- [x] T034 Fazer push da branch, confirmar `ci / build-test` e `infra-local` verdes e abrir
   o PR com `Closes #3`; validar o SC-005 no CI com um PR rascunho a partir de
   `tmp/sc005-violacao` (CI vermelho), fechado sem merge e com a branch apagada (R9)
 - [ ] T035 Após o merge, adicionar `build-test` como check obrigatório da proteção da
