@@ -1,0 +1,53 @@
+# Valida o ambiente local (specs/001-infra-local, research R8).
+# Não marcar como check obrigatório da main: o filtro de paths faria PRs que não o
+# disparam aguardarem o check indefinidamente.
+name: infra-local
+
+on:
+  pull_request:
+    paths:
+      - docker-compose.yml
+      - .env.example
+      - docker/**
+      - .github/workflows/infra-local.yml
+  push:
+    branches: [main]
+    paths:
+      - docker-compose.yml
+      - .env.example
+      - docker/**
+      - .github/workflows/infra-local.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infra-local-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compose:
+    name: Subir ambiente e exigir serviços healthy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validar docker-compose.yml
+        run: docker compose config -q
+
+      - name: Subir ambiente e aguardar healthchecks
+        run: docker compose up -d --wait --wait-timeout 120
+
+      - name: Estado dos serviços
+        if: always()
+        run: docker compose ps
+
+      - name: Logs dos serviços (em falha)
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Derrubar ambiente
+        if: always()
+        run: docker compose down -v
