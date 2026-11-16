@@ -12,7 +12,7 @@
 
 ```bash
 dotnet build src/backend/Bank.slnx -c Release
-dotnet test src/backend/Bank.slnx -c Release
+dotnet test --solution src/backend/Bank.slnx -c Release
 ```
 
 **Esperado**: build sem avisos (avisos são erros) e todos os testes unitários, de
@@ -97,7 +97,7 @@ aparece no dashboard.
 
 Em uma branch descartável, fazer um tipo de `Bank.Api.Endpoints` usar um tipo de
 `Bank.Infrastructure` (a API referencia a infraestrutura apenas para a composição, então
-compila) e executar `dotnet test src/backend/Bank.slnx`. Referências proibidas entre
+compila) e executar `dotnet test --solution src/backend/Bank.slnx`. Referências proibidas entre
 projetos de camada (por exemplo, Domain → Infrastructure) já são impedidas pelo próprio
 build, pois criariam referência circular.
 

@@ -35,4 +35,4 @@ jobs:
         run: dotnet build src/backend/Bank.slnx --no-restore -c Release
 
       - name: Testes (unitários, integração e arquitetura)
-        run: dotnet test src/backend/Bank.slnx --no-build -c Release
+        run: dotnet test --solution src/backend/Bank.slnx --no-build -c Release

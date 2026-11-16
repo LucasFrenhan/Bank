@@ -55,11 +55,15 @@ publicadas há poucos dias.
 | `OpenTelemetry.Instrumentation.Http` | 1.21.0 | Api | Spans de chamadas HTTP de saída (FR-007). |
 | `OpenTelemetry.Exporter.InMemory` | 1.21.0 | IntegrationTests | Captura em memória dos spans exportados, para testar o que de fato é exportado, inclusive o filtro de rotas (o filtro não impede a criação da `Activity`, só a gravação). |
 | `xunit.v3` | 4.0.3 | testes | Framework de testes (padrão do ecossistema .NET). |
-| `xunit.runner.visualstudio` | 4.0.1 | testes | Execução via `dotnet test`. |
-| `Microsoft.NET.Test.Sdk` | 18.12.0 | testes | Host de testes do `dotnet test`. |
 | `Microsoft.AspNetCore.Mvc.Testing` | 10.0.15 | IntegrationTests | `WebApplicationFactory` para testes de integração em memória (FR-015). |
 | `TngTech.ArchUnitNET` | 0.13.5 | ArchitectureTests | Regras de dependência entre camadas e tipos (FR-013, Princípio II). |
 
+- **Execução dos testes**: o xUnit v3 4.x roda sobre o Microsoft.Testing.Platform (MTP), e o
+  .NET 10 SDK não aceita mais o modo VSTest para ele. O `global.json` ativa o MTP
+  (`"test": { "runner": "Microsoft.Testing.Platform" }`) e o comando passa a ser
+  `dotnet test --solution src/backend/Bank.slnx`. Com isso, `xunit.runner.visualstudio` e
+  `Microsoft.NET.Test.Sdk` (pacotes do VSTest) foram removidos (identificado na
+  implementação, T010).
 - **Não adotados**:
   - `OpenTelemetry.Instrumentation.Runtime`: desde o .NET 9 o runtime publica o meter
     nativo `System.Runtime`; basta `AddMeter("System.Runtime")`.
@@ -186,7 +190,7 @@ Regras com ArchUnitNET (uma por teste, para mensagens claras):
 - **Decision**: `.github/workflows/ci.yml` em todo `pull_request` e `push` para `main`,
   **sem filtro de paths** (FR-014): `actions/checkout@v7`, `actions/setup-dotnet@v6` com
   `global-json-file: global.json`, `dotnet restore`, `dotnet build --no-restore -c
-  Release`, `dotnet test --no-build -c Release`. Nome do job estável (`build-test`) para
+  Release`, `dotnet test --solution ... --no-build -c Release`. Nome do job estável (`build-test`) para
   ser marcado como check obrigatório da `main` após o merge.
 - O workflow `infra-local` (spec 001) passa a incluir `src/backend/**` e `global.json` no
   filtro de paths, pois o Compose agora constrói a API.

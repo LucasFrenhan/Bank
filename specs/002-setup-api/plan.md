@@ -25,7 +25,7 @@ Instrumentation AspNetCore/Http) — justificativas em [research.md R3](research
 
 **Storage**: N/A (a API ainda não usa PostgreSQL nem RabbitMQ)
 
-**Testing**: xUnit v3 4.0.3, `Microsoft.AspNetCore.Mvc.Testing` (WebApplicationFactory),
+**Testing**: xUnit v3 4.0.3 sobre Microsoft.Testing.Platform, `Microsoft.AspNetCore.Mvc.Testing` (WebApplicationFactory), `OpenTelemetry.Exporter.InMemory`,
 TngTech.ArchUnitNET 0.13.5
 
 **Target Platform**: Linux container (`aspnet:10.0.15-alpine3.24`) e execução local pelo
