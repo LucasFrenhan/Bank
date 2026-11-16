@@ -54,7 +54,8 @@ Todo pull request é revisado quanto à conformidade com ela.
 4. Gere as tarefas: `/speckit-tasks` (opcional: `/speckit-analyze` para checar
    consistência entre spec, plano e tarefas).
 5. Implemente: `/speckit-implement`.
-6. Abra o PR para `main` referenciando a issue (`Closes #N`). O merge é por squash.
+6. Abra o PR para `main` referenciando a issue (`Closes #N`). O merge é feito
+   por merge commit (sem squash), preservando o histórico da branch.
 
 Mudanças sem spec (emendas da constituição, documentação, CI, manutenção) usam a
 branch `<tipo>/<issue>-nome-curto`, por exemplo `docs/1-constituicao`.

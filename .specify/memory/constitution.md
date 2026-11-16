@@ -174,10 +174,14 @@ Convenções:
 - Mudanças sem spec (emendas desta constituição, documentação, CI, manutenção) usam a
   branch `<tipo>/<issue>-nome-curto`, por exemplo `docs/1-constituicao`.
 - Commits seguem Conventional Commits: `tipo(escopo): descrição`, com
-  `tipo` em `feat`, `fix`, `docs`, `test`, `refactor`, `build`, `ci` ou `chore`.
+  `tipo` em `feat`, `fix`, `docs`, `test`, `refactor`, `build`, `ci` ou `chore`. Como o
+  histórico da branch é preservado em `main`, todo commit da branch MUST seguir esse
+  formato e representar um passo coerente; commits de rascunho são reorganizados antes
+  do merge.
 - O pull request MUST referenciar a issue (`Closes #N`), passar no CI e ser revisado
-  quanto à conformidade com esta constituição. O merge é feito por squash, e a branch é
-  removida após o merge.
+  quanto à conformidade com esta constituição. O merge é feito por merge commit
+  (sem squash nem rebase), preservando o histórico da spec, e a branch é removida após o
+  merge.
 
 ## Governance
 
