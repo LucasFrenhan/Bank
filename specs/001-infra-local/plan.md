@@ -61,8 +61,8 @@ telemetria visível em ≤ 10s (SC-004)
 **Resultado pré-pesquisa**: aprovado, sem violações.
 **Re-check pós-design (Phase 1)**: aprovado. O contrato, o modelo e o quickstart não
 introduzem desvios. A única ressalva é a possível ausência de ferramentas de healthcheck na
-imagem do Aspire Dashboard (R3), que será resolvida na implementação e, se necessário,
-justificada em Complexity Tracking.
+imagem do Aspire Dashboard (R3); nesse caso, a solução é uma imagem derivada mínima com a
+ferramenta de checagem, nunca a dispensa do healthcheck.
 
 ## Project Structure
 
@@ -87,6 +87,9 @@ specs/001-infra-local/
 /
 ├── docker-compose.yml           # projeto "bank": postgres, rabbitmq, aspire-dashboard
 ├── .env.example                 # variáveis com padrões de desenvolvimento (versionado)
+├── docker/
+│   └── aspire-dashboard/
+│       └── Dockerfile           # SOMENTE se a imagem não tiver ferramenta de healthcheck (R3)
 ├── .github/
 │   └── workflows/
 │       └── infra-local.yml      # valida o Compose e exige serviços healthy
@@ -101,5 +104,5 @@ healthchecks aqui definidos.
 ## Complexity Tracking
 
 Nenhuma violação da constituição até o momento. Se a imagem do Aspire Dashboard não
-oferecer ferramenta para healthcheck (R3), a solução adotada e a alternativa rejeitada
-serão registradas aqui durante a implementação.
+oferecer ferramenta para healthcheck (R3), o motivo da imagem derivada
+(`docker/aspire-dashboard/Dockerfile`) será registrado aqui durante a implementação.

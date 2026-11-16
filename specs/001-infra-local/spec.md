@@ -62,8 +62,10 @@ serviço e verificar que ele passa a reportar "não saudável".
 1. **Given** o comando de subida acabou de ser executado, **When** a pessoa consulta o
    estado dos serviços, **Then** cada serviço reporta "iniciando" até estar pronto e
    "saudável" quando aceita conexões.
-2. **Given** um serviço que depende de outro, **When** o ambiente sobe, **Then** ele só é
-   iniciado depois que suas dependências reportam "saudável".
+2. **Given** qualquer serviço do ambiente, **When** sua configuração é inspecionada,
+   **Then** ele expõe uma verificação de saúde que serviços futuros (como a API) podem usar
+   como condição de dependência para só iniciarem depois que ele estiver "saudável". A
+   comprovação com um serviço dependente real ocorre na spec da API (issue #3).
 3. **Given** um serviço que deixa de responder, **When** a verificação de saúde é
    executada, **Then** o serviço passa a reportar "não saudável".
 

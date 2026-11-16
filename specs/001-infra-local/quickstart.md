@@ -40,7 +40,7 @@ docker compose ps --format "table {{.Service}}\t{{.Status}}"
 
 ```bash
 docker compose exec rabbitmq rabbitmqctl stop_app
-# aguardar ~30s
+# repetir até o STATUS mudar (12 falhas × 5s ≈ 60–70s)
 docker compose ps rabbitmq
 docker compose exec rabbitmq rabbitmqctl start_app
 ```
@@ -59,8 +59,30 @@ curl -s -X POST http://localhost:4318/v1/traces \
 ```
 
 **Esperado**: em até 10s, o trace `teste-quickstart` do serviço `quickstart` aparece em
-`http://localhost:18888` → *Traces*. Repetir com `/v1/logs` e `/v1/metrics` (payloads
-OTLP/JSON equivalentes) e conferir *Structured logs* e *Metrics*.
+`http://localhost:18888` → *Traces*.
+
+Enviar um log correlacionado ao trace:
+
+```bash
+curl -s -X POST http://localhost:4318/v1/logs \
+  -H "Content-Type: application/json" \
+  -d '{"resourceLogs":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"quickstart"}}]},"scopeLogs":[{"logRecords":[{"timeUnixNano":"1700000000500000000","severityNumber":9,"severityText":"Information","body":{"stringValue":"log de teste do quickstart"},"traceId":"5b8efff798038103d269b633813fc60c","spanId":"eee19b7ec3c1b174"}]}]}]}'
+```
+
+**Esperado**: o log aparece em *Structured logs* e, ao abri-lo, está vinculado ao trace
+`teste-quickstart`.
+
+Enviar uma métrica (contador):
+
+```bash
+NOW=$(date +%s)000000000
+curl -s -X POST http://localhost:4318/v1/metrics \
+  -H "Content-Type: application/json" \
+  -d '{"resourceMetrics":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"quickstart"}}]},"scopeMetrics":[{"scope":{"name":"quickstart"},"metrics":[{"name":"quickstart.requisicoes","unit":"1","sum":{"aggregationTemporality":2,"isMonotonic":true,"dataPoints":[{"asInt":"1","startTimeUnixNano":"'"$NOW"'","timeUnixNano":"'"$NOW"'"}]}}]}]}]}'
+```
+
+**Esperado**: a métrica `quickstart.requisicoes` aparece em *Metrics* para o recurso
+`quickstart`.
 
 A validação definitiva com uma aplicação real (traces, métricas e logs correlacionados)
 acontece na spec da API (issue #3).
@@ -98,3 +120,9 @@ docker compose exec postgres psql -U bank -d bank -c "select * from smoke;"
   contêiner é recriado e nenhum dado é perdido.
 - **Dashboard fora do ar**: `docker compose stop aspire-dashboard` → PostgreSQL e RabbitMQ
   continuam `(healthy)`.
+- **Imagem indisponível**: definir temporariamente, num arquivo de override local, uma tag
+  inexistente para um serviço (por exemplo `postgres:0.0-inexistente`) e subir → a falha
+  cita o serviço e a imagem que não puderam ser obtidos.
+- **Onboarding (SC-001)**: a partir de um clone limpo, seguir apenas a seção "Ambiente
+  local" do README e cronometrar até todos os serviços estarem `(healthy)` (≤ 10 min, sem
+  contar download de imagens).

@@ -59,6 +59,9 @@ Regras:
 | `bank_postgres-data` | `postgres:/var/lib/postgresql` | Cluster do PostgreSQL 18 (R5) |
 | `bank_rabbitmq-data` | `rabbitmq:/var/lib/rabbitmq` | Definições e mensagens persistentes do RabbitMQ |
 
+- No `docker-compose.yml` os volumes são declarados como `postgres-data` e
+  `rabbitmq-data`; o Compose acrescenta o prefixo do projeto (`bank_`), resultando nos
+  nomes reais da tabela acima.
 - Sobrevivem a `docker compose stop`/`down` e a recriações de contêiner (FR-007).
 - Removidos somente por `docker compose down -v` (FR-008).
 - A telemetria do Aspire Dashboard não tem volume: fica em memória (R1).

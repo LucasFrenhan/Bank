@@ -45,9 +45,12 @@ Tags de imagem consultadas nos registries oficiais (Docker Hub e MCR) em 2026-11
   Decisão: verificar na implementação, nesta ordem de preferência:
   1. requisição HTTP ao frontend (`http://localhost:18888`) com ferramenta presente na imagem;
   2. teste de porta via `bash` (`/dev/tcp`) se houver bash;
-  3. se a imagem não tiver nenhuma ferramenta, registrar a limitação em
-     [Complexity Tracking](plan.md#complexity-tracking) e validar a saúde do dashboard
-     pelo script de verificação do quickstart (SC-003 exige 100% dos serviços cobertos).
+  3. se a imagem não tiver nenhuma ferramenta, usar uma imagem derivada mínima
+     (`docker/aspire-dashboard/Dockerfile`, `FROM` a tag fixada) que acrescente apenas a
+     ferramenta de checagem, e registrar o motivo em
+     [Complexity Tracking](plan.md#complexity-tracking). Validar a saúde só manualmente
+     **não** é aceitável: a constituição exige healthcheck em toda a infraestrutura, assim
+     como o FR-005 e o SC-003.
 - **Parâmetros comuns**: `interval: 5s`, `timeout: 5s`, `retries: 12`, `start_period`
   de 10s (Postgres/Dashboard) e 30s (RabbitMQ, que demora mais a subir). Com isso, a
   falha é declarada em no máximo ~70–90s, coerente com o SC-002 (≤ 60s em condições
@@ -107,5 +110,10 @@ Tags de imagem consultadas nos registries oficiais (Docker Hub e MCR) em 2026-11
   --wait-timeout 120` seguido de `docker compose down -v`.
 - **Rationale**: o Princípio VII exige que a qualidade seja demonstrada por verificação
   automatizada; o `--wait` comprova FR-001, FR-005 e SC-003 em todo PR.
+- O timeout de 120s é maior que os 60s do SC-002 de propósito: no CI as imagens não estão
+  em cache. O SC-002 é medido manualmente (T009).
+- Este workflow **não** deve ser marcado como check obrigatório na proteção da `main`:
+  por causa do filtro de paths, PRs que não o disparam ficariam aguardando o check para
+  sempre. O check obrigatório será o pipeline geral de CI (sem filtro), quando existir.
 - **Alternatives considered**: somente validação manual pelo quickstart — rejeitada por
   não impedir regressões.

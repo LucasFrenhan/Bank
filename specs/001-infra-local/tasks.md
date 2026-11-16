@@ -55,7 +55,8 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
   `push` para `main` com filtro de paths (`docker-compose.yml`, `.env.example`,
   `.github/workflows/infra-local.yml`); passos `docker compose config -q`,
   `docker compose up -d --wait --wait-timeout 120`, `docker compose ps`; em falha,
-  `docker compose logs`; sempre ao final, `docker compose down -v`
+  `docker compose logs`; sempre ao final, `docker compose down -v`. Este workflow **não**
+  deve ser marcado como check obrigatório da `main` (filtro de paths — R8)
 
 **Checkpoint**: arquivos base e CI prontos — as histórias podem começar
 
@@ -123,9 +124,11 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
   `127.0.0.1:${OTLP_GRPC_PORT:-4317}:18889` e `127.0.0.1:${OTLP_HTTP_PORT:-4318}:18890`;
   sem volume e sem `depends_on` (R1, R4, R7)
 - [ ] T012 [US3] Adicionar healthcheck ao `aspire-dashboard` em `docker-compose.yml`
-  conforme o resultado de T010 (ordem de preferência do R3); se não houver ferramenta
-  possível, registrar a solução adotada e a alternativa rejeitada em
-  `specs/001-infra-local/plan.md` (Complexity Tracking)
+  conforme o resultado de T010 (ordem de preferência do R3); se a imagem não tiver
+  ferramenta de checagem, criar `docker/aspire-dashboard/Dockerfile` (`FROM` a tag
+  fixada + apenas a ferramenta), apontar o serviço para esse build e registrar o motivo em
+  `specs/001-infra-local/plan.md` (Complexity Tracking). Dispensar o healthcheck não é
+  permitido (constituição, FR-005, SC-003)
 - [ ] T013 [US3] Executar o Cenário 3 do `quickstart.md` para traces, logs e métricas via
   OTLP/HTTP e confirmar visualização na UI em ≤ 10s (SC-004)
 
@@ -158,7 +161,8 @@ Quase todas as tarefas editam o `docker-compose.yml`, portanto são sequenciais.
   credenciais padrão, e link para `specs/001-infra-local/contracts/ambiente-local.md`;
   remover do status do README a menção de que as instruções da issue #2 estão pendentes
 - [ ] T016 Executar o Cenário 5 do `quickstart.md` (sem `.env`, porta ocupada com
-  sobrescrita no `.env`, subida repetida, dashboard parado)
+  sobrescrita no `.env`, subida repetida, dashboard parado, imagem indisponível e
+  onboarding cronometrado pelo README — SC-001)
 - [ ] T017 Conferir que `docker compose config` não contém tags flutuantes nem `latest`
   (FR-012) e que `.env` não aparece em `git status` (FR-010); sincronizar
   `specs/001-infra-local/contracts/ambiente-local.md` e `research.md` com qualquer ajuste
