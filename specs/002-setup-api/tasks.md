@@ -225,14 +225,14 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T031 [P] Adicionar a seção "Backend (API)" ao `README.md`: requisitos (SDK 10),
+- [x] T031 [P] Adicionar a seção "Backend (API)" ao `README.md`: requisitos (SDK 10),
   build, testes, `dotnet run`, URLs (`/health`, `/scalar/v1`, porta 5080 no SDK e 8080 no
   Compose) e link para `specs/002-setup-api/contracts/api-base.md`; atualizar a tabela do
   ambiente local com o serviço `api` e o status do README
-- [ ] T032 [P] Atualizar `specs/001-infra-local/contracts/ambiente-local.md` para a
+- [x] T032 [P] Atualizar `specs/001-infra-local/contracts/ambiente-local.md` para a
   versão 1.1.0 (mudança compatível): novo serviço `api` com portas e dependências
   (documentação viva, Princípio I)
-- [ ] T033 Executar o Cenário 1 do `quickstart.md` (build Release sem avisos e todos os
+- [x] T033 Executar o Cenário 1 do `quickstart.md` (build Release sem avisos e todos os
   testes), conferir que todos os pacotes de `Directory.Packages.props` estão
   justificados no R3 e cronometrar o onboarding a partir de um clone limpo seguindo só o
   README até o `/health` responder (SC-001: ≤ 10 min sem downloads)
