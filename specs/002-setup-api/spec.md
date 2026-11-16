@@ -185,8 +185,9 @@ build/teste falha localmente e no CI.
   em ambientes não produtivos (constituição, Princípio V).
 - **FR-006**: A API MUST exportar traces, métricas e logs via OTLP para o endpoint
   configurado, identificando-se com um nome de serviço estável.
-- **FR-007**: Os traces MUST cobrir as requisições HTTP recebidas e as chamadas HTTP de
-  saída; as métricas MUST incluir métricas de requisições HTTP e de runtime.
+- **FR-007**: Os traces MUST cobrir as requisições HTTP recebidas, e a instrumentação de
+  chamadas HTTP de saída MUST ficar configurada; as métricas MUST incluir métricas de
+  requisições HTTP e de runtime.
 - **FR-008**: Os logs MUST ser estruturados e correlacionados ao trace ativo; dados
   sensíveis MUST NOT ser registrados (constituição, Princípio VI).
 - **FR-009**: Falhas no envio de telemetria MUST NOT afetar o atendimento das requisições.
@@ -245,5 +246,7 @@ Não há entidades de negócio nesta feature.
   publicado no contrato.
 - Versionamento de rotas de negócio (por exemplo `/v1/...`) será decidido pela primeira
   spec de negócio; o `v1` em `/scalar/v1` identifica o documento OpenAPI.
+- A API não faz chamadas HTTP de saída nesta spec; a verificação de spans de saída
+  (FR-007) acontece na primeira spec que integrar um serviço externo.
 - Produção, deploy, TLS e autenticação da documentação estão fora de escopo.
 - O frontend não faz parte desta spec.

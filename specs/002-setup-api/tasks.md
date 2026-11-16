@@ -42,12 +42,14 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
   `ManagePackageVersionsCentrally` e exatamente as versões da tabela do R3
   (`Microsoft.AspNetCore.OpenApi` 10.0.15, `Scalar.AspNetCore` 2.21.0, `OpenTelemetry.*`
   1.21.0, `xunit.v3` 4.0.3, `xunit.runner.visualstudio` 4.0.1, `Microsoft.NET.Test.Sdk`
-  18.12.0, `Microsoft.AspNetCore.Mvc.Testing` 10.0.15, `TngTech.ArchUnitNET` 0.13.5)
+  18.12.0, `Microsoft.AspNetCore.Mvc.Testing` 10.0.15, `TngTech.ArchUnitNET` 0.13.5,
+  `OpenTelemetry.Exporter.InMemory` 1.21.0)
 - [ ] T004 Criar `backend/Bank.slnx` e os projetos `Bank.Domain`, `Bank.Application`,
   `Bank.Infrastructure` (classlib), `Bank.Api` (web), `Bank.UnitTests`,
   `Bank.IntegrationTests` e `Bank.ArchitectureTests` (xUnit v3), com as referências da
   tabela do R2 (Api → Application e Infrastructure; Infrastructure → Application e Domain;
-  Application → Domain; testes conforme R2); remover arquivos de exemplo dos templates
+  Application → Domain; testes conforme R2); os `.csproj` de teste são escritos à mão
+  (o template `xunit3` não vem com o SDK); remover arquivos de exemplo dos templates
   (depende de T001–T003)
 - [ ] T005 Executar `dotnet build backend/Bank.slnx` e confirmar build sem avisos
 
@@ -84,7 +86,9 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 ### Tests for User Story 1
 
 - [ ] T010 [US1] Criar `backend/tests/Bank.IntegrationTests/HealthEndpointTests.cs`:
-  `GET /health` → 200, corpo `Healthy`, sem autenticação (deve falhar antes de T011)
+  `GET /health` → 200, corpo `Healthy`, sem autenticação; com a fábrica registrando um
+  health check que falha (`ConfigureTestServices`) → 503 `Unhealthy` (deve falhar antes
+  de T011)
 
 ### Implementation for User Story 1
 
@@ -100,14 +104,16 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 - [ ] T014 [US1] Adicionar o serviço `api` em `docker-compose.yml`: build
   `src/backend`, `ASPNETCORE_ENVIRONMENT=Development`,
   `OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889`, porta
-  `127.0.0.1:${API_PORT:-8080}:8080`, `depends_on` de `postgres`, `rabbitmq` e
-  `aspire-dashboard` com `condition: service_healthy`, healthcheck
+  `127.0.0.1:${API_PORT:-8080}:8080`, `depends_on` de `postgres` e `rabbitmq` com
+  `condition: service_healthy` e de `aspire-dashboard` com `condition: service_started`
+  (R8), healthcheck
   `wget -q -O /dev/null http://localhost:8080/health`; adicionar `API_PORT=8080` ao
   `.env.example` (depende de T013)
 - [ ] T015 [P] [US1] Incluir `src/backend/**` e `global.json` no filtro de paths de
   `.github/workflows/infra-local.yml` (R10)
 - [ ] T016 [US1] Executar os Cenários 2 e 6 do `quickstart.md` (SDK e Compose, incluindo
-  ordem de inicialização e `api (healthy)`)
+  ordem de inicialização, `api (healthy)` e porta ocupada resolvida por `--urls` /
+  `API_PORT`)
 
 **Checkpoint**: MVP — API executável e saudável
 
@@ -146,18 +152,18 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 ### Tests for User Story 3
 
-- [ ] T020 [US3] Criar `backend/tests/Bank.IntegrationTests/TelemetryTests.cs`: o host
-  registra `TracerProvider` e `MeterProvider`; uma requisição a `/nao-existe` gera
-  `Activity` da fonte do ASP.NET Core e `/health` não gera (filtro, R5) (deve falhar
-  antes de T021)
+- [ ] T020 [US3] Criar `backend/tests/Bank.IntegrationTests/TelemetryTests.cs` usando o
+  exportador em memória (`OpenTelemetry.Exporter.InMemory`, R3): uma requisição a
+  `/nao-existe` exporta um span com rota/status e recurso `service.name = bank-api`; uma
+  requisição a `/health` não exporta span (filtro, R5) (deve falhar antes de T021)
 
 ### Implementation for User Story 3
 
 - [ ] T021 [US3] Criar `backend/src/Bank.Api/Observability/TelemetryExtensions.cs`
   (R5): recurso `bank-api`; tracing AspNetCore (filtro `/health`, `/openapi`, `/scalar`) +
   HttpClient; métricas AspNetCore + HttpClient + meter `System.Runtime`; `WithLogging()`
-  com `IncludeFormattedMessage` e `IncludeScopes`; `UseOtlpExporter()`; registrar em
-  `Program.cs`
+  com `IncludeFormattedMessage` e `IncludeScopes`; `UseOtlpExporter()` exceto no ambiente
+  `Testing`; registrar em `Program.cs`
 - [ ] T022 [US3] Ajustar `appsettings.json` para que os logs por requisição
   (`Microsoft.AspNetCore.Hosting.Diagnostics`) saiam em `Information`, garantindo logs
   correlacionados por requisição sem registrar corpos ou cabeçalhos (Princípio VI)
@@ -227,11 +233,12 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
   versão 1.1.0 (mudança compatível): novo serviço `api` com portas e dependências
   (documentação viva, Princípio I)
 - [ ] T033 Executar o Cenário 1 do `quickstart.md` (build Release sem avisos e todos os
-  testes) e conferir que todos os pacotes de `Directory.Packages.props` estão
-  justificados no R3
-- [ ] T034 Fazer push da branch, confirmar `ci / build-test` e `infra-local` verdes, abrir
-  o PR com `Closes #3` e validar o SC-005 no CI (commit temporário com violação → CI
-  vermelho → revert)
+  testes), conferir que todos os pacotes de `Directory.Packages.props` estão
+  justificados no R3 e cronometrar o onboarding a partir de um clone limpo seguindo só o
+  README até o `/health` responder (SC-001: ≤ 10 min sem downloads)
+- [ ] T034 Fazer push da branch, confirmar `ci / build-test` e `infra-local` verdes e abrir
+  o PR com `Closes #3`; validar o SC-005 no CI com um PR rascunho a partir de
+  `tmp/sc005-violacao` (CI vermelho), fechado sem merge e com a branch apagada (R9)
 - [ ] T035 Após o merge, adicionar `build-test` como check obrigatório da proteção da
   `main` (FR-014)
 

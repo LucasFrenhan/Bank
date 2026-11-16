@@ -52,6 +52,7 @@ publicadas há poucos dias.
 | `OpenTelemetry.Exporter.OpenTelemetryProtocol` | 1.21.0 | Api | Exportação OTLP dos três sinais via `UseOtlpExporter()` (FR-006). |
 | `OpenTelemetry.Instrumentation.AspNetCore` | 1.21.0 | Api | Spans de requisições recebidas com filtro de rotas de ruído (FR-007, edge case). |
 | `OpenTelemetry.Instrumentation.Http` | 1.21.0 | Api | Spans de chamadas HTTP de saída (FR-007). |
+| `OpenTelemetry.Exporter.InMemory` | 1.21.0 | IntegrationTests | Captura em memória dos spans exportados, para testar o que de fato é exportado, inclusive o filtro de rotas (o filtro não impede a criação da `Activity`, só a gravação). |
 | `xunit.v3` | 4.0.3 | testes | Framework de testes (padrão do ecossistema .NET). |
 | `xunit.runner.visualstudio` | 4.0.1 | testes | Execução via `dotnet test`. |
 | `Microsoft.NET.Test.Sdk` | 18.12.0 | testes | Host de testes do `dotnet test`. |
@@ -94,6 +95,8 @@ publicadas há poucos dias.
     nomeados (Princípio VI).
   - Filtro de traces: requisições a `/health`, `/openapi` e `/scalar` não geram spans
     (edge case de ruído); métricas continuam contabilizando-as.
+- **Ambiente `Testing`**: o `UseOtlpExporter()` não é registrado (não há coletor nos
+  testes nem no CI); os testes de telemetria acrescentam o exportador em memória.
 - **Resiliência (FR-009, SC-006)**: o exportador OTLP usa processamento em lote em
   segundo plano; falhas de conexão são descartadas e registradas apenas no
   `EventSource` interno do SDK, sem afetar as requisições. Comprovado na validação
@@ -142,8 +145,9 @@ publicadas há poucos dias.
 - **No Compose**: serviço `api` construído por `src/backend/Dockerfile` (multi-stage:
   `sdk:10.0.404-alpine3.24` → `aspnet:10.0.15-alpine3.24`, usuário não-root `app`, porta
   8080), publicado em `127.0.0.1:${API_PORT:-8080}`, com
-  `depends_on` de `postgres`, `rabbitmq` e `aspire-dashboard` em `service_healthy`
-  (FR-012 — comprova o adiado da spec 001).
+  `depends_on` de `postgres` e `rabbitmq` em `service_healthy` (FR-012 — comprova o
+  adiado da spec 001) e de `aspire-dashboard` em `service_started`, para que um coletor
+  indisponível não impeça a API de subir (caso de borda da spec, SC-006).
 - **Healthcheck**: a variante Alpine do `aspnet` inclui o `wget` do BusyBox:
   `wget -q -O /dev/null http://localhost:8080/health`. (A variante Debian não tem `curl`
   nem `wget`.)
@@ -166,8 +170,9 @@ Regras com ArchUnitNET (uma por teste, para mensagens claras):
 
 - Para que as regras não passem "por vacuidade", cada camada tem ao menos um tipo
   (as extensões de registro e um marcador de assembly).
-- **SC-005**: validado introduzindo uma violação proposital em uma branch descartável e
-  confirmando a falha local e no CI.
+- **SC-005**: validado introduzindo uma violação proposital localmente e, no CI, por um PR
+  rascunho a partir de uma branch descartável (`tmp/sc005-violacao`), fechado sem merge —
+  assim a violação não entra no histórico da `main`.
 
 ## R10. CI
 

@@ -28,6 +28,10 @@ curl -i http://localhost:5080/health
 
 **Esperado**: `HTTP/1.1 200 OK` com corpo `Healthy`.
 
+**Porta ocupada**: com outro processo na 5080, a inicialização falha citando o endereço
+(`address already in use`); `dotnet run --project src/backend/src/Bank.Api --urls
+http://localhost:5090` resolve sem editar arquivos versionados.
+
 ## Cenário 3 — Documentação interativa (US2, FR-003..005, SC-002)
 
 - Abrir `http://localhost:5080/scalar/v1` → a UI lista `GET /health`; executar pela UI →
@@ -83,8 +87,9 @@ docker compose ps
 curl -s http://localhost:8080/health
 ```
 
-**Esperado**: `api` só inicia depois de `postgres`, `rabbitmq` e `aspire-dashboard`
-ficarem `(healthy)`; `api` também fica `(healthy)`; `/health` responde `Healthy` e
+**Esperado**: `api` só inicia depois de `postgres` e `rabbitmq` ficarem `(healthy)` e de o
+`aspire-dashboard` ter iniciado (o coletor não bloqueia a API); `api` também fica
+`(healthy)`; com `API_PORT=8085` no `.env`, a API passa a responder na 8085; `/health` responde `Healthy` e
 `http://localhost:8080/scalar/v1` abre a documentação; a telemetria do serviço `bank-api`
 aparece no dashboard.
 
@@ -98,3 +103,10 @@ build, pois criariam referência circular.
 
 **Esperado**: o teste de arquitetura correspondente falha indicando o tipo infrator; o CI
 do PR também falha. Descartar a branch.
+
+## Cenário 8 — Onboarding (SC-001)
+
+A partir de um clone limpo, seguir apenas a seção "Backend (API)" do README e cronometrar
+até `GET /health` responder `Healthy`.
+
+**Esperado**: ≤ 10 minutos, sem contar downloads (SDK, pacotes NuGet e imagens).
