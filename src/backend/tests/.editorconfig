@@ -1,0 +1,4 @@
+# Regras de análise específicas dos projetos de teste
+[*.cs]
+# Nomes de teste no formato Cenario_Condicao_Resultado usam sublinhados
+dotnet_diagnostic.CA1707.severity = none

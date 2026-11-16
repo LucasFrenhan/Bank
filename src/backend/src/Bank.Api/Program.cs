@@ -1,3 +1,4 @@
+using Bank.Api.Endpoints;
 using Bank.Application;
 using Bank.Infrastructure;
 
@@ -6,9 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure();
+    .AddInfrastructure()
+    .AddHealthEndpoints();
 
 var app = builder.Build();
+
+app.MapHealthEndpoints();
 
 await app.RunAsync();
 

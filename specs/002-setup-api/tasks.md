@@ -85,23 +85,23 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
 
 ### Tests for User Story 1
 
-- [ ] T010 [US1] Criar `backend/tests/Bank.IntegrationTests/HealthEndpointTests.cs`:
+- [x] T010 [US1] Criar `backend/tests/Bank.IntegrationTests/HealthEndpointTests.cs`:
   `GET /health` → 200, corpo `Healthy`, sem autenticação; com a fábrica registrando um
   health check que falha (`ConfigureTestServices`) → 503 `Unhealthy` (deve falhar antes
   de T011)
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Criar `backend/src/Bank.Api/Endpoints/HealthEndpoints.cs`
+- [x] T011 [US1] Criar `backend/src/Bank.Api/Endpoints/HealthEndpoints.cs`
   (`AddHealthChecks()` + `MapHealthChecks("/health")`) e registrá-lo em `Program.cs`
-- [ ] T012 [P] [US1] Criar `backend/src/Bank.Api/Properties/launchSettings.json` (perfil
+- [x] T012 [P] [US1] Criar `backend/src/Bank.Api/Properties/launchSettings.json` (perfil
   `http`: `http://localhost:5080`, `ASPNETCORE_ENVIRONMENT=Development`,
   `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317`) e `appsettings.json` /
   `appsettings.Development.json` com níveis de log (R8, data-model)
-- [ ] T013 [P] [US1] Criar `backend/Dockerfile` (multi-stage `sdk:10.0.404-alpine3.24` →
+- [x] T013 [P] [US1] Criar `backend/Dockerfile` (multi-stage `sdk:10.0.404-alpine3.24` →
   `aspnet:10.0.15-alpine3.24`, usuário `app`, porta 8080) e `backend/.dockerignore`
   (`bin/`, `obj/`, `tests/`) (R8)
-- [ ] T014 [US1] Adicionar o serviço `api` em `docker-compose.yml`: build
+- [x] T014 [US1] Adicionar o serviço `api` em `docker-compose.yml`: build
   `src/backend`, `ASPNETCORE_ENVIRONMENT=Development`,
   `OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889`, porta
   `127.0.0.1:${API_PORT:-8080}:8080`, `depends_on` de `postgres` e `rabbitmq` com
@@ -109,9 +109,9 @@ Backend em `src/backend/` (abreviado abaixo como `backend/`): projetos em
   (R8), healthcheck
   `wget -q -O /dev/null http://localhost:8080/health`; adicionar `API_PORT=8080` ao
   `.env.example` (depende de T013)
-- [ ] T015 [P] [US1] Incluir `src/backend/**` e `global.json` no filtro de paths de
+- [x] T015 [P] [US1] Incluir `src/backend/**` e `global.json` no filtro de paths de
   `.github/workflows/infra-local.yml` (R10)
-- [ ] T016 [US1] Executar os Cenários 2 e 6 do `quickstart.md` (SDK e Compose, incluindo
+- [x] T016 [US1] Executar os Cenários 2 e 6 do `quickstart.md` (SDK e Compose, incluindo
   ordem de inicialização, `api (healthy)` e porta ocupada resolvida por `--urls` /
   `API_PORT`)
 
