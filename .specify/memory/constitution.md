@@ -136,6 +136,18 @@ Stack:
 - Backend: .NET 10, C#, Minimal APIs, com o código e os testes sob `src/backend/`.
 - Persistência: PostgreSQL via Entity Framework Core (provedor Npgsql); o schema evolui
   exclusivamente por migrations versionadas.
+- SQL puro: consultas e comandos de produção usam LINQ/EF Core por padrão. Quando for
+  necessário SQL puro (consulta nativa, stored procedure, function ou view), ele MUST ser
+  escrito primeiro em um arquivo `.sql` próprio, versionado em
+  `src/backend/src/Bank.Infrastructure/Persistencia/Sql/`, e MUST NOT aparecer como string
+  no código C#:
+  - `Sql/Procedures/` — procedures, functions e views, criadas e alteradas exclusivamente
+    por migrations que leem o arquivo `.sql` correspondente;
+  - `Sql/Consultas/` — consultas nativas executadas em tempo de execução, carregadas como
+    recurso embutido do assembly da Infrastructure.
+  Cada arquivo tem um nome que descreve a operação e um comentário de cabeçalho com a spec
+  de origem. Fora do escopo: expressões declaradas no mapeamento do EF Core (por exemplo,
+  `HasCheckConstraint`) e SQL usado apenas para preparar ou verificar dados em testes.
 - Autenticação e autorização: ASP.NET Core Identity e JWT Bearer, com validação de claims
   e policies.
 - Mensageria: RabbitMQ por meio do `RabbitMQ.Client` nativo; frameworks de abstração como
@@ -201,4 +213,4 @@ Violações são corrigidas antes do merge ou justificadas explicitamente na se�
 A constituição é revisada sempre que arquitetura, contratos, segurança ou plataforma
 mudarem materialmente.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-16 | **Last Amended**: 2026-11-16
+**Version**: 1.1.0 | **Ratified**: 2026-11-16 | **Last Amended**: 2026-11-17
