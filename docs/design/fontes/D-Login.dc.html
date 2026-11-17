@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bank — Login</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="min-height: 900px; display: flex; flex-wrap: wrap; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A">
+  <section style="flex: 1 1 480px; min-width: 0; background: #0F172A; color: #FFFFFF; padding: 56px 64px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 48px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#1D4ED8"></rect><path d="M10 9h7a4 4 0 0 1 0 8h-7zM10 17h8a4 4 0 0 1 0 8h-8z" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linejoin="round"></path></svg>
+      <span style="font-size: 20px; line-height: 28px; font-weight: 700">Bank</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 16px; max-width: 460px">
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">Sua carteira digital, para você e para sua empresa.</h1>
+      <p style="margin: 0; font-size: 16px; line-height: 24px; color: #CBD5E1">Envie e receba transferências entre contas Pessoa Física e Pessoa Jurídica, com extrato sempre em dia.</p>
+    </div>
+    <p style="margin: 0; font-size: 12px; line-height: 16px; color: #94A3B8">Ambiente de demonstração.</p>
+  </section>
+
+  <section style="flex: 1 1 480px; min-width: 0; display: flex; align-items: center; justify-content: center; padding: 56px 24px; box-sizing: border-box">
+    <form style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <h2 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 600; letter-spacing: -0.01em">Entrar</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 24px; color: #475569">Use o e-mail e a senha da sua conta.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="dl-email" style="font-size: 14px; line-height: 20px; font-weight: 500">E-mail</label>
+        <input id="dl-email" type="email" autocomplete="email" placeholder="voce@exemplo.com.br" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; color: #0F172A; background: #FFFFFF">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline">
+          <label for="dl-senha" style="font-size: 14px; line-height: 20px; font-weight: 500">Senha</label>
+          <a href="#" style="font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none">Esqueci a senha</a>
+        </div>
+        <input id="dl-senha" type="password" autocomplete="current-password" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; color: #0F172A; background: #FFFFFF">
+      </div>
+      <a href="D-Inicio.dc.html" style="display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 16px; line-height: 24px; font-weight: 600; text-decoration: none">Entrar</a>
+      <p style="margin: 0; font-size: 14px; line-height: 20px; color: #475569; text-align: center">Ainda não tem conta? <a href="D-Cadastro.dc.html" style="font-weight: 600; text-decoration: none">Criar conta</a></p>
+    </form>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
