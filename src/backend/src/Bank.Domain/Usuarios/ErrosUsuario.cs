@@ -13,4 +13,7 @@ public static class ErrosUsuario
 
     public static readonly Erro CredenciaisInvalidas =
         new("credenciais-invalidas", "E-mail ou senha inválidos.", TipoErro.NaoAutorizado);
+
+    public static readonly Erro NaoEncontrado =
+        new("usuario-nao-encontrado", "Usuário não encontrado para o token informado.", TipoErro.NaoEncontrado);
 }

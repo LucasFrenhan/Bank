@@ -50,6 +50,15 @@ public class OpenApiTests(BankApiFactory factory) : IClassFixture<BankApiFactory
         }
 
         Assert.True(minha.GetProperty("security")[0].TryGetProperty("Bearer", out _));
+
+        // specs/005-usuarios-me
+        var me = caminhos.GetProperty("/api/v1/usuarios/me").GetProperty("get");
+        foreach (var status in new[] { "200", "401", "403", "404" })
+        {
+            Assert.True(me.GetProperty("responses").TryGetProperty(status, out _), $"usuarios/me {status}");
+        }
+
+        Assert.True(me.GetProperty("security")[0].TryGetProperty("Bearer", out _));
         Assert.False(caminhos.GetProperty("/api/v1/autenticacao/login").GetProperty("post").TryGetProperty("security", out _));
 
         var bearer = raiz.GetProperty("components").GetProperty("securitySchemes").GetProperty("Bearer");

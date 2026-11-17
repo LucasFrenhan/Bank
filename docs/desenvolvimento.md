@@ -110,6 +110,9 @@ definidos em [`specs/003-usuarios-carteiras`](../specs/003-usuarios-carteiras/sp
   com outro valor. Os dados de carteiras locais existem só para testes.
 - No Scalar, use **Authorize** (esquema `Bearer`) com o `tokenAcesso` do login para chamar
   os endpoints protegidos.
+- **Dados do titular**: `GET /api/v1/usuarios/me` devolve nome, e-mail, documento (sem
+  máscara), tipo de conta e data de cadastro do usuário do token, com `Cache-Control: no-store`
+  — [contrato](../specs/005-usuarios-me/contracts/usuarios-me-api.md) (spec 005).
 
 ## Frontend
 

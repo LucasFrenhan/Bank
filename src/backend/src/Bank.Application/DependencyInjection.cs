@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<RegistrarUsuario>();
         services.AddScoped<Autenticar>();
         services.AddScoped<ObterMinhaCarteira>();
+        services.AddScoped<ObterTitular>();
 
         return services;
     }

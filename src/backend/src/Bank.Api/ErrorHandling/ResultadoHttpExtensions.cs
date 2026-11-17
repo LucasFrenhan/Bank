@@ -18,6 +18,7 @@ public static class ResultadoHttpExtensions
         ["documento-ja-cadastrado"] = "Documento já cadastrado",
         ["credenciais-invalidas"] = "Credenciais inválidas",
         ["carteira-nao-encontrada"] = "Carteira não encontrada",
+        ["usuario-nao-encontrado"] = "Usuário não encontrado",
     };
 
     public static string Tipo(string codigo) => PrefixoTipo + codigo;
