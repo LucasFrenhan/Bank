@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
@@ -6,21 +8,65 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
 namespace Bank.IntegrationTests;
 
-/// <summary>Fábrica que captura em memória logs, spans e métricas exportados pela API.</summary>
+/// <summary>
+/// Fábrica que captura em memória logs e spans exportados pela API e, com um
+/// <see cref="MeterListener"/>, cada medição dos meters da API no momento em que é registrada.
+/// </summary>
+/// <remarks>
+/// As métricas não são lidas pelo exportador em memória do SDK: o que ele entrega depende de
+/// quando o leitor coleta, e no CI a métrica de login recusado chegou a faltar (PR #35).
+/// </remarks>
 public sealed class TelemetriaCompletaApiFactory : BankApiFactory
 {
+    private readonly Lock _trava = new();
+    private MeterListener? _ouvinte;
+
     public SynchronizedCollection<Activity> Spans { get; } = new();
 
     public SynchronizedCollection<LogRecord> Logs { get; } = new();
 
-    // Snapshots: o exportador copia os pontos a cada coleta; com <c>Metric</c> as referências são
-    // reaproveitadas pelo SDK e uma coleta posterior altera o que um teste anterior lê.
-    public SynchronizedCollection<MetricSnapshot> Metricas { get; } = new();
+    /// <summary>Medições (instrumento, valor, tags) dos meters desta API.</summary>
+    public ConcurrentQueue<(string Nome, double Valor, Dictionary<string, string?> Tags)> Medicoes { get; } = new();
+
+    /// <summary>
+    /// Passa a ouvir os meters criados pelo <see cref="IMeterFactory"/> desta API; o escopo do
+    /// meter separa esta fábrica das outras que rodam em paralelo no mesmo processo.
+    /// </summary>
+    public void IniciarCapturaDeMetricas()
+    {
+        lock (_trava)
+        {
+            if (_ouvinte is not null)
+            {
+                return;
+            }
+
+            var fabricaDeMeters = Services.GetRequiredService<IMeterFactory>();
+            _ouvinte = new MeterListener
+            {
+                InstrumentPublished = (instrumento, ouvinte) =>
+                {
+                    if (ReferenceEquals(instrumento.Meter.Scope, fabricaDeMeters))
+                    {
+                        ouvinte.EnableMeasurementEvents(instrumento);
+                    }
+                },
+            };
+            _ouvinte.SetMeasurementEventCallback<long>((i, v, tags, _) => Registrar(i.Name, v, tags));
+            _ouvinte.SetMeasurementEventCallback<double>((i, v, tags, _) => Registrar(i.Name, v, tags));
+            _ouvinte.Start();
+        }
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        _ouvinte?.Dispose();
+        await base.DisposeAsync();
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -29,9 +75,11 @@ public sealed class TelemetriaCompletaApiFactory : BankApiFactory
         {
             services.ConfigureOpenTelemetryTracerProvider(tracing => tracing.AddInMemoryExporter(Spans));
             services.ConfigureOpenTelemetryLoggerProvider(logging => logging.AddInMemoryExporter(Logs));
-            services.ConfigureOpenTelemetryMeterProvider(metricas => metricas.AddInMemoryExporter(Metricas));
         });
     }
+
+    private void Registrar(string nome, double valor, ReadOnlySpan<KeyValuePair<string, object?>> tags) =>
+        Medicoes.Enqueue((nome, valor, tags.ToArray().ToDictionary(t => t.Key, t => t.Value?.ToString())));
 }
 
 /// <summary>
@@ -46,6 +94,7 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
     public async Task CadastroLoginEConsulta_NaoExpoemDadosSensiveisETemMetricas()
     {
         using var client = factory.CreateClient();
+        factory.IniciarCapturaDeMetricas();
         const string senha = "Sigilosa#2026xyz";
         var email = Dados.Email();
         var cnpj = Dados.CnpjAlfanumerico();
@@ -88,6 +137,7 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
     public async Task Transferencias_NaoExpoemDadosSensiveisETemMetricas()
     {
         using var client = factory.CreateClient();
+        factory.IniciarCapturaDeMetricas();
         var emailPagador = Dados.Email();
         var cpfPagador = Dados.Cpf();
         (await client.PostAsJsonAsync(ApiBank.Registrar, new { nomeCompleto = "Pagadora Reservada", email = emailPagador, documento = cpfPagador, tipoConta = "PessoaFisica", senha = Dados.SenhaValida }, Ct)).Dispose();
@@ -128,7 +178,6 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
     {
         factory.Services.GetRequiredService<TracerProvider>().ForceFlush();
         factory.Services.GetRequiredService<LoggerProvider>().ForceFlush();
-        factory.Services.GetRequiredService<MeterProvider>().ForceFlush();
     }
 
     private List<string> TextosExportados()
@@ -154,21 +203,6 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
 
     private void AssertMetrica(string nome, string tag, string valor)
     {
-        var pontos = factory.Metricas.Copiar()
-            .Where(m => m.Name == nome)
-            .SelectMany(m => m.MetricPoints);
-
-        Assert.Contains(pontos, p =>
-        {
-            foreach (var t in p.Tags)
-            {
-                if (t.Key == tag && Equals(t.Value, valor))
-                {
-                    return p.GetSumLong() > 0;
-                }
-            }
-
-            return false;
-        });
+        Assert.Contains(factory.Medicoes, m => m.Nome == nome && m.Tags.TryGetValue(tag, out var v) && v == valor && m.Valor > 0);
     }
 }
