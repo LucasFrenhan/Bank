@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Bank.Api.ErrorHandling;
 using Bank.Api.Seguranca;
 using Bank.Application.Carteiras;
-using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Bank.Api.Endpoints;
 
@@ -33,7 +32,7 @@ public static class CarteirasEndpoints
 
     private static async Task<IResult> ObterMinhaAsync(ClaimsPrincipal usuario, ObterMinhaCarteira casoDeUso, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(usuario.FindFirstValue(JwtRegisteredClaimNames.Sub), out var usuarioId))
+        if (!usuario.TentarObterUsuarioId(out var usuarioId))
         {
             return TypedResults.Forbid();
         }
