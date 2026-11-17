@@ -18,7 +18,9 @@ public sealed class TelemetriaCompletaApiFactory : BankApiFactory
 
     public SynchronizedCollection<LogRecord> Logs { get; } = new();
 
-    public SynchronizedCollection<Metric> Metricas { get; } = new();
+    // Snapshots: o exportador copia os pontos a cada coleta; com <c>Metric</c> as referências são
+    // reaproveitadas pelo SDK e uma coleta posterior altera o que um teste anterior lê.
+    public SynchronizedCollection<MetricSnapshot> Metricas { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -154,16 +156,7 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
     {
         var pontos = factory.Metricas.Copiar()
             .Where(m => m.Name == nome)
-            .SelectMany(m =>
-            {
-                var lista = new List<MetricPoint>();
-                foreach (ref readonly var ponto in m.GetMetricPoints())
-                {
-                    lista.Add(ponto);
-                }
-
-                return lista;
-            });
+            .SelectMany(m => m.MetricPoints);
 
         Assert.Contains(pontos, p =>
         {
