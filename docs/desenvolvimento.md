@@ -36,8 +36,9 @@ docker compose down -v
 | Aspire Dashboard (traces, métricas e logs) | <http://localhost:18888> | sem login |
 | OTLP gRPC / HTTP | `http://localhost:4317` / `http://localhost:4318` | sem autenticação |
 | API (`/health`, `/scalar/v1`) | <http://localhost:8080> | sem autenticação |
+| Frontend | <http://localhost:3000> | conta criada na própria tela |
 
-- O `docker compose up -d --wait` também constrói e sobe a API (use `--build` após alterar
+- O `docker compose up -d --wait` também constrói e sobe a API e o frontend (use `--build` após alterar
   o código). Para subir só a infraestrutura e rodar a API pelo SDK:
   `docker compose up -d --wait postgres rabbitmq aspire-dashboard`.
 - As portas escutam apenas em `127.0.0.1` e podem ser alteradas no `.env`, por exemplo
@@ -109,6 +110,48 @@ definidos em [`specs/003-usuarios-carteiras`](../specs/003-usuarios-carteiras/sp
   com outro valor. Os dados de carteiras locais existem só para testes.
 - No Scalar, use **Authorize** (esquema `Bearer`) com o `tokenAcesso` do login para chamar
   os endpoints protegidos.
+
+## Frontend
+
+Aplicação React + TypeScript em `src/frontend/`, definida em
+[`specs/004-frontend-base`](../specs/004-frontend-base/spec.md) —
+[contrato](../specs/004-frontend-base/contracts/frontend.md) e
+[roteiro de validação](../specs/004-frontend-base/quickstart.md). Telas de login, cadastro
+PF/PJ, início e perfil, em desktop e mobile, seguindo o [protótipo](design/prototipo.md).
+
+**Pré-requisito:** Node.js 26.13.0 (`src/frontend/.nvmrc`). Para só usar o frontend, basta o
+Compose: <http://localhost:3000>.
+
+```bash
+cd src/frontend
+npm ci
+
+# desenvolvimento: http://localhost:5173, com /api → API pelo SDK (5080) e /otlp → coletor (4318)
+npm run dev
+# usando a API do Compose em vez do SDK:
+BANK_API_URL=http://localhost:8080 npm run dev
+
+# qualidade
+npm run lint && npm run typecheck && npm test && npm run build
+
+# ponta a ponta (desktop e mobile, API real): Compose no ar
+npx playwright install chromium   # uma vez
+npm run e2e                        # contra http://localhost:3000 (E2E_BASE_URL muda o alvo)
+
+# tipos da API a partir do OpenAPI (API no ar; BANK_API_URL muda a origem)
+npm run api:tipos
+```
+
+- A API e o coletor são acessados pela mesma origem: o proxy do Vite (desenvolvimento) e o
+  nginx (Compose) encaminham `/api` e `/otlp`. A API não tem CORS.
+- A sessão fica só na aba (`sessionStorage`) e expira com o token (1 hora).
+- No Compose a telemetria do navegador está ligada: o frontend aparece no Aspire Dashboard
+  como `bank-frontend`, no mesmo trace das chamadas à `bank-api`. Em produção ela vem
+  desligada (`VITE_TELEMETRIA_HABILITADA`).
+- Métricas no Aspire Dashboard (<http://localhost:18888/metrics>): a tela abre sem recurso
+  selecionado — escolha `bank-api` (meter `Bank.Usuarios`: cadastros e logins) ou
+  `bank-frontend` (carregamento e navegações).
+- Depois de alterar o frontend, reconstrua a imagem: `docker compose up -d --build frontend`.
 
 ## Fluxo de desenvolvimento (SDD)
 
