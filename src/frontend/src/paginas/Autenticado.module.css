@@ -131,3 +131,35 @@
     grid-template-columns: 200px 1fr;
   }
 }
+
+/* ---------- CNPJ para receber (início PJ) ---------- */
+.cnpj {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  padding: 0 var(--espaco-6) var(--espaco-5);
+}
+
+.rotuloCnpj {
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}
+
+.linhaCnpj {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.valorCnpj {
+  font: var(--texto-h3);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.avisoCopia {
+  min-height: 20px;
+  color: var(--cor-entrada);
+  font: var(--texto-corpo-m);
+}
