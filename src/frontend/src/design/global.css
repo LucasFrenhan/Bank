@@ -1,0 +1,86 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font: var(--texto-corpo-l);
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: anywhere;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font: var(--texto-h1);
+}
+
+h2 {
+  font: var(--texto-h2);
+}
+
+h3 {
+  font: var(--texto-h3);
+}
+
+a {
+  color: var(--cor-primaria);
+  font-weight: 500;
+}
+
+a:hover {
+  color: var(--cor-primaria-escura);
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+/* Foco visível em todo elemento interativo (WCAG 2.2 AA — FR-001a). */
+:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.valor-monetario {
+  font-variant-numeric: tabular-nums;
+}
+
+.apenas-leitor-de-tela {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
