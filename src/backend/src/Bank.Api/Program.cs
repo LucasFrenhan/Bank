@@ -2,6 +2,7 @@ using Bank.Api.Endpoints;
 using Bank.Api.ErrorHandling;
 using Bank.Api.Observability;
 using Bank.Api.OpenApi;
+using Bank.Api.Seguranca;
 using Bank.Api.Testing;
 using Bank.Application;
 using Bank.Infrastructure;
@@ -12,18 +13,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddTelemetria();
 
 builder.Services
-    .AddApplication()
-    .AddInfrastructure()
+    .AddApplication(ambienteDeProducao: builder.Environment.IsProduction())
+    .AddInfrastructure(builder.Configuration)
     .AddTratamentoDeErros()
+    .AddAutenticacaoJwt()
     .AddDocumentacaoApi()
     .AddHealthEndpoints();
 
 var app = builder.Build();
 
 app.UseTratamentoDeErros();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapDocumentacaoApi();
 app.MapHealthEndpoints();
+app.MapAutenticacaoEndpoints();
+app.MapCarteirasEndpoints();
 app.MapTestEndpoints();
 
 await app.RunAsync();
