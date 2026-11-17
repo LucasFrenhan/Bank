@@ -7,11 +7,13 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="OpenTelemetry.Exporter.InMemory" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bank.Api\Bank.Api.csproj" />
+    <ProjectReference Include="..\..\src\Bank.Infrastructure\Bank.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
