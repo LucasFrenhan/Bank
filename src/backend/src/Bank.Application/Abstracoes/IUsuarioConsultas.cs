@@ -11,8 +11,14 @@ public sealed record DadosTitular(
     TipoConta TipoConta,
     DateTimeOffset CriadoEm);
 
+/// <summary>Titular de destino de uma transferência, encontrado pelo documento (spec 006, FR-002).</summary>
+public sealed record Destinatario(Guid UsuarioId, Guid CarteiraId, string Nome, string Documento, TipoConta TipoConta);
+
 /// <summary>Consultas de leitura de usuários (implementadas em Infrastructure).</summary>
 public interface IUsuarioConsultas
 {
     Task<DadosTitular?> ObterTitularAsync(Guid usuarioId, CancellationToken cancellationToken);
+
+    /// <param name="documento">Documento já normalizado (sem máscara, maiúsculas).</param>
+    Task<Destinatario?> ObterDestinatarioAsync(string documento, CancellationToken cancellationToken);
 }

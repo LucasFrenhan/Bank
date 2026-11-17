@@ -1,5 +1,7 @@
 using Bank.Domain.Carteiras;
+using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Bank.Infrastructure.Mensageria;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bank.Infrastructure.Persistencia;
@@ -13,6 +15,12 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
     public DbSet<Usuario> Usuarios => Set<Usuario>();
 
     public DbSet<Carteira> Carteiras => Set<Carteira>();
+
+    public DbSet<Transferencia> Transferencias => Set<Transferencia>();
+
+    public DbSet<Lancamento> Lancamentos => Set<Lancamento>();
+
+    public DbSet<EventoOutbox> EventosOutbox => Set<EventoOutbox>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

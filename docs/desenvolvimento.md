@@ -114,6 +114,33 @@ definidos em [`specs/003-usuarios-carteiras`](../specs/003-usuarios-carteiras/sp
   máscara), tipo de conta e data de cadastro do usuário do token, com `Cache-Control: no-store`
   — [contrato](../specs/005-usuarios-me/contracts/usuarios-me-api.md) (spec 005).
 
+### Transferências e extrato
+
+Definidos em [`specs/006-transferencias`](../specs/006-transferencias/spec.md) —
+[contrato](../specs/006-transferencias/contracts/transferencias-api.md),
+[evento](../specs/006-transferencias/contracts/evento-transferencia-concluida.md) e
+[roteiro de validação](../specs/006-transferencias/quickstart.md).
+
+- **Transferir** (`POST /api/v1/transferencias`, só PF): corpo `documentoDestino` (CPF ou CNPJ,
+  com ou sem máscara), `valor` (≥ 0,01, até 2 casas) e `descricao` opcional (até 200). O
+  cabeçalho **`Idempotency-Key`** (UUID gerado pelo cliente) é obrigatório: reenviar com a mesma
+  chave e os mesmos destino e valor devolve `200` com o comprovante original, sem novo débito;
+  com outro destino ou valor, `409`. Saldo insuficiente e autotransferência → `422`.
+- **Consultar destinatário** (`POST /api/v1/transferencias/destinatarios/consultar`, só PF):
+  confirma nome e tipo de conta antes de enviar. O documento vai no corpo, nunca na URL.
+- **Extrato** (`GET /api/v1/transferencias/extrato`, PF e PJ): `pagina` (padrão 1),
+  `tamanhoPagina` (padrão 20, máximo 100) e `direcao` (`Entrada`/`Saida`), mais recente
+  primeiro; CPF de terceiros mascarado, CNPJ completo.
+- **Razão**: transferências e lançamentos são imutáveis (trigger no banco) e toda carteira tem
+  saldo = soma dos lançamentos. O evento `transferencia.concluida` é gravado em `outbox_eventos`
+  na mesma transação (a publicação no broker fica para a issue #9).
+- **Abertura**: o saldo de demonstração vira um lançamento `Abertura` no cadastro; fora de
+  `Production`, ao subir a API, carteiras antigas sem abertura a recebem
+  (`Persistencia:CriarLancamentosDeAberturaNaInicializacao`).
+- **SQL puro** (bloqueio `FOR UPDATE`, trigger, abertura) fica em arquivos `.sql` em
+  `src/backend/src/Bank.Infrastructure/Persistencia/Sql/`, embutidos no assembly (constituição
+  v1.1.0).
+
 ## Frontend
 
 Aplicação React + TypeScript em `src/frontend/`, definida em

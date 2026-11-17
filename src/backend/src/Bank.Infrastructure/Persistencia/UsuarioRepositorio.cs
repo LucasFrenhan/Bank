@@ -20,8 +20,13 @@ internal sealed class UsuarioRepositorio(BankDbContext contexto) : IUsuarioRepos
 
     public async Task<ResultadoPersistencia> AdicionarAsync(Usuario usuario, CancellationToken cancellationToken)
     {
-        // Usuário e carteira (navegação) são gravados no mesmo SaveChanges: uma transação (RN-04).
+        // Usuário, carteira (navegação) e lançamento de abertura no mesmo SaveChanges: uma
+        // transação (RN-04 da spec 003; FR-016 da spec 006).
         contexto.Usuarios.Add(usuario);
+        if (usuario.LancamentoDeAbertura is { } abertura)
+        {
+            contexto.Lancamentos.Add(abertura);
+        }
 
         try
         {

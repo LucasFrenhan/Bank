@@ -12,4 +12,12 @@ internal sealed class UsuarioConsultas(BankDbContext contexto) : IUsuarioConsult
             .Where(u => u.Id == usuarioId)
             .Select(u => new DadosTitular(u.Id, u.NomeCompleto, u.Email, u.Documento, u.TipoConta, u.CriadoEm))
             .SingleOrDefaultAsync(cancellationToken);
+
+    /// <summary>Destinatário pelo documento normalizado (índice único ux_usuarios_documento).</summary>
+    public Task<Destinatario?> ObterDestinatarioAsync(string documento, CancellationToken cancellationToken) =>
+        contexto.Usuarios
+            .AsNoTracking()
+            .Where(u => u.Documento == documento)
+            .Select(u => new Destinatario(u.Id, u.Carteira.Id, u.NomeCompleto, u.Documento, u.TipoConta))
+            .SingleOrDefaultAsync(cancellationToken);
 }

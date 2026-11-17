@@ -14,6 +14,11 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
   </ItemGroup>
   <ItemGroup>
+    <!-- SQL puro em arquivos .sql (constituição v1.1.0; specs/006-transferencias, research R3) -->
+    <EmbeddedResource Include="Persistencia/Sql/**/*.sql" />
+  </ItemGroup>
+  <ItemGroup>
     <InternalsVisibleTo Include="Bank.UnitTests" />
+    <InternalsVisibleTo Include="Bank.ArchitectureTests" />
   </ItemGroup>
 </Project>

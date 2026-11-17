@@ -29,7 +29,12 @@ public static class PostgresCompartilhado
 
     private static async Task<PostgreSqlContainer> IniciarAsync()
     {
-        var container = new PostgreSqlBuilder(Imagem).Build();
+        // Muitas classes rodam em paralelo, cada uma com seu pool, e os testes de concorrência
+        // (spec 006) seguram conexões enquanto aguardam o FOR UPDATE: o padrão de 100 conexões
+        // do PostgreSQL esgota ("53300: too many clients").
+        var container = new PostgreSqlBuilder(Imagem)
+            .WithCommand("-c", "max_connections=500")
+            .Build();
         await container.StartAsync();
         return container;
     }

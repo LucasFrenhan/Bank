@@ -363,7 +363,9 @@ e gerar cobranças, mas não a de transferir.
 - **Fora de escopo**: refresh token, logout/revogação de token, recuperação e troca de
   senha, confirmação de e-mail, bloqueio por tentativas de login, alteração de dados
   cadastrais, exclusão de conta, múltiplas carteiras e frontend.
-- **Saldo inicial não é lançamento financeiro (por enquanto)**: o saldo de demonstração é
+- **Saldo inicial não é lançamento financeiro (por enquanto)** — *entregue pela spec 006*
+  (`specs/006-transferencias`: lançamento de abertura no cadastro e, fora de `Production`, na
+  inicialização para as carteiras existentes). Texto original: o saldo de demonstração é
   atribuído na criação da carteira e só existe fora de `Production` (ver Clarifications);
   os dados de carteiras atuais são apenas de desenvolvimento e testes. O histórico de
   lançamentos e a idempotência de movimentações (constituição, Princípio IV) pertencem à

@@ -41,6 +41,41 @@ public sealed record Documento
     /// Valida o documento sem conhecer o tipo de conta (usado quando o tipo informado é
     /// inválido, para ainda assim reportar todos os campos inválidos de uma vez).
     /// </summary>
+    /// <summary>
+    /// Valida e normaliza um CPF ou CNPJ sem saber o tipo de conta (busca do destinatário de uma
+    /// transferência — specs/006-transferencias, FR-002). O tipo resultante vem do formato.
+    /// </summary>
+    public static Resultado<Documento> CriarSemTipo(string? valor, string campo = Campo)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            return Resultado.Falha<Documento>(Erro.Validacao(campo, "Informe o CPF ou CNPJ."));
+        }
+
+        var cpf = Cpf.Criar(valor);
+        if (cpf.Sucesso)
+        {
+            return Resultado.Ok(new Documento(cpf.Valor.Valor, TipoConta.PessoaFisica));
+        }
+
+        var cnpj = Cnpj.Criar(valor);
+        return cnpj.Sucesso
+            ? Resultado.Ok(new Documento(cnpj.Valor.Valor, TipoConta.PessoaJuridica))
+            : Resultado.Falha<Documento>(Erro.Validacao(campo, "Documento inválido: informe um CPF ou CNPJ válido."));
+    }
+
+    /// <summary>
+    /// Documento de terceiros para exibição (FR-014 da spec 006): CPF mascarado
+    /// (<c>•••.982.247-••</c>); CNPJ, que é dado de empresa, completo.
+    /// </summary>
+    public static string Ocultar(string documento)
+    {
+        ArgumentNullException.ThrowIfNull(documento);
+        return documento.Length == Cpf.Tamanho
+            ? $"•••.{documento[3..6]}.{documento[6..9]}-••"
+            : documento;
+    }
+
     public static Resultado ValidarSemTipo(string? valor)
     {
         if (string.IsNullOrWhiteSpace(valor))

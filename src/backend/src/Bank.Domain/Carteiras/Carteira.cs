@@ -38,4 +38,27 @@ public sealed class Carteira
             AtualizadoEm = agora,
         };
     }
+
+    /// <summary>Debita o valor; recusa sem alterar nada se o saldo não cobrir (RN-05 da #8).</summary>
+    public Resultado Debitar(decimal valor, DateTimeOffset agora)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(valor);
+
+        if (Saldo < valor)
+        {
+            return Resultado.Falha(Transferencias.ErrosTransferencia.SaldoInsuficiente);
+        }
+
+        Saldo = Dinheiro.NormalizarEscala(Saldo - valor);
+        AtualizadoEm = agora;
+        return Resultado.Ok();
+    }
+
+    public void Creditar(decimal valor, DateTimeOffset agora)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(valor);
+
+        Saldo = Dinheiro.NormalizarEscala(Saldo + valor);
+        AtualizadoEm = agora;
+    }
 }

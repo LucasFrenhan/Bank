@@ -19,6 +19,10 @@ public static class ResultadoHttpExtensions
         ["credenciais-invalidas"] = "Credenciais inválidas",
         ["carteira-nao-encontrada"] = "Carteira não encontrada",
         ["usuario-nao-encontrado"] = "Usuário não encontrado",
+        ["destinatario-nao-encontrado"] = "Destinatário não encontrado",
+        ["autotransferencia"] = "Transferência para a própria conta",
+        ["saldo-insuficiente"] = "Saldo insuficiente",
+        ["idempotencia-divergente"] = "Chave de idempotência já usada com outros dados",
     };
 
     public static string Tipo(string codigo) => PrefixoTipo + codigo;
@@ -63,6 +67,7 @@ public static class ResultadoHttpExtensions
         TipoErro.Conflito => StatusCodes.Status409Conflict,
         TipoErro.NaoAutorizado => StatusCodes.Status401Unauthorized,
         TipoErro.NaoEncontrado => StatusCodes.Status404NotFound,
+        TipoErro.RegraDeNegocio => StatusCodes.Status422UnprocessableEntity,
         _ => StatusCodes.Status500InternalServerError,
     };
 }

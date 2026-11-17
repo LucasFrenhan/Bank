@@ -34,6 +34,13 @@ public sealed class Usuario
 
     public Carteira Carteira { get; private set; } = null!;
 
+    /// <summary>
+    /// Lançamento de abertura do saldo de demonstração, gravado junto com o cadastro
+    /// (specs/006-transferencias, FR-016); nulo quando o saldo inicial é zero. Não é persistido
+    /// como parte do usuário.
+    /// </summary>
+    public Transferencias.Lancamento? LancamentoDeAbertura { get; private set; }
+
     /// <summary>Nome completo ou razão social: 1–150 caracteres após remover espaços nas extremidades.</summary>
     public static Resultado<string> ValidarNome(string? nome)
     {
@@ -72,6 +79,7 @@ public sealed class Usuario
         }
 
         var id = Guid.CreateVersion7(agora);
+        var carteira = Carteira.Criar(id, saldoInicial, agora);
 
         return new Usuario
         {
@@ -82,7 +90,8 @@ public sealed class Usuario
             TipoConta = documento.TipoConta,
             SenhaHash = senhaHash,
             CriadoEm = agora,
-            Carteira = Carteira.Criar(id, saldoInicial, agora),
+            Carteira = carteira,
+            LancamentoDeAbertura = carteira.Saldo > 0 ? Transferencias.Lancamento.Abertura(carteira.Id, carteira.Saldo, agora) : null,
         };
     }
 

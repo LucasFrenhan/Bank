@@ -1,0 +1,152 @@
+using Bank.Application.Observabilidade;
+using Bank.Application.Transferencias;
+using Bank.Domain.Comum;
+using Bank.Domain.Transferencias;
+using Bank.Domain.Usuarios;
+using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Bank.UnitTests.Application;
+
+/// <summary>Caso de uso de transferência (spec 006: US1, US2; research R3, R4).</summary>
+public sealed class RealizarTransferenciaTests : IDisposable
+{
+    private readonly BancoFalso _banco = new();
+    private readonly MetricasCapturadasTransferencias _metricas = new();
+    private readonly RealizarTransferencia _casoDeUso;
+    private readonly Usuario _pf;
+    private readonly Usuario _pj;
+
+    public RealizarTransferenciaTests()
+    {
+        _casoDeUso = new RealizarTransferencia(_banco, _banco, _banco, _banco, TimeProvider.System, _metricas.Metricas, NullLogger<RealizarTransferencia>.Instance);
+        _pf = _banco.Criar("Lucas Silva", "52998224725", TipoConta.PessoaFisica, 10m);
+        _pj = _banco.Criar("Cafeteria Ltda", "12ABC34501DE35", TipoConta.PessoaJuridica, 0m);
+    }
+
+    public void Dispose() => _metricas.Dispose();
+
+    [Fact]
+    public async Task Executar_Sucesso_DebitaCreditaEDevolveComprovante()
+    {
+        var resultado = await Transferir("12.abc.345/01de-35", 4.5m, "  Almoço ");
+
+        Assert.True(resultado.Sucesso);
+        Assert.False(resultado.Valor.Replay);
+        var comprovante = resultado.Valor.Comprovante;
+        Assert.Equal(("Lucas Silva", "Cafeteria Ltda", "12ABC34501DE35", 4.5m, "Almoço", StatusTransferencia.Concluida),
+            (comprovante.Pagador.Nome, comprovante.Recebedor.Nome, comprovante.Recebedor.Documento, comprovante.Valor, comprovante.Descricao, comprovante.Status));
+        Assert.Equal((5.5m, 4.5m), (_pf.Carteira.Saldo, _pj.Carteira.Saldo));
+        Assert.Single(_banco.Gravadas);
+        Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.concluidas" && m.Tags["tipo_destino"] == "PessoaJuridica");
+        Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.valor");
+    }
+
+    [Fact]
+    public async Task Executar_TodosOsCamposInvalidos_DevolveTodosOsErros()
+    {
+        var resultado = await _casoDeUso.ExecutarAsync(new RealizarTransferenciaComando(_pf.Id, "nao-e-uuid", "123", 10.005m, new string('a', 201)), CancellationToken.None);
+
+        Assert.Equal(["Idempotency-Key", "descricao", "documentoDestino", "valor"], resultado.Erros.Select(e => e.Campo!).Order(StringComparer.Ordinal));
+        AssertRecusa("validacao");
+    }
+
+    [Fact]
+    public async Task Executar_DestinoInexistente_404()
+    {
+        var resultado = await Transferir("11222333000181", 1m);
+
+        Assert.Equal(ErrosTransferencia.DestinatarioNaoEncontrado, Assert.Single(resultado.Erros));
+        AssertRecusa("destinatario-nao-encontrado");
+    }
+
+    [Fact]
+    public async Task Executar_ParaOProprioDocumento_Autotransferencia()
+    {
+        var resultado = await Transferir("529.982.247-25", 1m);
+
+        Assert.Equal(ErrosTransferencia.Autotransferencia, Assert.Single(resultado.Erros));
+    }
+
+    [Fact]
+    public async Task Executar_SaldoInsuficiente_RecusaSemGravar()
+    {
+        var resultado = await Transferir("12ABC34501DE35", 10.01m);
+
+        Assert.Equal(ErrosTransferencia.SaldoInsuficiente, Assert.Single(resultado.Erros));
+        Assert.Empty(_banco.Gravadas);
+        Assert.Equal(10m, _pf.Carteira.Saldo);
+        Assert.Equal(1, _banco.Desfeitas);
+        AssertRecusa("saldo-insuficiente");
+    }
+
+    [Fact]
+    public async Task Executar_CarteiraSumiuAntesDoBloqueio_404EDesfaz()
+    {
+        _banco.OmitirCarteirasNoBloqueio = true;
+
+        var resultado = await Transferir("12ABC34501DE35", 1m);
+
+        Assert.Equal(ErrosTransferencia.DestinatarioNaoEncontrado, Assert.Single(resultado.Erros));
+        Assert.Equal(1, _banco.Desfeitas);
+    }
+
+    [Fact]
+    public async Task Replay_MesmaChaveEMesmosDados_DevolveOriginalSemDebitar()
+    {
+        var chave = Guid.NewGuid();
+        var primeira = await Transferir("12ABC34501DE35", 4m, chave: chave);
+
+        var segunda = await Transferir("12.ABC.345/01DE-35", 4m, "outra descrição", chave);
+
+        Assert.True(segunda.Valor.Replay);
+        Assert.Equal(primeira.Valor.Comprovante.TransferenciaId, segunda.Valor.Comprovante.TransferenciaId);
+        Assert.Equal(6m, _pf.Carteira.Saldo);
+        Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.replays");
+    }
+
+    [Theory]
+    [InlineData("12ABC34501DE35", 5)]
+    [InlineData("11222333000181", 4)]
+    public async Task Replay_MesmaChaveComDadosDiferentes_409(string documento, decimal valor)
+    {
+        _banco.Criar("Outra Empresa", "11222333000181", TipoConta.PessoaJuridica, 0m);
+        var chave = Guid.NewGuid();
+        await Transferir("12ABC34501DE35", 4m, chave: chave);
+
+        var resultado = await Transferir(documento, valor, chave: chave);
+
+        Assert.Equal(ErrosTransferencia.IdempotenciaDivergente, Assert.Single(resultado.Erros));
+    }
+
+    [Fact]
+    public async Task ChaveGravadaPorOutraRequisicaoNaConfirmacao_DevolveReplay()
+    {
+        var chave = Guid.NewGuid();
+        var outra = Transferencia.Executar(_pf.Carteira, _pj.Carteira, ValorTransferencia.Criar(2m).Valor, null, chave, DateTimeOffset.UtcNow).Valor;
+        _banco.ForcarChaveDuplicada = true;
+        _banco.AntesDeConfirmar = () => _banco.Gravadas.Add(outra);
+
+        var resultado = await Transferir("12ABC34501DE35", 2m, chave: chave);
+
+        Assert.True(resultado.Valor.Replay);
+        Assert.Equal(outra.Transferencia.Id, resultado.Valor.Comprovante.TransferenciaId);
+    }
+
+    private Task<Resultado<TransferenciaRealizada>> Transferir(string documento, decimal valor, string? descricao = null, Guid? chave = null) =>
+        _casoDeUso.ExecutarAsync(new RealizarTransferenciaComando(_pf.Id, (chave ?? Guid.NewGuid()).ToString(), documento, valor, descricao), CancellationToken.None);
+
+    private void AssertRecusa(string motivo) =>
+        Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.recusadas" && m.Tags["motivo"] == motivo);
+}
+
+/// <summary>Captura as medições de <see cref="MetricasTransferencias"/>.</summary>
+internal sealed class MetricasCapturadasTransferencias : IDisposable
+{
+    private readonly MetricasCapturadasBase _base = new(f => new MetricasTransferencias(f));
+
+    public MetricasTransferencias Metricas => (MetricasTransferencias)_base.Instancia;
+
+    public IReadOnlyCollection<(string Nome, double Valor, Dictionary<string, string?> Tags)> Medicoes => _base.Medicoes;
+
+    public void Dispose() => _base.Dispose();
+}

@@ -68,6 +68,129 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bank.Domain.Transferencias.Lancamento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CarteiraId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("carteira_id");
+
+                    b.Property<DateTimeOffset>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("descricao");
+
+                    b.Property<string>("Direcao")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("direcao");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("tipo");
+
+                    b.Property<Guid?>("TransferenciaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transferencia_id");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_lancamentos");
+
+                    b.HasIndex("CarteiraId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_lancamentos_abertura_por_carteira")
+                        .HasFilter("tipo = 'Abertura'");
+
+                    b.HasIndex("TransferenciaId")
+                        .HasDatabaseName("ix_lancamentos_transferencia_id");
+
+                    b.HasIndex("CarteiraId", "CriadoEm", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_lancamentos_extrato");
+
+                    b.ToTable("lancamentos", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_lancamentos_direcao", "direcao IN ('Entrada', 'Saida')");
+
+                            t.HasCheckConstraint("ck_lancamentos_tipo", "tipo IN ('Abertura', 'Transferencia')");
+
+                            t.HasCheckConstraint("ck_lancamentos_transferencia_coerente", "(tipo = 'Transferencia') = (transferencia_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_lancamentos_valor_positivo", "valor > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Transferencias.Transferencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CarteiraDestinoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("carteira_destino_id");
+
+                    b.Property<Guid>("CarteiraOrigemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("carteira_origem_id");
+
+                    b.Property<Guid>("ChaveIdempotencia")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chave_idempotencia");
+
+                    b.Property<DateTimeOffset>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("descricao");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_transferencias");
+
+                    b.HasIndex("CarteiraDestinoId")
+                        .HasDatabaseName("ix_transferencias_carteira_destino_id");
+
+                    b.HasIndex("CarteiraOrigemId", "ChaveIdempotencia")
+                        .IsUnique()
+                        .HasDatabaseName("ux_transferencias_origem_chave");
+
+                    b.ToTable("transferencias", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_transferencias_origem_diferente_destino", "carteira_origem_id <> carteira_destino_id");
+
+                            t.HasCheckConstraint("ck_transferencias_status", "status = 'Concluida'");
+
+                            t.HasCheckConstraint("ck_transferencias_valor_positivo", "valor > 0");
+                        });
+                });
+
             modelBuilder.Entity("Bank.Domain.Usuarios.Usuario", b =>
                 {
                     b.Property<Guid>("Id")
@@ -124,6 +247,45 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bank.Infrastructure.Mensageria.EventoOutbox", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("OcorridoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ocorrido_em");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTimeOffset?>("PublicadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("publicado_em");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("tipo");
+
+                    b.Property<int>("Versao")
+                        .HasColumnType("integer")
+                        .HasColumnName("versao");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outbox_eventos");
+
+                    b.HasIndex("OcorridoEm")
+                        .HasDatabaseName("ix_outbox_eventos_pendentes")
+                        .HasFilter("publicado_em IS NULL");
+
+                    b.ToTable("outbox_eventos", (string)null);
+                });
+
             modelBuilder.Entity("Bank.Domain.Carteiras.Carteira", b =>
                 {
                     b.HasOne("Bank.Domain.Usuarios.Usuario", null)
@@ -132,6 +294,39 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_carteiras_usuarios");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Transferencias.Lancamento", b =>
+                {
+                    b.HasOne("Bank.Domain.Carteiras.Carteira", null)
+                        .WithMany()
+                        .HasForeignKey("CarteiraId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_lancamentos_carteiras");
+
+                    b.HasOne("Bank.Domain.Transferencias.Transferencia", null)
+                        .WithMany()
+                        .HasForeignKey("TransferenciaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_lancamentos_transferencias");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Transferencias.Transferencia", b =>
+                {
+                    b.HasOne("Bank.Domain.Carteiras.Carteira", null)
+                        .WithMany()
+                        .HasForeignKey("CarteiraDestinoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_transferencias_carteira_destino");
+
+                    b.HasOne("Bank.Domain.Carteiras.Carteira", null)
+                        .WithMany()
+                        .HasForeignKey("CarteiraOrigemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_transferencias_carteira_origem");
                 });
 
             modelBuilder.Entity("Bank.Domain.Usuarios.Usuario", b =>

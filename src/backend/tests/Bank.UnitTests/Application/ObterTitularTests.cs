@@ -40,5 +40,8 @@ public class ObterTitularTests
     {
         public Task<DadosTitular?> ObterTitularAsync(Guid usuarioId, CancellationToken cancellationToken) =>
             Task.FromResult(titular.UsuarioId == usuarioId ? titular : null);
+
+        public Task<Destinatario?> ObterDestinatarioAsync(string documento, CancellationToken cancellationToken) =>
+            Task.FromResult<Destinatario?>(null);
     }
 }
