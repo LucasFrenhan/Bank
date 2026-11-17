@@ -1,15 +1,36 @@
+using Bank.Application.Autenticacao;
+using Bank.Application.Carteiras;
+using Bank.Application.Observabilidade;
+using Bank.Application.Usuarios;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Bank.Application;
 
 /// <summary>Registro dos serviços da camada de aplicação.</summary>
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    /// <param name="ambienteDeProducao">
+    /// Em produção, o saldo inicial de demonstração deve ser zero (FR-013; research R8).
+    /// </param>
+    public static IServiceCollection AddApplication(this IServiceCollection services, bool ambienteDeProducao)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        // Serviços de aplicação serão registrados pelas specs de negócio.
+        services.AddOptions<SaldoInicialOptions>()
+            .BindConfiguration(SaldoInicialOptions.Secao)
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<SaldoInicialOptions>>(new ValidadorSaldoInicialOptions(ambienteDeProducao));
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<MetricasUsuarios>();
+        services.AddSingleton<HashSenhaFicticio>();
+
+        services.AddScoped<RegistrarUsuario>();
+        services.AddScoped<Autenticar>();
+        services.AddScoped<ObterMinhaCarteira>();
+
         return services;
     }
 }

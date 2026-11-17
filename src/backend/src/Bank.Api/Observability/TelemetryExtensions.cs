@@ -1,3 +1,4 @@
+using Bank.Application.Observabilidade;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -35,7 +36,8 @@ public static class TelemetryExtensions
             .WithMetrics(metricas => metricas
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
-                .AddMeter("System.Runtime"))
+                .AddMeter("System.Runtime")
+                .AddMeter(MetricasUsuarios.NomeMeter))
             .WithLogging();
 
         // Nos testes não há coletor; eles acrescentam um exportador em memória (R5).

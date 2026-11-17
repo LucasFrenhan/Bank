@@ -24,6 +24,41 @@ public class OpenApiTests(BankApiFactory factory) : IClassFixture<BankApiFactory
     }
 
     [Fact]
+    public async Task DocumentoOpenApi_DescreveEndpointsDeUsuariosECarteirasComBearer()
+    {
+        using var client = factory.CreateClient();
+
+        using var resposta = await client.GetAsync(DocumentoOpenApi, TestContext.Current.CancellationToken);
+
+        using var documento = JsonDocument.Parse(await resposta.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var raiz = documento.RootElement;
+        var caminhos = raiz.GetProperty("paths");
+
+        var registrar = caminhos.GetProperty("/api/v1/autenticacao/registrar").GetProperty("post").GetProperty("responses");
+        Assert.True(registrar.TryGetProperty("201", out _));
+        Assert.True(registrar.TryGetProperty("400", out _));
+        Assert.True(registrar.TryGetProperty("409", out _));
+
+        var login = caminhos.GetProperty("/api/v1/autenticacao/login").GetProperty("post").GetProperty("responses");
+        Assert.True(login.TryGetProperty("200", out _));
+        Assert.True(login.TryGetProperty("401", out _));
+
+        var minha = caminhos.GetProperty("/api/v1/carteiras/minha").GetProperty("get");
+        foreach (var status in new[] { "200", "401", "403", "404" })
+        {
+            Assert.True(minha.GetProperty("responses").TryGetProperty(status, out _), status);
+        }
+
+        Assert.True(minha.GetProperty("security")[0].TryGetProperty("Bearer", out _));
+        Assert.False(caminhos.GetProperty("/api/v1/autenticacao/login").GetProperty("post").TryGetProperty("security", out _));
+
+        var bearer = raiz.GetProperty("components").GetProperty("securitySchemes").GetProperty("Bearer");
+        Assert.Equal("http", bearer.GetProperty("type").GetString());
+        Assert.Equal("bearer", bearer.GetProperty("scheme").GetString());
+        Assert.Equal("JWT", bearer.GetProperty("bearerFormat").GetString());
+    }
+
+    [Fact]
     public async Task Scalar_ForaDeProducao_RetornaPaginaHtml()
     {
         using var client = factory.CreateClient();

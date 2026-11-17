@@ -59,12 +59,16 @@ unitário, de integração e de arquitetura.
 `global.json` fixa a versão).
 
 ```bash
-# compilar e executar todos os testes
+# ferramentas locais (dotnet-ef, fixado em .config/dotnet-tools.json)
+dotnet tool restore
+
+# compilar e executar todos os testes (os de integração exigem Docker: PostgreSQL via Testcontainers)
 dotnet build src/backend/Bank.slnx
 dotnet test --solution src/backend/Bank.slnx
 
-# rodar a API pelo SDK (com o ambiente local no ar para receber a telemetria)
+# rodar a API pelo SDK (com o ambiente local no ar: banco e telemetria)
 docker compose up -d --wait postgres rabbitmq aspire-dashboard
+dotnet user-secrets set "Jwt:ChaveAssinatura" "$(openssl rand -base64 48)" --project src/backend/src/Bank.Api  # uma vez
 dotnet run --project src/backend/src/Bank.Api
 ```
 
@@ -80,6 +84,31 @@ dotnet run --project src/backend/src/Bank.Api
 - Outra porta pelo SDK: `dotnet run --project src/backend/src/Bank.Api --urls http://localhost:5090`.
 - Garantias de erro, endpoints e telemetria:
   [contrato da API base](../specs/002-setup-api/contracts/api-base.md).
+
+### Usuários, carteiras e autenticação
+
+Cadastro (`POST /api/v1/autenticacao/registrar`), login com JWT
+(`POST /api/v1/autenticacao/login`) e consulta da carteira (`GET /api/v1/carteiras/minha`),
+definidos em [`specs/003-usuarios-carteiras`](../specs/003-usuarios-carteiras/spec.md) —
+[contrato](../specs/003-usuarios-carteiras/contracts/usuarios-carteiras-api.md) e
+[roteiro de validação](../specs/003-usuarios-carteiras/quickstart.md).
+
+- **Chave JWT** (obrigatória; a API não sobe sem ela, com ≥ 32 bytes): pelo SDK, via
+  `dotnet user-secrets` (comando acima); no Compose, `JWT_CHAVE_ASSINATURA` do `.env`, com
+  um padrão só de desenvolvimento em `.env.example`.
+- **Banco**: fora de `Production`, as migrations são aplicadas automaticamente ao subir a
+  API (`Persistencia:AplicarMigracoesNaInicializacao`). Para criar uma migration:
+
+  ```bash
+  dotnet ef migrations add NomeDaMigration --project src/backend/src/Bank.Infrastructure \
+    --startup-project src/backend/src/Bank.Api --output-dir Persistencia/Migrations
+  ```
+
+- **Saldo de demonstração**: fora de `Production`, contas PF nascem com R$ 10,00 e PJ com
+  R$ 0,00 (`Carteiras:SaldoInicial`); em `Production` ambos são R$ 0,00 e a API recusa subir
+  com outro valor. Os dados de carteiras locais existem só para testes.
+- No Scalar, use **Authorize** (esquema `Bearer`) com o `tokenAcesso` do login para chamar
+  os endpoints protegidos.
 
 ## Fluxo de desenvolvimento (SDD)
 

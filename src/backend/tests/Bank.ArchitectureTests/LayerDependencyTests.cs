@@ -10,7 +10,8 @@ namespace Bank.ArchitectureTests;
 
 /// <summary>
 /// Direção de dependências entre as camadas (constituição, Princípio II;
-/// specs/002-setup-api, R9). Uma regra por teste para mensagens de falha claras.
+/// specs/002-setup-api, R9; specs/003-usuarios-carteiras, R10). Uma regra por teste para
+/// mensagens de falha claras.
 /// </summary>
 public class LayerDependencyTests
 {
@@ -24,6 +25,8 @@ public class LayerDependencyTests
 
     private const string AspNetCore = @"^Microsoft\.AspNetCore(\..*)?$";
     private const string EntityFrameworkCore = @"^Microsoft\.EntityFrameworkCore(\..*)?$";
+    private const string IdentityModel = @"^Microsoft\.IdentityModel(\..*)?$";
+    private const string Npgsql = @"^Npgsql(\..*)?$";
 
     [Fact]
     public void Domain_NaoDependeDeOutrasCamadasNemDeFrameworks()
@@ -60,6 +63,36 @@ public class LayerDependencyTests
         var regra = Types().That().ResideInNamespaceMatching(@"^Bank\.Api\.Endpoints(\..*)?$")
             .Should().NotDependOnAnyTypesThat().ResideInNamespaceMatching(
                 @"^Bank\.Infrastructure(\..*)?$|" + EntityFrameworkCore);
+
+        AssertSemViolacoes(regra);
+    }
+
+    [Fact]
+    public void Domain_NaoDependeDeSegurancaNemDoDriverDoBanco()
+    {
+        var regra = Types().That().ResideInNamespaceMatching(@"^Bank\.Domain(\..*)?$")
+            .Should().NotDependOnAnyTypesThat().ResideInNamespaceMatching(
+                IdentityModel + "|" + Npgsql + "|" + @"^Microsoft\.Extensions\.Identity(\..*)?$");
+
+        AssertSemViolacoes(regra);
+    }
+
+    [Fact]
+    public void Application_NaoDependeDeAspNetCoreJwtNemDoDriverDoBanco()
+    {
+        // Hash de senha e emissão de token ficam atrás de IHasherSenha/IEmissorToken (specs/003, R3/R4).
+        var regra = Types().That().ResideInNamespaceMatching(@"^Bank\.Application(\..*)?$")
+            .Should().NotDependOnAnyTypesThat().ResideInNamespaceMatching(
+                AspNetCore + "|" + IdentityModel + "|" + Npgsql);
+
+        AssertSemViolacoes(regra);
+    }
+
+    [Fact]
+    public void Endpoints_NaoAcessamODriverDoBanco()
+    {
+        var regra = Types().That().ResideInNamespaceMatching(@"^Bank\.Api\.Endpoints(\..*)?$")
+            .Should().NotDependOnAnyTypesThat().ResideInNamespaceMatching(Npgsql);
 
         AssertSemViolacoes(regra);
     }
