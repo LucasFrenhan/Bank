@@ -347,16 +347,16 @@ teclado
 
 **Pré-requisito**: `GET /api/v1/usuarios/me` integrado na `main` (issue #18).
 
-- [ ] T049 [US4] Executar `npm run api:tipos` com a API atualizada e adicionar
+- [X] T049 [US4] Executar `npm run api:tipos` com a API atualizada e adicionar
   `obterTitular` a `front/src/api/cliente.ts` (e o caso `usuario-nao-encontrado` em
   `erros.ts`, se ainda não coberto)
-- [ ] T050 [P] [US4] Estender `front/src/paginas/Perfil.test.tsx` e `e2e/perfil.spec.ts`:
+- [X] T050 [P] [US4] Estender `front/src/paginas/Perfil.test.tsx` e `e2e/perfil.spec.ts`:
   documento mascarado (CPF `•••.982.247-••`; CNPJ `••.•••.345/01DE-••`) e "Cliente desde
   {data}"
-- [ ] T051 [P] [US4] Estender `front/src/paginas/Inicio.test.tsx` e `e2e/inicio.spec.ts`:
+- [X] T051 [P] [US4] Estender `front/src/paginas/Inicio.test.tsx` e `e2e/inicio.spec.ts`:
   início PJ mostra o CNPJ com máscara e "Copiar" grava o valor sem máscara na área de
   transferência e confirma "CNPJ copiado" (anunciado por leitor de tela)
-- [ ] T052 [US4] Implementar os dados do titular em `Perfil.tsx` e o bloco "Receber
+- [X] T052 [US4] Implementar os dados do titular em `Perfil.tsx` e o bloco "Receber
   transferências" com "Copiar" em `InicioPj.tsx` (FR-017, FR-017a) e executar T050–T051
 
 ---
@@ -395,7 +395,11 @@ teclado
 - **Pendente (T056)**: conferência visual do trace `bank-frontend` → `bank-api` no Aspire
   Dashboard; validação manual em Firefox e Safari/WebKit; cronometragem a partir de um clone
   limpo (SC-007); cadastro + login em < 2 min com pessoa real (SC-001).
-- **Fase 8** (T049–T052): aguardando a issue #18.
+- **Fase 8** (T049–T052, 2026-11-17, após o merge da issue #18 / PR #23): tipos regenerados de
+  `/openapi/v1.json`; perfil com documento mascarado e "Cliente desde" e início PJ com
+  "Copiar CNPJ" lendo `GET /api/v1/usuarios/me`. **88 testes** de componentes e **35 ponta a
+  ponta** aprovados no Compose (inclui a área de transferência real no Chromium e axe sem
+  violações). SC-005 da spec 005 verificado.
 
 ### Ajustes feitos na implementação
 
