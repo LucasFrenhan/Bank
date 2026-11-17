@@ -22,9 +22,13 @@ public static class DependencyInjection
         services.AddDbContext<BankDbContext>(opcoes =>
             opcoes.UseNpgsql(configuration.GetConnectionString(PersistenciaOptions.NomeConnectionString)));
         services.AddHostedService<MigracoesNaInicializacao>();
+        services.AddHostedService<LancamentosDeAberturaNaInicializacao>(); // depois das migrations
         services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
         services.AddScoped<ICarteiraConsultas, CarteiraConsultas>();
         services.AddScoped<IUsuarioConsultas, UsuarioConsultas>();
+        services.AddScoped<ITransferenciaRepositorio, TransferenciaRepositorio>();
+        services.AddScoped<IUnidadeDeTransferencia, UnidadeDeTransferencia>();
+        services.AddScoped<IExtratoConsultas, ExtratoConsultas>();
 
         // Segurança (research R3, R4)
         services.AddOptions<JwtOptions>().BindConfiguration(JwtOptions.Secao).ValidateOnStart();

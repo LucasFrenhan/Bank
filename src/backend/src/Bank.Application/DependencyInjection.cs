@@ -2,6 +2,7 @@ using Bank.Application.Autenticacao;
 using Bank.Application.Carteiras;
 using Bank.Application.Observabilidade;
 using Bank.Application.Usuarios;
+using Bank.Application.Transferencias;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -31,6 +32,10 @@ public static class DependencyInjection
         services.AddScoped<Autenticar>();
         services.AddScoped<ObterMinhaCarteira>();
         services.AddScoped<ObterTitular>();
+        services.AddSingleton<MetricasTransferencias>();
+        services.AddScoped<RealizarTransferencia>();
+        services.AddScoped<ConsultarDestinatario>();
+        services.AddScoped<ObterExtrato>();
 
         return services;
     }

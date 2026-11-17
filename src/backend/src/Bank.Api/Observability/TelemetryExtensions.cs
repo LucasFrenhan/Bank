@@ -37,7 +37,8 @@ public static class TelemetryExtensions
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddMeter("System.Runtime")
-                .AddMeter(MetricasUsuarios.NomeMeter))
+                .AddMeter(MetricasUsuarios.NomeMeter)
+                .AddMeter(MetricasTransferencias.NomeMeter))
             .WithLogging();
 
         // Nos testes não há coletor; eles acrescentam um exportador em memória (R5).
