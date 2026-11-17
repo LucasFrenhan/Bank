@@ -1,0 +1,3 @@
+# Migrations são geradas pelo EF Core (dotnet ef): tratadas como código gerado pelos analisadores.
+[*.cs]
+generated_code = true

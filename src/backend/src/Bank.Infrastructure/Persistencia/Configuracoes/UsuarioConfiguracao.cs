@@ -37,5 +37,6 @@ internal sealed class UsuarioConfiguracao : IEntityTypeConfiguration<Usuario>
             .IsRequired();
 
         builder.Navigation(u => u.Carteira).IsRequired();
+        builder.Ignore(u => u.LancamentoDeAbertura);
     }
 }

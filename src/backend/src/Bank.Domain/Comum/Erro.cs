@@ -7,6 +7,9 @@ public enum TipoErro
     Conflito,
     NaoAutorizado,
     NaoEncontrado,
+
+    /// <summary>Regra de negócio violada com dados válidos (422).</summary>
+    RegraDeNegocio,
 }
 
 /// <summary>

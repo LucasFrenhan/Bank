@@ -141,19 +141,12 @@ public class UsuariosMeTests(BankApiFactory factory) : IClassFixture<BankApiFact
     }
 
     [Fact]
-    public async Task TokenValidoDeUsuarioRemovido_404()
+    public async Task TokenValidoDeUsuarioInexistente_404()
     {
+        // Token válido (assinado com a chave da API) de um usuário que não existe na base. Apagar
+        // dados não é mais possível: lançamentos são imutáveis (specs/006-transferencias, R2).
         using var client = factory.CreateClient();
-        var email = Dados.Email();
-        var cadastro = await ApiBank.RegistrarAsync(client, Dados.CadastroPf(email));
-        var token = await ApiBank.ObterTokenAsync(client, email);
-        var usuarioId = cadastro.GetProperty("usuarioId").GetGuid();
-
-        await using (var contexto = factory.CriarContexto())
-        {
-            await contexto.Carteiras.Where(c => c.UsuarioId == usuarioId).ExecuteDeleteAsync(Ct);
-            await contexto.Usuarios.Where(u => u.Id == usuarioId).ExecuteDeleteAsync(Ct);
-        }
+        var token = TokensDeTeste.Criar(factory.ChaveJwt, TokensDeTeste.Claims(Guid.CreateVersion7().ToString(), Guid.CreateVersion7().ToString()));
 
         using var resposta = await GetComTokenAsync(client, token);
 
