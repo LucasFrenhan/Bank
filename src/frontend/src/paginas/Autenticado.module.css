@@ -1,0 +1,133 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.saudacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-3);
+}
+
+.resumo {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+.saldo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+  padding: var(--espaco-6);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-destaque);
+  color: var(--cor-sobre-destaque);
+}
+
+.rotuloSaldo {
+  color: var(--cor-sobre-destaque-suave);
+  font: var(--texto-corpo-m);
+}
+
+.valorSaldo {
+  font: var(--texto-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+}
+
+.atualizado {
+  color: var(--cor-sobre-destaque-suave);
+  font: var(--texto-legenda);
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+}
+
+.cabecalhoSecao {
+  padding: var(--espaco-5) var(--espaco-6);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.avisoPj {
+  padding: var(--espaco-5) var(--espaco-6);
+  color: var(--cor-texto-suave);
+}
+
+/* ---------- Perfil ---------- */
+.identidade {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  padding: var(--espaco-6);
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--cor-primaria-suave);
+  color: var(--cor-primaria);
+  font-weight: 700;
+}
+
+.nomeIdentidade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  min-width: 0;
+}
+
+.dados {
+  margin: 0;
+}
+
+.linhaDado {
+  display: grid;
+  gap: var(--espaco-1);
+  padding: var(--espaco-4) var(--espaco-6);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.linhaDado dt {
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}
+
+.linhaDado dd {
+  margin: 0;
+}
+
+.permissoes {
+  margin: 0;
+  padding: var(--espaco-4) var(--espaco-6) var(--espaco-6) calc(var(--espaco-6) + var(--espaco-4));
+}
+
+.permissoes li + li {
+  margin-top: var(--espaco-2);
+}
+
+@media (min-width: 1024px) {
+  .resumo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .saldo {
+    padding: var(--espaco-8);
+  }
+
+  .linhaDado {
+    grid-template-columns: 200px 1fr;
+  }
+}
