@@ -58,6 +58,14 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
             (await client.SendAsync(requisicao, Ct)).Dispose();
         }
 
+        // specs/005-usuarios-me: a consulta dos dados do titular também não deixa rastro sensível.
+        using (var requisicao = new HttpRequestMessage(HttpMethod.Get, new Uri("/api/v1/usuarios/me", UriKind.Relative)))
+        {
+            requisicao.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            using var resposta = await client.SendAsync(requisicao, Ct);
+            Assert.Equal(System.Net.HttpStatusCode.OK, resposta.StatusCode);
+        }
+
         ForcarExportacao();
 
         var textos = TextosExportados();
