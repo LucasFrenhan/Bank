@@ -40,6 +40,17 @@ export function carteira(tipoConta: TipoConta = 'PessoaFisica') {
   };
 }
 
+export function titular(tipoConta: TipoConta = 'PessoaFisica') {
+  return {
+    usuarioId: 'usuario-1',
+    nomeCompleto: tipoConta === 'PessoaFisica' ? 'Lucas Silva' : 'Empresa Exemplo Ltda',
+    email: tipoConta === 'PessoaFisica' ? 'lucas@exemplo.com.br' : 'contato@exemplo.com.br',
+    documento: tipoConta === 'PessoaFisica' ? '52998224725' : '12ABC34501DE35',
+    tipoConta,
+    criadoEm: '2026-11-09T12:00:00Z',
+  };
+}
+
 export const handlersPadrao = [
   http.post('*/api/v1/autenticacao/login', () =>
     HttpResponse.json({ tokenAcesso: tokenFalso(), tipoToken: 'Bearer', expiraEmSegundos: 3600 }),
@@ -60,4 +71,5 @@ export const handlersPadrao = [
     ),
   ),
   http.get('*/api/v1/carteiras/minha', () => HttpResponse.json(carteira())),
+  http.get('*/api/v1/usuarios/me', () => HttpResponse.json(titular())),
 ];
