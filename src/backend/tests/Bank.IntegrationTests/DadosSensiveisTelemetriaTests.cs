@@ -81,6 +81,47 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
         AssertMetrica("bank.autenticacao.logins", "resultado", "falha");
     }
 
+    /// <summary>Spec 006 (FR-009b, FR-020): transferência, consulta de destinatário e extrato.</summary>
+    [Fact]
+    public async Task Transferencias_NaoExpoemDadosSensiveisETemMetricas()
+    {
+        using var client = factory.CreateClient();
+        var emailPagador = Dados.Email();
+        var cpfPagador = Dados.Cpf();
+        (await client.PostAsJsonAsync(ApiBank.Registrar, new { nomeCompleto = "Pagadora Reservada", email = emailPagador, documento = cpfPagador, tipoConta = "PessoaFisica", senha = Dados.SenhaValida }, Ct)).Dispose();
+        var emailRecebedor = Dados.Email();
+        var cnpjRecebedor = Dados.CnpjAlfanumerico();
+        (await client.PostAsJsonAsync(ApiBank.Registrar, new { nomeCompleto = "Recebedora Reservada Ltda", email = emailRecebedor, documento = cnpjRecebedor, tipoConta = "PessoaJuridica", senha = Dados.SenhaValida }, Ct)).Dispose();
+        var token = await ApiBank.ObterTokenAsync(client, emailPagador);
+        var pagador = new ContaTeste(emailPagador, cpfPagador, Guid.Empty, Guid.Empty, token);
+
+        using (var consulta = await ApiTransferencias.PostComTokenAsync(client, token, ApiTransferencias.ConsultarDestinatario, new { documento = cnpjRecebedor }))
+        {
+            Assert.Equal(System.Net.HttpStatusCode.OK, consulta.StatusCode);
+        }
+
+        using (var transferencia = await ApiTransferencias.TransferirAsync(client, pagador, Dados.CnpjComMascara(cnpjRecebedor), 2m))
+        {
+            Assert.Equal(System.Net.HttpStatusCode.Created, transferencia.StatusCode);
+        }
+
+        (await ApiTransferencias.TransferirAsync(client, pagador, cnpjRecebedor, 100m)).Dispose();
+        (await ApiTransferencias.GetComTokenAsync(client, token, "/api/v1/transferencias/extrato")).Dispose();
+
+        ForcarExportacao();
+
+        var textos = TextosExportados();
+        string[] sensiveis = [cpfPagador, Dados.CpfComMascara(cpfPagador), cnpjRecebedor, Dados.CnpjComMascara(cnpjRecebedor), emailPagador, emailRecebedor, "Pagadora Reservada", "Recebedora Reservada", token];
+        foreach (var sensivel in sensiveis)
+        {
+            Assert.DoesNotContain(textos, t => t.Contains(sensivel, StringComparison.OrdinalIgnoreCase));
+        }
+
+        AssertMetrica("bank.transferencias.concluidas", "tipo_destino", "PessoaJuridica");
+        AssertMetrica("bank.transferencias.recusadas", "motivo", "saldo-insuficiente");
+        AssertMetrica("bank.transferencias.destinatario.consultas", "resultado", "encontrado");
+    }
+
     private void ForcarExportacao()
     {
         factory.Services.GetRequiredService<TracerProvider>().ForceFlush();

@@ -67,6 +67,45 @@ public class OpenApiTests(BankApiFactory factory) : IClassFixture<BankApiFactory
         Assert.Equal("JWT", bearer.GetProperty("bearerFormat").GetString());
     }
 
+    /// <summary>specs/006-transferencias (contracts/transferencias-api.md).</summary>
+    [Fact]
+    public async Task DocumentoOpenApi_DescreveTransferenciasDestinatarioEExtrato()
+    {
+        using var client = factory.CreateClient();
+
+        using var resposta = await client.GetAsync(DocumentoOpenApi, TestContext.Current.CancellationToken);
+
+        using var documento = JsonDocument.Parse(await resposta.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var caminhos = documento.RootElement.GetProperty("paths");
+
+        var transferir = caminhos.GetProperty("/api/v1/transferencias").GetProperty("post");
+        AssertRespostas(transferir, "201", "200", "400", "401", "403", "404", "409", "422");
+        var chave = Assert.Single(transferir.GetProperty("parameters").EnumerateArray(), p => p.GetProperty("name").GetString() == "Idempotency-Key");
+        Assert.Equal("header", chave.GetProperty("in").GetString());
+        Assert.True(chave.GetProperty("required").GetBoolean());
+
+        var destinatario = caminhos.GetProperty("/api/v1/transferencias/destinatarios/consultar").GetProperty("post");
+        AssertRespostas(destinatario, "200", "400", "401", "403", "404", "422");
+
+        var extrato = caminhos.GetProperty("/api/v1/transferencias/extrato").GetProperty("get");
+        AssertRespostas(extrato, "200", "400", "401", "403");
+        var parametros = extrato.GetProperty("parameters").EnumerateArray().Select(p => p.GetProperty("name").GetString()).ToList();
+        Assert.Equal(["direcao", "pagina", "tamanhoPagina"], parametros.Order(StringComparer.Ordinal));
+
+        foreach (var operacao in new[] { transferir, destinatario, extrato })
+        {
+            Assert.True(operacao.GetProperty("security")[0].TryGetProperty("Bearer", out _));
+        }
+
+        static void AssertRespostas(JsonElement operacao, params string[] status)
+        {
+            foreach (var s in status)
+            {
+                Assert.True(operacao.GetProperty("responses").TryGetProperty(s, out _), s);
+            }
+        }
+    }
+
     [Fact]
     public async Task Scalar_ForaDeProducao_RetornaPaginaHtml()
     {
