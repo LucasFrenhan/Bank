@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { criarContaPelaApi, entrar, SENHA, semViolacoesA11y } from './apoio';
+import { criarContaPelaApi, entrar, mascararCnpj, SENHA, semViolacoesA11y } from './apoio';
 
 // US3 — tela inicial PF e PJ com a carteira real (FR-014 a FR-016; SC-005).
 test.describe('Início', () => {
@@ -28,7 +28,19 @@ test.describe('Início', () => {
     await expect(page.getByRole('heading', { name: 'Empresa Exemplo Ltda' })).toBeVisible();
     await expect(page.getByText(/R\$\s0,00/)).toBeVisible();
     await expect(page.getByRole('main').getByRole('button', { name: /Transferir/ })).toHaveCount(0);
+    await expect(page.getByText(mascararCnpj(conta.documento))).toBeVisible();
     await semViolacoesA11y(page);
+  });
+
+  test('PJ: "Copiar" grava o CNPJ sem máscara e confirma', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const conta = await criarContaPelaApi(page, 'PessoaJuridica');
+    await entrar(page, conta);
+
+    await page.getByRole('button', { name: 'Copiar CNPJ' }).click();
+
+    await expect(page.getByRole('status').filter({ hasText: 'CNPJ copiado' })).toBeVisible();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(conta.documento);
   });
 
   test('o valor exibido é o da API ao recarregar', async ({ page }) => {

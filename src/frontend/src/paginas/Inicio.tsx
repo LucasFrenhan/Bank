@@ -1,5 +1,7 @@
-import type { ReactNode } from 'react';
-import { AcaoEmBreve } from '../design/componentes/Botao';
+import { useState, type ReactNode } from 'react';
+import { AcaoEmBreve, Botao } from '../design/componentes/Botao';
+import { mascararCnpj } from '../formatacao/mascaras';
+import { useTitular } from './useTitular';
 import { AvisoErro, Cartao, Carregando, EstadoVazio, Selo } from '../design/componentes/Feedback';
 import { IconeExtrato, IconeTransferir } from '../design/componentes/Icones';
 import { formatarDataHora } from '../formatacao/data';
@@ -95,6 +97,7 @@ function InicioPj({ carteira }: { carteira: MinhaCarteira }) {
             Clientes com conta Bank transferem para você informando o seu CNPJ. Contas Pessoa Jurídica não enviam
             transferências.
           </p>
+          <CnpjParaReceber />
         </Cartao>
       </div>
 
@@ -104,6 +107,49 @@ function InicioPj({ carteira }: { carteira: MinhaCarteira }) {
         </div>
         <EstadoVazio titulo="Suas movimentações aparecerão aqui" descricao="Os recebimentos ficam disponíveis em breve." />
       </Cartao>
+    </div>
+  );
+}
+
+/**
+ * CNPJ da empresa para quem vai transferir, com "Copiar" (FR-017a). O valor copiado vai sem
+ * máscara; a confirmação é anunciada por leitores de tela.
+ */
+function CnpjParaReceber() {
+  const titular = useTitular();
+  const [aviso, definirAviso] = useState('');
+
+  if (titular.estado !== 'pronto') {
+    return null;
+  }
+
+  const { documento } = titular.titular;
+
+  async function copiar() {
+    try {
+      await navigator.clipboard.writeText(documento);
+      definirAviso('CNPJ copiado');
+    } catch {
+      definirAviso('Não foi possível copiar. Selecione o CNPJ e copie manualmente.');
+    }
+  }
+
+  return (
+    <div className={estilos.cnpj}>
+      <p className={estilos.rotuloCnpj}>
+        Seu CNPJ
+      </p>
+      <div className={estilos.linhaCnpj}>
+        <span className={estilos.valorCnpj}>
+          {mascararCnpj(documento)}
+        </span>
+        <Botao variante="secundario" onClick={() => void copiar()} aria-label="Copiar CNPJ">
+          Copiar
+        </Botao>
+      </div>
+      <p className={estilos.avisoCopia} role="status" aria-live="polite">
+        {aviso}
+      </p>
     </div>
   );
 }

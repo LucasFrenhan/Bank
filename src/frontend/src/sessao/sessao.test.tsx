@@ -52,7 +52,7 @@ describe('sessão na aplicação (US2; FR-009 a FR-013)', () => {
   });
 
   it('401 em rota protegida encerra a sessão e leva ao login com aviso e retorno', async () => {
-    servidor.use(http.get('*/api/v1/carteiras/minha', () => problema('nao-autenticado', 401)));
+    servidor.use(http.get('*/api/v1/usuarios/me', () => problema('nao-autenticado', 401)));
 
     renderizarApp('/perfil', { sessao: 'PessoaFisica' });
 

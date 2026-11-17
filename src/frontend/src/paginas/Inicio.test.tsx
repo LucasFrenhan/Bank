@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { carteira, problema, TRACE_ID } from '../testes/handlers';
+import { carteira, problema, titular, TRACE_ID } from '../testes/handlers';
 import { renderizarApp } from '../testes/renderizar';
 import { servidor } from '../testes/setup';
 
@@ -32,6 +32,35 @@ describe('Início (US3; FR-014 a FR-016)', () => {
     expect(screen.getByText(/Contas Pessoa Jurídica não enviam transferências/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Transferir/ })).not.toBeInTheDocument();
     expect(screen.queryByText('Transferir')).not.toBeInTheDocument();
+  });
+
+  it('PJ: mostra o próprio CNPJ e "Copiar" grava o valor sem máscara (FR-017a)', async () => {
+    servidor.use(
+      http.get('*/api/v1/carteiras/minha', () => HttpResponse.json(carteira('PessoaJuridica'))),
+      http.get('*/api/v1/usuarios/me', () => HttpResponse.json(titular('PessoaJuridica'))),
+    );
+    const { usuario } = renderizarApp('/', { sessao: 'PessoaJuridica' });
+
+    expect(await screen.findByText('12.ABC.345/01DE-35')).toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Copiar CNPJ' }));
+
+    expect(await navigator.clipboard.readText()).toBe('12ABC34501DE35');
+    expect(screen.getByRole('status')).toHaveTextContent('CNPJ copiado');
+  });
+
+  it('PF: não consulta nem exibe CNPJ', async () => {
+    let consultas = 0;
+    servidor.use(
+      http.get('*/api/v1/usuarios/me', () => {
+        consultas++;
+        return HttpResponse.json(titular());
+      }),
+    );
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    await screen.findByRole('heading', { name: 'Olá, Lucas' });
+    expect(screen.queryByRole('button', { name: 'Copiar CNPJ' })).not.toBeInTheDocument();
+    expect(consultas).toBe(0);
   });
 
   it('mostra carregamento sem saldo falso', async () => {
