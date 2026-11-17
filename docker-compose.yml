@@ -4,6 +4,7 @@
 # Contratos (portas, endpoints, credenciais e comandos):
 #   specs/001-infra-local/contracts/ambiente-local.md
 #   specs/002-setup-api/contracts/api-base.md (serviço api)
+#   specs/003-usuarios-carteiras/contracts/usuarios-carteiras-api.md (banco e JWT da api)
 #
 # Subir:  docker compose up -d --wait
 # Parar:  docker compose down        (mantém os dados)
@@ -86,6 +87,10 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+      # PostgreSQL do Compose (specs/003-usuarios-carteiras, research R7)
+      ConnectionStrings__Bank: Host=postgres;Port=5432;Database=${POSTGRES_DB:-bank};Username=${POSTGRES_USER:-bank};Password=${POSTGRES_PASSWORD:-bank_dev_password}
+      # Chave JWT só de desenvolvimento (research R4); mesmo padrão do .env.example
+      Jwt__ChaveAssinatura: ${JWT_CHAVE_ASSINATURA:-bank-dev-only-jwt-signing-key-change-me-0123456789}
     ports:
       - "127.0.0.1:${API_PORT:-8080}:8080"
     depends_on:
