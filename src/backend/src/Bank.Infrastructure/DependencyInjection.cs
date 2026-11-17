@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddHostedService<MigracoesNaInicializacao>();
         services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
         services.AddScoped<ICarteiraConsultas, CarteiraConsultas>();
+        services.AddScoped<IUsuarioConsultas, UsuarioConsultas>();
 
         // Segurança (research R3, R4)
         services.AddOptions<JwtOptions>().BindConfiguration(JwtOptions.Secao).ValidateOnStart();

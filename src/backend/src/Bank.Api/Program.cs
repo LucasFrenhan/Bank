@@ -30,6 +30,7 @@ app.MapDocumentacaoApi();
 app.MapHealthEndpoints();
 app.MapAutenticacaoEndpoints();
 app.MapCarteirasEndpoints();
+app.MapUsuariosEndpoints();
 app.MapTestEndpoints();
 
 await app.RunAsync();
