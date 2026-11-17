@@ -16,6 +16,7 @@ export type RegistrarRequisicao = Esquemas['RegistrarRequisicao'];
 export type UsuarioRegistrado = Esquemas['UsuarioRegistradoResposta'];
 export type TokenAcesso = Esquemas['LoginResposta'];
 export type MinhaCarteira = Esquemas['MinhaCarteiraResposta'];
+export type Titular = Esquemas['TitularResposta'];
 
 interface IntegracaoSessao {
   obterToken?: () => string | null;
@@ -87,4 +88,7 @@ export const api = {
     chamar<TokenAcesso>(() => cliente.POST('/api/v1/autenticacao/login', { body: { email, senha } })),
 
   obterMinhaCarteira: () => chamar<MinhaCarteira>(() => cliente.GET('/api/v1/carteiras/minha')),
+
+  /** Dados do titular (specs/005-usuarios-me): documento completo e data de cadastro. */
+  obterTitular: () => chamar<Titular>(() => cliente.GET('/api/v1/usuarios/me')),
 };
