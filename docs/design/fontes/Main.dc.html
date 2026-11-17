@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bank — Tipografia e tokens</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1640px; box-sizing: border-box; padding: 72px 80px; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; display: flex; flex-direction: column; gap: 48px">
+
+  <header style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <p style="margin: 0; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #1D4ED8">Design System · v0.1</p>
+      <h1 style="margin: 0; font-size: 48px; line-height: 56px; font-weight: 700; letter-spacing: -0.02em">Tipografia</h1>
+      <p style="margin: 0; font-size: 16px; line-height: 24px; color: #475569; max-width: 640px">Inter para toda a interface, com algarismos tabulares nos valores em reais. JetBrains Mono para identificadores técnicos (IDs, chaves de idempotência, traceId).</p>
+    </div>
+    <div style="display: flex; gap: 16px">
+      <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 12px; line-height: 16px; color: #475569">Interface</span>
+        <span style="font-size: 24px; line-height: 32px; font-weight: 600">Inter</span>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 12px; line-height: 16px; color: #475569">Técnico</span>
+        <span style="font-size: 22px; line-height: 32px; font-weight: 500; font-family: 'JetBrains Mono', monospace">JetBrains Mono</span>
+      </div>
+    </div>
+  </header>
+
+  <section style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden">
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; padding: 14px 32px; background: #F1F5F9; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #475569">
+      <span>Estilo</span><span>Desktop / Mobile</span><span>Exemplo</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">Display / Saldo</strong><span style="font-size: 12px; line-height: 16px; color: #475569">Semibold 600 · tnum</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">40/48 · 32/40</span>
+      <span style="font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">R$ 1.250,00</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">H1</strong><span style="font-size: 12px; line-height: 16px; color: #475569">Semibold 600</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">32/40 · 24/32</span>
+      <span style="font-size: 32px; line-height: 40px; font-weight: 600; letter-spacing: -0.01em">Transferir dinheiro</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">H2</strong><span style="font-size: 12px; line-height: 16px; color: #475569">Semibold 600</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">24/32 · 20/28</span>
+      <span style="font-size: 24px; line-height: 32px; font-weight: 600">Últimas movimentações</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">H3</strong><span style="font-size: 12px; line-height: 16px; color: #475569">Medium 500</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">20/28 · 18/24</span>
+      <span style="font-size: 20px; line-height: 28px; font-weight: 500">Saldo disponível</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">Body L</strong><span style="font-size: 12px; line-height: 16px; color: #475569">Regular 400</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">16/24 · 16/24</span>
+      <span style="font-size: 16px; line-height: 24px">Contas Pessoa Jurídica recebem transferências e geram cobranças, mas não enviam transferências.</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">Body M</strong><span style="font-size: 12px; line-height: 16px; color: #475569">Regular 400 · tnum</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">14/20 · 14/20</span>
+      <div style="display: flex; gap: 32px; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums">
+        <span>Transferência recebida · Mariana Costa</span>
+        <span style="color: #047857; font-weight: 500">+ R$ 120,00</span>
+        <span style="font-weight: 500">− R$ 45,90</span>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">Label</strong><span style="font-size: 12px; line-height: 16px; color: #475569">Medium 500</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">14/20 · 14/20</span>
+      <div style="display: flex; gap: 16px; align-items: center">
+        <span style="font-size: 14px; line-height: 20px; font-weight: 500">CPF ou CNPJ</span>
+        <span style="display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 14px; line-height: 20px; font-weight: 600">Continuar</span>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">Caption</strong><span style="font-size: 12px; line-height: 16px; color: #475569">Regular 400</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">12/16 · 12/16</span>
+      <span style="font-size: 12px; line-height: 16px; color: #475569">17 nov 2026 · 14:32 · O tipo de conta não pode ser alterado depois do cadastro.</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 200px 1fr; gap: 24px; align-items: center; padding: 24px 32px; border-top: 1px solid #E2E8F0">
+      <div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; line-height: 20px">Mono</strong><span style="font-size: 12px; line-height: 16px; color: #475569">JetBrains Mono 400</span></div>
+      <span style="font-size: 14px; line-height: 20px; color: #475569; font-family: 'JetBrains Mono', monospace">13/20 · 12/16</span>
+      <span style="font-size: 13px; line-height: 20px; font-family: 'JetBrains Mono', monospace">traceId 4bf92f3577b34da6a3ce929d0e0e4736 · 019a8f50-1111-7890-abcd-ef1234567890</span>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px">
+    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 20px">
+      <h2 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 600">Cores</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 64px; border-radius: 10px; background: #1D4ED8"></div><strong style="font-size: 14px; line-height: 20px">Primária</strong><span style="font-size: 12px; line-height: 16px; color: #475569; font-family: 'JetBrains Mono', monospace">#1D4ED8</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 64px; border-radius: 10px; background: #0F172A"></div><strong style="font-size: 14px; line-height: 20px">Texto</strong><span style="font-size: 12px; line-height: 16px; color: #475569; font-family: 'JetBrains Mono', monospace">#0F172A</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 64px; border-radius: 10px; background: #475569"></div><strong style="font-size: 14px; line-height: 20px">Texto suave</strong><span style="font-size: 12px; line-height: 16px; color: #475569; font-family: 'JetBrains Mono', monospace">#475569</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 64px; border-radius: 10px; background: #F5F7FA; border: 1px solid #E2E8F0; box-sizing: border-box"></div><strong style="font-size: 14px; line-height: 20px">Fundo</strong><span style="font-size: 12px; line-height: 16px; color: #475569; font-family: 'JetBrains Mono', monospace">#F5F7FA</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 64px; border-radius: 10px; background: #047857"></div><strong style="font-size: 14px; line-height: 20px">Entrada</strong><span style="font-size: 12px; line-height: 16px; color: #475569; font-family: 'JetBrains Mono', monospace">#047857</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 64px; border-radius: 10px; background: #B42318"></div><strong style="font-size: 14px; line-height: 20px">Erro</strong><span style="font-size: 12px; line-height: 16px; color: #475569; font-family: 'JetBrains Mono', monospace">#B42318</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 64px; border-radius: 10px; background: #B54708"></div><strong style="font-size: 14px; line-height: 20px">Atenção</strong><span style="font-size: 12px; line-height: 16px; color: #475569; font-family: 'JetBrains Mono', monospace">#B54708</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 64px; border-radius: 10px; background: #E2E8F0"></div><strong style="font-size: 14px; line-height: 20px">Borda</strong><span style="font-size: 12px; line-height: 16px; color: #475569; font-family: 'JetBrains Mono', monospace">#E2E8F0</span></div>
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 16px; color: #475569">Entrada e saída também se distinguem por sinal (+ / −) e ícone, não só pela cor. Saídas usam a cor de texto.</p>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 20px">
+      <h2 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 600">Componentes base</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px">
+        <button type="button" style="height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font: 600 14px/20px Inter, sans-serif">Primário</button>
+        <button type="button" style="height: 44px; padding: 0 20px; border: 1px solid #CBD5E1; border-radius: 10px; background: #FFFFFF; color: #0F172A; font: 600 14px/20px Inter, sans-serif">Secundário</button>
+        <button type="button" style="height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: transparent; color: #1D4ED8; font: 600 14px/20px Inter, sans-serif">Texto</button>
+        <button type="button" disabled style="height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #E2E8F0; color: #475569; font: 600 14px/20px Inter, sans-serif">Desabilitado</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="ds-cpf" style="font-size: 14px; line-height: 20px; font-weight: 500">CPF</label>
+          <input id="ds-cpf" value="123.456.789-09" style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; color: #0F172A; background: #FFFFFF">
+          <span style="font-size: 12px; line-height: 16px; color: #475569">Apenas números ou com máscara.</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="ds-email" style="font-size: 14px; line-height: 20px; font-weight: 500">E-mail</label>
+          <input id="ds-email" value="lucas@exemplo" style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 2px solid #B42318; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; color: #0F172A; background: #FFFFFF">
+          <span style="font-size: 12px; line-height: 16px; color: #B42318">Informe um e-mail válido.</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap">
+        <span style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: #EFF4FF; color: #1D4ED8; font-size: 12px; line-height: 16px; font-weight: 600">Pessoa Física</span>
+        <span style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: #F1F5F9; color: #334155; font-size: 12px; line-height: 16px; font-weight: 600">Pessoa Jurídica</span>
+        <span style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: #ECFDF3; color: #047857; font-size: 12px; line-height: 16px; font-weight: 600">Concluída</span>
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 16px; color: #475569">Raio 10 px em controles, 16 px em cards. Espaçamento em múltiplos de 4. Alvos de toque com no mínimo 44 px.</p>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

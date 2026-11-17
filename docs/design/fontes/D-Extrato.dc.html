@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bank — Extrato</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="min-height: 900px; display: flex; flex-wrap: wrap; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A">
+  <nav aria-label="Principal" style="flex: 1 1 240px; max-width: 100%; background: #FFFFFF; border-right: 1px solid #E2E8F0; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#1D4ED8"></rect><path d="M10 9h7a4 4 0 0 1 0 8h-7zM10 17h8a4 4 0 0 1 0 8h-8z" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linejoin="round"></path></svg>
+      <span style="font-size: 18px; line-height: 24px; font-weight: 700">Bank</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <a href="D-Inicio.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px; color: #334155; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7v9H3z"></path><path d="M9 20v-6h6v6"></path></svg>Início</a>
+      <a href="D-Transferir.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px; color: #334155; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h13l-4-4M17 17H4l4 4"></path></svg>Transferir</a>
+      <a href="D-Extrato.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px; background: #EFF4FF; color: #1D4ED8; font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg>Extrato</a>
+      <a href="D-Perfil.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px; color: #334155; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Perfil</a>
+    </div>
+  </nav>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 40px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+    <header style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 600; letter-spacing: -0.01em">Extrato</h1>
+        <span style="font-size: 14px; line-height: 20px; color: #475569; font-variant-numeric: tabular-nums">Saldo atual R$ 842,50</span>
+      </div>
+      <div role="group" aria-label="Filtrar por direção" style="display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: #E9EEF4">
+        <sc-for list="{{ filtros }}" as="f" hint-placeholder-count="3">
+          <button type="button" onClick="{{ f.pick }}" aria-pressed="{{ f.pressed }}" style="{{ f.style }}">{{ f.rotulo }}</button>
+        </sc-for>
+      </div>
+    </header>
+
+    <section style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden">
+      <div style="overflow-x: auto">
+        <table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; line-height: 20px">
+          <thead>
+            <tr style="background: #F8FAFC; text-align: left; color: #475569">
+              <th scope="col" style="padding: 12px 24px; font-size: 12px; line-height: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em">Data</th>
+              <th scope="col" style="padding: 12px 24px; font-size: 12px; line-height: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em">Contraparte</th>
+              <th scope="col" style="padding: 12px 24px; font-size: 12px; line-height: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em">Descrição</th>
+              <th scope="col" style="padding: 12px 24px; font-size: 12px; line-height: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em">Status</th>
+              <th scope="col" style="padding: 12px 24px; font-size: 12px; line-height: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; text-align: right">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ linhas }}" as="l" hint-placeholder-count="8">
+              <tr style="border-top: 1px solid #EEF2F6">
+                <td style="padding: 16px 24px; color: #475569; white-space: nowrap">{{ l.data }}</td>
+                <td style="padding: 16px 24px">
+                  <div style="display: flex; align-items: center; gap: 12px">
+                    <span style="{{ l.iconeStyle }}" aria-hidden="true">{{ l.seta }}</span>
+                    <div style="display: flex; flex-direction: column">
+                      <a href="D-Comprovante.dc.html" style="color: #0F172A; font-weight: 500; text-decoration: none">{{ l.nome }}</a>
+                      <span style="font-size: 12px; line-height: 16px; color: #475569">{{ l.direcao }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding: 16px 24px; color: #475569">{{ l.desc }}</td>
+                <td style="padding: 16px 24px"><span style="display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; background: #ECFDF3; color: #047857; font-size: 12px; line-height: 16px; font-weight: 600">Concluída</span></td>
+                <td style="{{ l.valorStyle }}">{{ l.valor }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 24px; border-top: 1px solid #E2E8F0">
+        <span style="font-size: 14px; line-height: 20px; color: #475569">Página 1 de 3 · 20 por página</span>
+        <div style="display: flex; gap: 8px">
+          <button type="button" disabled style="height: 40px; padding: 0 14px; border: 1px solid #E2E8F0; border-radius: 8px; background: #FFFFFF; color: #475569; font: 600 14px/20px Inter, sans-serif">Anterior</button>
+          <button type="button" style="height: 40px; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 8px; background: #FFFFFF; color: #0F172A; font: 600 14px/20px Inter, sans-serif">Próxima</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { filtro: 'todas' }; }
+  renderVals() {
+    const todas = [
+      { data: '17 nov, 14:32', nome: 'Mariana Costa', desc: 'Divisão do jantar', valor: '+ R$ 120,00', entrada: true },
+      { data: '17 nov, 08:10', nome: 'Padaria Boa Massa Ltda', desc: 'Café e pães', valor: '− R$ 45,90', entrada: false },
+      { data: '16 nov, 19:47', nome: 'Rafael Lima', desc: 'Aluguel da quadra', valor: '− R$ 200,00', entrada: false },
+      { data: '15 nov, 11:05', nome: 'Ana Souza', desc: 'Reembolso', valor: '+ R$ 1.200,00', entrada: true },
+      { data: '14 nov, 16:20', nome: 'Oficina Rápida ME', desc: 'Troca de óleo', valor: '− R$ 241,60', entrada: false },
+      { data: '12 nov, 10:02', nome: 'Pedro Alves', desc: 'Sem descrição', valor: '+ R$ 120,00', entrada: true },
+      { data: '10 nov, 21:15', nome: 'Livraria Página Ltda', desc: 'Livros', valor: '− R$ 89,90', entrada: false },
+      { data: '09 nov, 09:30', nome: 'Saldo inicial', desc: 'Abertura da conta', valor: '+ R$ 10,00', entrada: true }
+    ];
+    const f = this.state.filtro;
+    const vis = todas.filter((l) => f === 'todas' || (f === 'entradas' ? l.entrada : !l.entrada));
+    const btn = (id, rotulo) => {
+      const on = f === id;
+      return {
+        rotulo, pressed: on ? 'true' : 'false',
+        style: 'height: 36px; padding: 0 16px; border: 0; border-radius: 8px; cursor: pointer; font: 600 14px/20px Inter, sans-serif; ' + (on ? 'background: #FFFFFF; color: #0F172A; box-shadow: 0 1px 2px rgba(15,23,42,.12);' : 'background: transparent; color: #475569;'),
+        pick: () => this.setState({ filtro: id })
+      };
+    };
+    return {
+      filtros: [btn('todas', 'Todas'), btn('entradas', 'Entradas'), btn('saidas', 'Saídas')],
+      linhas: vis.map((l) => ({
+        ...l,
+        seta: l.entrada ? '↓' : '↑',
+        direcao: l.entrada ? 'Entrada' : 'Saída',
+        iconeStyle: 'flex: none; width: 32px; height: 32px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; ' + (l.entrada ? 'background: #ECFDF3; color: #047857;' : 'background: #F1F5F9; color: #334155;'),
+        valorStyle: 'padding: 16px 24px; text-align: right; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; color: ' + (l.entrada ? '#047857' : '#0F172A')
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

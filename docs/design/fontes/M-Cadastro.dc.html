@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bank mobile — Criar conta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; display: flex; flex-direction: column; overflow: hidden">
+  <header style="display: flex; align-items: center; gap: 4px; padding: 44px 12px 8px; background: #FFFFFF; border-bottom: 1px solid #E2E8F0">
+    <a href="M-Login.dc.html" aria-label="Voltar" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; color: #0F172A"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18 9 12l6-6"></path></svg></a>
+    <h1 style="margin: 0; font-size: 18px; line-height: 24px; font-weight: 600">Criar conta</h1>
+  </header>
+  <form style="flex: 1; overflow-y: auto; padding: 20px 20px 24px; display: flex; flex-direction: column; gap: 18px">
+    <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px">
+      <legend style="padding: 0; margin-bottom: 8px; font-size: 14px; line-height: 20px; font-weight: 500">Tipo de conta</legend>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{ tipos }}" as="t" hint-placeholder-count="2">
+          <button type="button" onClick="{{ t.pick }}" aria-pressed="{{ t.pressed }}" style="{{ t.style }}">
+            <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{ t.titulo }}</span>
+            <span style="font-size: 12px; line-height: 16px; color: #475569">{{ t.doc }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <span style="font-size: 12px; line-height: 16px; color: #475569">Não pode ser alterado depois.</span>
+    </fieldset>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="mc-nome" style="font-size: 14px; line-height: 20px; font-weight: 500">{{ rotuloNome }}</label>
+      <input id="mc-nome" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; color: #0F172A; background: #FFFFFF">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="mc-doc" style="font-size: 14px; line-height: 20px; font-weight: 500">{{ rotuloDoc }}</label>
+      <input id="mc-doc" inputmode="numeric" placeholder="{{ mascaraDoc }}" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; color: #0F172A; background: #FFFFFF">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="mc-email" style="font-size: 14px; line-height: 20px; font-weight: 500">E-mail</label>
+      <input id="mc-email" type="email" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; color: #0F172A; background: #FFFFFF">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="mc-senha" style="font-size: 14px; line-height: 20px; font-weight: 500">Senha</label>
+      <input id="mc-senha" type="password" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; color: #0F172A; background: #FFFFFF">
+      <span style="font-size: 12px; line-height: 16px; color: #475569">8 ou mais caracteres, com letras, números e símbolos.</span>
+    </div>
+    <div style="padding: 12px 14px; border-radius: 12px; background: #EFF4FF; border: 1px solid #C7D7FE; font-size: 14px; line-height: 20px">{{ saldoInicial }}</div>
+  </form>
+  <div style="padding: 12px 20px 32px; background: #FFFFFF; border-top: 1px solid #E2E8F0">
+    <a href="{{ destino }}" style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 12px; background: #1D4ED8; color: #FFFFFF; font-size: 16px; line-height: 24px; font-weight: 600; text-decoration: none">Criar conta</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tipo: 'PF' }; }
+  renderVals() {
+    const pf = this.state.tipo === 'PF';
+    const base = 'display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 64px; padding: 12px 14px; border-radius: 12px; text-align: left; cursor: pointer; font-family: Inter, sans-serif; color: #0F172A; ';
+    const on = base + 'background: #EFF4FF; border: 2px solid #1D4ED8;';
+    const off = base + 'background: #FFFFFF; border: 2px solid #E2E8F0;';
+    return {
+      tipos: [
+        { titulo: 'Pessoa Física', doc: 'CPF', pressed: pf ? 'true' : 'false', style: pf ? on : off, pick: () => this.setState({ tipo: 'PF' }) },
+        { titulo: 'Pessoa Jurídica', doc: 'CNPJ', pressed: pf ? 'false' : 'true', style: pf ? off : on, pick: () => this.setState({ tipo: 'PJ' }) }
+      ],
+      rotuloNome: pf ? 'Nome completo' : 'Razão social',
+      rotuloDoc: pf ? 'CPF' : 'CNPJ',
+      mascaraDoc: pf ? '000.000.000-00' : '00.000.000/0000-00',
+      saldoInicial: pf ? 'Sua conta começa com R$ 10,00 de saldo de demonstração.' : 'Sua conta começa com saldo de R$ 0,00.',
+      destino: pf ? 'M-Inicio.dc.html' : 'M-InicioPJ.dc.html'
+    };
+  }
+}
+</script>
+</body>
+</html>

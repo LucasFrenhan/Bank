@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bank — Confirmar transferência</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="min-height: 900px; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #E2E8F0">
+    <a href="D-Transferir.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 4px; color: #0F172A; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18 9 12l6-6"></path></svg>Editar dados</a>
+    <ol aria-label="Etapas" style="margin: 0 0 0 auto; padding: 0; list-style: none; display: flex; gap: 8px; align-items: center; font-size: 14px; line-height: 20px">
+      <li style="display: flex; align-items: center; gap: 8px; color: #047857; font-weight: 500"><span style="width: 24px; height: 24px; border-radius: 999px; background: #047857; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-size: 12px">✓</span>Dados</li>
+      <li aria-hidden="true" style="width: 32px; height: 2px; background: #047857"></li>
+      <li aria-current="step" style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #1D4ED8"><span style="width: 24px; height: 24px; border-radius: 999px; background: #1D4ED8; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-size: 12px">2</span>Confirmar</li>
+      <li aria-hidden="true" style="width: 32px; height: 2px; background: #CBD5E1"></li>
+      <li style="display: flex; align-items: center; gap: 8px; color: #475569"><span style="width: 24px; height: 24px; border-radius: 999px; border: 2px solid #CBD5E1; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; font-size: 12px">3</span>Comprovante</li>
+    </ol>
+  </header>
+
+  <main style="flex: 1; display: flex; justify-content: center; padding: 48px 24px; box-sizing: border-box">
+    <div style="width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 24px">
+      <h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 600; letter-spacing: -0.01em">Confira antes de enviar</h1>
+
+      <section style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden">
+        <div style="padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 4px; border-bottom: 1px solid #E2E8F0">
+          <span style="font-size: 14px; line-height: 20px; color: #475569">Você vai transferir</span>
+          <span style="font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">R$ 45,90</span>
+        </div>
+        <dl style="margin: 0; padding: 8px 24px; display: grid; grid-template-columns: auto 1fr; font-size: 14px; line-height: 20px">
+          <dt style="padding: 12px 0; color: #475569">Para</dt><dd style="margin: 0; padding: 12px 0; text-align: right; font-weight: 500">Padaria Boa Massa Ltda</dd>
+          <dt style="padding: 12px 0; color: #475569; border-top: 1px solid #EEF2F6">Documento</dt><dd style="margin: 0; padding: 12px 0; text-align: right; border-top: 1px solid #EEF2F6">CNPJ ••.345.678/0001-••</dd>
+          <dt style="padding: 12px 0; color: #475569; border-top: 1px solid #EEF2F6">Tipo de conta</dt><dd style="margin: 0; padding: 12px 0; text-align: right; border-top: 1px solid #EEF2F6">Pessoa Jurídica</dd>
+          <dt style="padding: 12px 0; color: #475569; border-top: 1px solid #EEF2F6">Descrição</dt><dd style="margin: 0; padding: 12px 0; text-align: right; border-top: 1px solid #EEF2F6">Café e pães</dd>
+          <dt style="padding: 12px 0; color: #475569; border-top: 1px solid #EEF2F6">Saldo depois</dt><dd style="margin: 0; padding: 12px 0; text-align: right; border-top: 1px solid #EEF2F6; font-variant-numeric: tabular-nums">R$ 796,60</dd>
+        </dl>
+      </section>
+
+      <p style="margin: 0; font-size: 12px; line-height: 16px; color: #475569">Transferências são concluídas na hora e não podem ser desfeitas. Se a conexão cair, pode tentar de novo: o valor não é cobrado duas vezes.</p>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap">
+        <a href="D-Transferir.dc.html" style="flex: 1 1 160px; display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 10px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; font-size: 16px; line-height: 24px; font-weight: 600; text-decoration: none">Voltar</a>
+        <a href="D-Comprovante.dc.html" style="flex: 2 1 240px; display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 16px; line-height: 24px; font-weight: 600; text-decoration: none">Transferir R$ 45,90</a>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
