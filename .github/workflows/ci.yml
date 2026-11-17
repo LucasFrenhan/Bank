@@ -1,4 +1,4 @@
-# Pipeline geral do backend (specs/002-setup-api, research R10).
+# Pipeline geral (backend: specs/002-setup-api, research R10; frontend: specs/004-frontend-base, R9).
 # Sem filtro de paths: o job "build-test" é o check obrigatório da main.
 name: ci
 
@@ -36,3 +36,83 @@ jobs:
 
       - name: Testes (unitários, integração e arquitetura)
         run: dotnet test --solution src/backend/Bank.slnx --no-build -c Release
+
+  # Frontend (specs/004-frontend-base, research R9): sem filtro de paths, apto a check obrigatório.
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: src/frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Instalar Node (.nvmrc)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: src/frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Dependências
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Testes (unitários e componentes)
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  frontend-e2e:
+    name: frontend-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Instalar Node (.nvmrc)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: src/frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Subir o ambiente completo (Compose)
+        run: docker compose up -d --build --wait --wait-timeout 300
+
+      - name: Dependências e navegador
+        working-directory: src/frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Testes ponta a ponta (desktop e mobile, API real)
+        working-directory: src/frontend
+        run: npm run e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+
+      - name: Logs do Compose
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Relatório do Playwright
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: src/frontend/playwright-report
+          retention-days: 7
+
+      - name: Derrubar o ambiente
+        if: always()
+        run: docker compose down -v
