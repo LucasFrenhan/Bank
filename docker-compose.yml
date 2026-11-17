@@ -5,6 +5,7 @@
 #   specs/001-infra-local/contracts/ambiente-local.md
 #   specs/002-setup-api/contracts/api-base.md (serviço api)
 #   specs/003-usuarios-carteiras/contracts/usuarios-carteiras-api.md (banco e JWT da api)
+#   specs/004-frontend-base/contracts/frontend.md (serviço frontend)
 #
 # Subir:  docker compose up -d --wait
 # Parar:  docker compose down        (mantém os dados)
@@ -107,6 +108,29 @@ services:
       timeout: 5s
       retries: 12
       start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    # Frontend React servido por nginx — specs/004-frontend-base (research R4, R9).
+    # /api e /otlp são encaminhados pelo nginx para a api e o coletor (mesma origem, sem CORS).
+    build:
+      context: ./src/frontend
+      args:
+        VITE_TELEMETRIA_HABILITADA: "true"
+    image: bank/frontend:local
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+      aspire-dashboard:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/saude"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
     restart: unless-stopped
 
 volumes:
