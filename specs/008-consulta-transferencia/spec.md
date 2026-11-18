@@ -140,8 +140,10 @@ e com um identificador aleatório; comparar as duas respostas.
 - **FR-006**: A consulta MUST ser somente leitura: nenhum saldo, lançamento, transferência ou
   evento é criado ou alterado.
 - **FR-007**: As consultas MUST ser contadas em métrica própria por resultado (`encontrada`,
-  `nao-encontrada`, `invalida`), para permitir detectar varreduras; identificadores, documentos,
-  nomes e e-mails MUST NOT ir para logs, traces ou métricas (Princípio VI).
+  `nao-encontrada`, `invalida`), para permitir detectar varreduras; documentos, nomes e e-mails
+  MUST NOT ir para logs, traces ou métricas (Princípio VI). O identificador da transferência não é
+  dado pessoal (como na spec 006, FR-019) e pode aparecer no caminho registrado pelos traces HTTP,
+  mas MUST NOT ser usado como rótulo de métrica.
 - **FR-008**: O endpoint MUST ser publicado no OpenAPI com o esquema `Bearer` e as respostas 200,
   400, 401, 403 e 404, e o contrato de transferências MUST passar à versão 1.1.0; nos endpoints
   existentes, a única mudança permitida é o campo aditivo do documento mascarado do pagador
@@ -166,8 +168,8 @@ e com um identificador aleatório; comparar as duas respostas.
 - **SC-003**: 0 ocorrências da chave de idempotência do pagador nas consultas feitas pelo
   recebedor.
 - **SC-004**: 95% das consultas respondem em menos de 1 segundo no ambiente local.
-- **SC-005**: 0 ocorrências de identificador da transferência, documento, nome ou e-mail na
-  telemetria gerada pelos testes; as consultas aparecem na métrica por resultado.
+- **SC-005**: 0 ocorrências de documento, nome ou e-mail na telemetria gerada pelos testes; as
+  consultas aparecem na métrica por resultado, sem o identificador da transferência como rótulo.
 - **SC-006**: Saldos, lançamentos e eventos ficam idênticos antes e depois de qualquer número de
   consultas.
 
