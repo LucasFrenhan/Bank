@@ -162,4 +162,13 @@ export const api = {
         },
       }),
     ),
+
+  /**
+   * Comprovante pelo identificador, para pagador e recebedor (specs/008-consulta-transferencia).
+   * Inexistente ou de outra pessoa → 404 `transferencia-nao-encontrada`.
+   */
+  obterTransferencia: (transferenciaId: string) =>
+    chamar<Comprovante>(() =>
+      cliente.GET('/api/v1/transferencias/{transferenciaId}', { params: { path: { transferenciaId } } }),
+    ),
 };

@@ -36,15 +36,14 @@ Confirmação ──422/404/403/400/rede/5xx──▶ aviso correspondente; mant
 
 ## Comprovante
 
-Corpo de `POST /transferencias` (200/201) e, após a issue #36, de
-`GET /transferencias/{id}`. Cache da aba em `sessionStorage['bank.comprovantes']` (até 20,
+Corpo de `POST /transferencias` (200/201) e de `GET /transferencias/{id}` (spec 008). Cache da aba em `sessionStorage['bank.comprovantes']` (até 20,
 mapa `transferenciaId → comprovante`).
 
 | Exibição | Origem |
 | --- | --- |
 | Título | "Transferência concluída" (sessão = pagador) ou "Transferência recebida" (sessão = recebedor) |
 | Valor | `valor` |
-| De | `pagador.nome`; + ` · CPF {mascarado}` só quando a sessão é o pagador (`GET /usuarios/me`) — a API não devolve o documento do pagador |
+| De | `pagador.nome` · CPF `pagador.documento` (já mascarado pela API, para pagador e recebedor — spec 008) |
 | Para | `recebedor.nome` · `ocultarDocumento(recebedor.documento)` |
 | Descrição | `descricao` (linha omitida quando vazia) |
 | Data | `criadoEm` no fuso do navegador (`17 nov 2026, 08:10`) |
@@ -65,7 +64,7 @@ Do `GET /transferencias/extrato`.
 | Data (início) | `Hoje, 14:32` · `Ontem, 19:47` · `15 nov, 11:05` |
 | Grupo (mobile) | `HOJE` · `ONTEM` · `15 DE NOVEMBRO` (ano quando diferente do atual) |
 | Linha secundária (mobile) | `Entrada · 14:32` / `Saída · 08:10`; na abertura, `Saldo inicial de demonstração · 09:30` (o mobile não tem coluna de descrição) |
-| Link | `tipo = Transferencia` → `/transferencias/{transferenciaId}`; abertura sem link. Até a issue #36, só quando o comprovante está no cache da aba |
+| Link | `tipo = Transferencia` → `/transferencias/{transferenciaId}`; abertura sem link |
 
 Datas e agrupamentos usam o fuso do navegador.
 

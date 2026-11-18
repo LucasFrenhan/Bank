@@ -28,15 +28,19 @@ test.describe('Telemetria — transferências', () => {
     const chave = await page.evaluate(() => (JSON.parse(sessionStorage.getItem('bank.transferencia')!) as { chave: string }).chave);
     await page.getByRole('button', { name: /^Transferir R\$/ }).click();
     await expect(page.getByRole('heading', { name: 'Transferência concluída' })).toBeVisible();
-    const transferenciaId = new URL(page.url()).pathname.split('/').at(-1)!;
+    // Reabre o comprovante pela consulta (spec 008), sem o cache da aba: a chamada também é coberta.
+    await page.evaluate(() => sessionStorage.removeItem('bank.comprovantes'));
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Transferência concluída' })).toBeVisible();
 
     await expect.poll(() => corpos.some((c) => c.includes('/transferencias/:id')), { timeout: 15_000 }).toBe(true);
     const sensiveis = [pagador.documento, recebedor.documento, 'Lucas Telemetria', 'Padaria Sigilo Ltda', descricao, chave, '6,17'];
     for (const sensivel of sensiveis) {
       expect(corpos.some((c) => c.includes(sensivel)), `telemetria contém "${sensivel.slice(0, 12)}…"`).toBe(false);
     }
-    // A rota é registrada pelo padrão: o identificador da transferência não aparece nos sinais.
-    expect(corpos.some((c) => c.includes(transferenciaId)), 'identificador da transferência na telemetria').toBe(false);
+    // O identificador da transferência não é dado pessoal (spec 008, FR-007): pode aparecer no
+    // caminho da chamada GET /api/v1/transferencias/{id}; a navegação continua registrada pelo
+    // padrão da rota (verificado acima).
   });
 });
 

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
-import type { Comprovante as DadosComprovante } from '../api/cliente';
-import { MENSAGENS } from '../api/erros';
+import { api, type Comprovante as DadosComprovante } from '../api/cliente';
+import { MENSAGENS, type MensagemErro } from '../api/erros';
 import { Botao } from '../design/componentes/Botao';
-import { Aviso, Cartao } from '../design/componentes/Feedback';
+import { Aviso, AvisoErro, Carregando, Cartao } from '../design/componentes/Feedback';
 import { IconeConfirmado } from '../design/componentes/Icones';
 import { LayoutEtapas } from '../design/componentes/LayoutEtapas';
 import { formatarDataHora } from '../formatacao/data';
@@ -13,22 +13,68 @@ import { lerComprovante } from '../transferencia/armazenamento';
 import { useTitulo } from './comum';
 import estilos from './Transferencia.module.css';
 import { descreverDocumento } from './Transferir';
-import { useTitular } from './useTitular';
+
+type EstadoComprovante =
+  | { estado: 'carregando' }
+  | { estado: 'pronto'; comprovante: DadosComprovante }
+  | { estado: 'nao-encontrado' }
+  | { estado: 'erro'; erro: MensagemErro };
 
 /**
- * Comprovante de uma transferência (specs/007: US1; FR-011, FR-013, FR-014; research R5, R10).
- * Até a issue #36, os dados vêm dos comprovantes guardados nesta aba.
+ * Comprovante da aba, se houver (logo após o envio); senão, pela consulta por identificador
+ * (spec 008) — vale para pagador e recebedor, em qualquer sessão (FR-014).
+ */
+function useComprovante(transferenciaId: string): EstadoComprovante & { recarregar: () => void } {
+  const [versao, definirVersao] = useState(0);
+  const daAba = lerComprovante(transferenciaId);
+  const chave = `${transferenciaId}|${versao}`;
+  const [resposta, definirResposta] = useState<{ chave: string; estado: EstadoComprovante } | null>(null);
+
+  useEffect(() => {
+    if (daAba) return undefined;
+    let ativo = true;
+
+    void api.obterTransferencia(transferenciaId).then((resultado) => {
+      if (!ativo) return;
+      if (resultado.ok) {
+        definirResposta({ chave, estado: { estado: 'pronto', comprovante: resultado.dados } });
+      } else if (resultado.erro.codigo === 'transferencia-nao-encontrada' || resultado.erro.codigo === 'validacao') {
+        definirResposta({ chave, estado: { estado: 'nao-encontrado' } });
+      } else if (!resultado.erro.encerrarSessao) {
+        definirResposta({ chave, estado: { estado: 'erro', erro: resultado.erro } });
+      }
+    });
+
+    return () => {
+      ativo = false;
+    };
+  }, [chave, daAba, transferenciaId]);
+
+  const recarregar = useCallback(() => definirVersao((v) => v + 1), []);
+  if (daAba) return { estado: 'pronto', comprovante: daAba, recarregar };
+  return { ...(resposta?.chave === chave ? resposta.estado : { estado: 'carregando' as const }), recarregar };
+}
+
+/**
+ * Comprovante de uma transferência (specs/007: US1; FR-011, FR-013, FR-014; research R5, R10;
+ * consulta da spec 008).
  */
 export function Comprovante() {
   useTitulo('Comprovante');
   const { transferenciaId = '' } = useParams();
-  const comprovante = lerComprovante(transferenciaId);
+  const comprovante = useComprovante(transferenciaId);
 
   return (
     <LayoutEtapas>
-      {comprovante ? (
-        <ComprovanteEncontrado comprovante={comprovante} />
-      ) : (
+      {comprovante.estado === 'carregando' ? <Carregando texto="Carregando comprovante…" /> : null}
+      {comprovante.estado === 'pronto' ? <ComprovanteEncontrado comprovante={comprovante.comprovante} /> : null}
+      {comprovante.estado === 'erro' ? (
+        <div className={estilos.pagina}>
+          <h1>Comprovante</h1>
+          <AvisoErro erro={comprovante.erro} aoTentarDeNovo={comprovante.recarregar} />
+        </div>
+      ) : null}
+      {comprovante.estado === 'nao-encontrado' ? (
         <div className={estilos.pagina}>
           <h1>Comprovante</h1>
           <Aviso variante="neutro" titulo={MENSAGENS.comprovanteNaoEncontrado}>
@@ -38,7 +84,7 @@ export function Comprovante() {
             </p>
           </Aviso>
         </div>
-      )}
+      ) : null}
     </LayoutEtapas>
   );
 }
@@ -49,6 +95,8 @@ function ComprovanteEncontrado({ comprovante }: { comprovante: DadosComprovante 
   const souPagador = comprovante.pagador.usuarioId === sessao.usuarioId;
   const valor = formatarCentavos(saldoEmCentavos(comprovante.valor));
   const recebedor = `${comprovante.recebedor.nome} · ${descreverDocumento(comprovante.recebedor.documento)}`;
+  // O documento do pagador já chega mascarado da API (spec 008, FR-002a); o pagador é sempre PF.
+  const pagador = `${comprovante.pagador.nome} · CPF ${comprovante.pagador.documento}`;
   const descricao = comprovante.descricao?.trim();
   const data = formatarDataHora(comprovante.criadoEm);
 
@@ -56,7 +104,7 @@ function ComprovanteEncontrado({ comprovante }: { comprovante: DadosComprovante 
     const linhas = [
       `Comprovante de transferência — Bank`,
       `Valor: ${valor}`,
-      `De: ${comprovante.pagador.nome}`,
+      `De: ${pagador}`,
       `Para: ${recebedor}`,
       ...(descricao ? [`Descrição: ${descricao}`] : []),
       `Data: ${data}`,
@@ -102,7 +150,7 @@ function ComprovanteEncontrado({ comprovante }: { comprovante: DadosComprovante 
           <li className={estilos.linha}>
             <span className={estilos.rotuloLinha}>De</span>
             <span className={estilos.valorLinha}>
-              {souPagador ? <PagadorComDocumento nome={comprovante.pagador.nome} /> : comprovante.pagador.nome}
+              {pagador}
             </span>
           </li>
           <li className={estilos.linha}>
@@ -147,8 +195,3 @@ function ComprovanteEncontrado({ comprovante }: { comprovante: DadosComprovante 
   );
 }
 
-/** "Nome · CPF •••.982.247-••" — o documento do pagador só existe para o próprio pagador (FR-011). */
-function PagadorComDocumento({ nome }: { nome: string }) {
-  const titular = useTitular();
-  return <>{titular.estado === 'pronto' ? `${nome} · ${descreverDocumento(titular.titular.documento)}` : nome}</>;
-}

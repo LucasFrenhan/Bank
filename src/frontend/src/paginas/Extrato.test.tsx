@@ -1,7 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { guardarComprovante } from '../transferencia/armazenamento';
-import { carteira, comprovante, extratoDe, ITEM_ABERTURA, itemExtrato, problema, TRACE_ID } from '../testes/handlers';
+import { carteira, extratoDe, ITEM_ABERTURA, itemExtrato, problema, TRACE_ID } from '../testes/handlers';
 import { renderizarApp } from '../testes/renderizar';
 import { servidor } from '../testes/setup';
 
@@ -61,14 +60,14 @@ describe('Extrato — desktop (US4)', () => {
     expect(within(linhas[2]!).queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('lançamento com comprovante na aba leva ao comprovante; sem comprovante, não há link (até a #36)', async () => {
-    const item = itemExtrato(1);
-    guardarComprovante(comprovante({ transferenciaId: item.transferenciaId }));
-    servidor.use(extratoDe([item, itemExtrato(3)]));
+  it('todo lançamento de transferência leva ao comprovante; o saldo inicial não (spec 007 FR-014, spec 008)', async () => {
+    const [item1, item3] = [itemExtrato(1), itemExtrato(3)];
+    servidor.use(extratoDe([item1, item3, ITEM_ABERTURA]));
     renderizarApp('/extrato', { sessao: 'PessoaFisica' });
 
-    expect(await screen.findByRole('link', { name: /Contraparte 1/ })).toHaveAttribute('href', `/transferencias/${item.transferenciaId}`);
-    expect(screen.queryByRole('link', { name: /Contraparte 3/ })).not.toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /Contraparte 1/ })).toHaveAttribute('href', `/transferencias/${item1.transferenciaId}`);
+    expect(screen.getByRole('link', { name: /Contraparte 3/ })).toHaveAttribute('href', `/transferencias/${item3.transferenciaId}`);
+    expect(screen.queryByRole('link', { name: /Saldo inicial/ })).not.toBeInTheDocument();
   });
 
   it('filtros mudam a URL, voltam à página 1 e consultam a API com Entrada/Saida', async () => {

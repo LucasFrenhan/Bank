@@ -211,8 +211,9 @@ Definidos em [`specs/007-frontend-transferencias`](../specs/007-frontend-transfe
   `bank.comprovantes`; tudo é apagado ao sair ou quando a sessão expira.
 - **Dinheiro em centavos**: valores digitados e saldos são convertidos para centavos inteiros
   (`src/formatacao/valor.ts`); nenhuma conta de dinheiro usa ponto flutuante.
-- **Comprovante depois**: até a issue #36 (`GET /api/v1/transferencias/{id}`), o comprovante só
-  abre para transferências feitas na aba atual; os demais lançamentos do extrato não têm link.
+- **Comprovante depois**: todo lançamento de transferência do extrato e do início leva ao
+  comprovante, carregado pela consulta `GET /api/v1/transferencias/{id}` (spec 008) quando não
+  está guardado na aba — para pagador e recebedor, em qualquer sessão.
 - **Saldo para testar**: toda PF começa com R$ 10,00 de demonstração. Para ter mais, crie outras
   PF e transfira os R$ 10,00 delas para a conta de teste. Os testes ponta a ponta fazem o mesmo
   pela API (`acumularSaldo` e `criarLancamentos` em `src/frontend/e2e/apoio.ts`), sem acessar o
