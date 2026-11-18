@@ -64,6 +64,7 @@ Do `GET /transferencias/extrato`.
 | Data (desktop) | `17 nov, 14:32` (ano quando diferente do atual) |
 | Data (início) | `Hoje, 14:32` · `Ontem, 19:47` · `15 nov, 11:05` |
 | Grupo (mobile) | `HOJE` · `ONTEM` · `15 DE NOVEMBRO` (ano quando diferente do atual) |
+| Linha secundária (mobile) | `Entrada · 14:32` / `Saída · 08:10`; na abertura, `Saldo inicial de demonstração · 09:30` (o mobile não tem coluna de descrição) |
 | Link | `tipo = Transferencia` → `/transferencias/{transferenciaId}`; abertura sem link. Até a issue #36, só quando o comprovante está no cache da aba |
 
 Datas e agrupamentos usam o fuso do navegador.

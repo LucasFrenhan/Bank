@@ -366,12 +366,12 @@ recebimentos; navegação ativa
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T048 [P] Acrescentar a `front/e2e/telemetria.spec.ts`: após uma transferência, os sinais
+- [X] T048 [P] Acrescentar a `front/e2e/telemetria.spec.ts`: após uma transferência, os sinais
   enviados a `/otlp` não contêm documento, nome, valor, descrição nem chave de idempotência, e a
   navegação aparece como `/transferencias/:id` (SC-007)
-- [ ] T049 [P] Atualizar `docs/desenvolvimento.md` (seção Frontend): telas novas, rotas,
+- [X] T049 [P] Atualizar `docs/desenvolvimento.md` (seção Frontend): telas novas, rotas,
   preparo de contas e saldo para testes locais (FR-031)
-- [ ] T050 Executar `npm run lint && npm run typecheck && npm test && npm run build && npm run
+- [X] T050 Executar `npm run lint && npm run typecheck && npm test && npm run build && npm run
   e2e` e o roteiro de [quickstart.md](quickstart.md) cenários 1–6 e 8; registrar desvios na spec,
   no plano ou no contrato no mesmo PR (constituição, Princípio I)
 
