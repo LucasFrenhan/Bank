@@ -364,3 +364,25 @@ a.lancamento:hover {
   font: var(--texto-legenda);
   font-weight: 600;
 }
+
+/* ---------- Campo de valor (specs/007) ---------- */
+.controleValor {
+  align-items: center;
+}
+
+.prefixoValor {
+  position: absolute;
+  left: var(--espaco-4);
+  color: var(--cor-texto-suave);
+  font: var(--texto-h3);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.entradaValor {
+  min-height: 64px;
+  padding-left: 56px;
+  font: var(--texto-display);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+}

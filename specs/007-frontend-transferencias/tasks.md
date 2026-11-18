@@ -143,7 +143,7 @@ mobile e conferir comprovante e saldos (quickstart, cenário 3)
 
 ### Tests for User Story 1
 
-- [ ] T019 [P] [US1] Criar `front/src/paginas/Transferir.test.tsx`: título "Transferir dinheiro"
+- [X] T019 [P] [US1] Criar `front/src/paginas/Transferir.test.tsx`: título "Transferir dinheiro"
   e etapas; máscara CPF/CNPJ (CNPJ minúsculo vira maiúsculo); consulta só com CNPJ de 14
   caracteres ou CPF com DV válido após 500 ms/ao sair do campo; ao sair do campo com CPF de DV
   inválido, consulta mesmo assim e mostra o 400 da API no campo; "Buscando titular…" durante a
@@ -151,19 +151,19 @@ mobile e conferir comprovante e saldos (quickstart, cenário 3)
   iniciais, nome, tipo e documento mascarado; alterar o documento descarta o titular; resposta
   atrasada de consulta anterior é ignorada; texto "Disponível: R$ … · mínimo R$ 0,01"; contador "N/200"; "Continuar"
   indisponível sem titular confirmado; dados restaurados de `bank.transferencia`
-- [ ] T020 [P] [US1] Criar `front/src/paginas/ConfirmarTransferencia.test.tsx`: "Confira antes
+- [X] T020 [P] [US1] Criar `front/src/paginas/ConfirmarTransferencia.test.tsx`: "Confira antes
   de enviar", valor em destaque, linhas Para/Documento/Tipo de conta/Descrição (omitida se vazia)/
   Saldo depois (em centavos: 842,50 − 45,90 = R$ 796,60); descrição só com espaços não aparece e
   não é enviada; aviso de que não pode ser desfeita;
   "Voltar"/"Editar dados" voltam com tudo preenchido; botão "Transferir R$ 45,90" envia com
   `Idempotency-Key` e leva a `/transferencias/{id}`; sem transferência em andamento →
   `/transferir`
-- [ ] T021 [P] [US1] Criar `front/src/paginas/Comprovante.test.tsx`: a partir do cache da aba,
+- [X] T021 [P] [US1] Criar `front/src/paginas/Comprovante.test.tsx`: a partir do cache da aba,
   "Transferência concluída", "R$ 45,90 enviados para {nome}", linhas Valor, De (nome · CPF
   mascarado de `/usuarios/me`, só quando a sessão é o pagador), Para (nome · documento mascarado), Descrição, Data, Status
   "Concluída", ID monoespaçado; "Voltar ao início"; "Compartilhar" usa `navigator.share` e, sem
   ele, copia o texto (sem chave de idempotência) e anuncia "Comprovante copiado"
-- [ ] T022 [P] [US1] Criar `front/e2e/transferencia.spec.ts` (caminho feliz) e acrescentar a
+- [X] T022 [P] [US1] Criar `front/e2e/transferencia.spec.ts` (caminho feliz) e acrescentar a
   `front/e2e/apoio.ts` `transferirPelaApi(page, token, documento, valor)` e
   `acumularSaldo(page, conta, contasDeApoio)`: PF→PJ (CNPJ alfanumérico digitado em minúsculas) e
   PF→PF, comprovante, saldo reduzido no início e transferência em "Últimas movimentações", nos
@@ -172,31 +172,31 @@ mobile e conferir comprovante e saldos (quickstart, cenário 3)
 
 ### Implementation for User Story 1
 
-- [ ] T023 [P] [US1] Criar `front/src/design/componentes/Etapas.tsx` (Dados → Confirmar →
+- [X] T023 [P] [US1] Criar `front/src/design/componentes/Etapas.tsx` (Dados → Confirmar →
   Comprovante; etapa atual com `aria-current="step"`, concluídas com ✓),
   `front/src/design/componentes/LayoutEtapas.tsx` (sem menu; variante `etapas` com link de volta
   — "Voltar ao início"/"Editar dados" — e `Etapas`; variante `marca` só com a marca, para o
   comprovante; `main#conteudo` e "Pular para o conteúdo" como no `Layout`) e
   `front/src/design/componentes/CampoValor.tsx` (prefixo "R$", `inputMode="decimal"`, texto de
   ajuda e erro associados por `aria-describedby`)
-- [ ] T024 [US1] Criar `front/src/transferencia/useTransferencia.ts`: estado da transferência em
+- [X] T024 [US1] Criar `front/src/transferencia/useTransferencia.ts`: estado da transferência em
   andamento (data-model), consulta do destinatário com sequência + `AbortController` (R6),
   validação local de valor (`valorCentavos` ≥ 1) e descrição ("≤ 200"), `prepararConfirmacao`
   (chave por assinatura, R2), `enviar()` com trava contra envio simultâneo e gravação do
   comprovante no cache
-- [ ] T025 [US1] Criar `front/src/paginas/Transferir.tsx` (etapa Dados, layout do protótipo
+- [X] T025 [US1] Criar `front/src/paginas/Transferir.tsx` (etapa Dados, layout do protótipo
   `desktop-06`/`mobile-06`; "Voltar ao início"; restaura a transferência em andamento; após uma
   concluída, começa vazia)
-- [ ] T026 [US1] Criar `front/src/paginas/ConfirmarTransferencia.tsx` (layout `desktop-07`/
+- [X] T026 [US1] Criar `front/src/paginas/ConfirmarTransferencia.tsx` (layout `desktop-07`/
   `mobile-07`; "Saldo depois" a partir de `useCarteira` em centavos; envio e navegação para o
   comprovante)
-- [ ] T027 [US1] Criar `front/src/paginas/Comprovante.tsx` (layout `desktop-08`/`mobile-08`; lê o
+- [X] T027 [US1] Criar `front/src/paginas/Comprovante.tsx` (layout `desktop-08`/`mobile-08`; lê o
   cache da aba por `:transferenciaId`; sem comprovante → "Comprovante não encontrado" com link
   "Ir para o extrato"; "Compartilhar" conforme research R10)
-- [ ] T028 [US1] Registrar em `front/src/App.tsx` as rotas protegidas `/transferir`,
+- [X] T028 [US1] Registrar em `front/src/App.tsx` as rotas protegidas `/transferir`,
   `/transferir/confirmar` e `/transferencias/:transferenciaId`, envolvidas por `LayoutEtapas`
   (variante `etapas` nas duas primeiras e `marca` no comprovante), conforme o protótipo
-- [ ] T029 [US1] Em `front/src/paginas/Transferir.tsx` e `ConfirmarTransferencia.tsx`, mostrar
+- [X] T029 [US1] Em `front/src/paginas/Transferir.tsx` e `ConfirmarTransferencia.tsx`, mostrar
   para PJ (claim `tipo_conta`) o aviso neutro "Indisponível para Pessoa Jurídica — Contas PJ
   recebem transferências e geram cobranças, mas não enviam." com link para o início, sem
   formulário (FR-001)
@@ -213,7 +213,7 @@ mobile e conferir comprovante e saldos (quickstart, cenário 3)
 
 ### Tests for User Story 2
 
-- [ ] T030 [P] [US2] Acrescentar a `Transferir.test.tsx` e `ConfirmarTransferencia.test.tsx`:
+- [X] T030 [P] [US2] Acrescentar a `Transferir.test.tsx` e `ConfirmarTransferencia.test.tsx`:
   404 → erro no campo "Nenhuma conta Bank com esse documento."; 422 `autotransferencia` → aviso
   "Esse documento é o seu" (na consulta e no envio); 400 por campo (`documento`,
   `documentoDestino`, `valor`, `descricao`) no campo certo; valor acima do saldo → aviso "Saldo
@@ -221,16 +221,16 @@ mobile e conferir comprovante e saldos (quickstart, cenário 3)
   envio; 422 `saldo-insuficiente` no envio recarrega a carteira e mostra o saldo atual; 409 →
   "Essa transferência mudou" e o próximo envio usa outra chave; 403 → "Indisponível para Pessoa
   Jurídica"; rede/500 → mensagem de conexão ou "Algo deu errado" com `traceId`, dados preservados
-- [ ] T031 [P] [US2] Acrescentar a `front/e2e/transferencia.spec.ts`: CPF sem conta, próprio
+- [X] T031 [P] [US2] Acrescentar a `front/e2e/transferencia.spec.ts`: CPF sem conta, próprio
   documento, valor acima do saldo, `10,005`, PJ abrindo `/transferir` (desktop e mobile)
 
 ### Implementation for User Story 2
 
-- [ ] T032 [US2] Em `front/src/transferencia/useTransferencia.ts`, tratar cada `codigo` de erro
+- [X] T032 [US2] Em `front/src/transferencia/useTransferencia.ts`, tratar cada `codigo` de erro
   (consulta e envio) conforme a tabela do data-model, mantendo dados e chave; em 409, zerar a
   chave; em `saldo-insuficiente`, chamar `recarregar` da carteira; erros de campo da API mapeados
   `documentoDestino` → campo do documento
-- [ ] T033 [US2] Exibir em `front/src/paginas/Transferir.tsx` e
+- [X] T033 [US2] Exibir em `front/src/paginas/Transferir.tsx` e
   `ConfirmarTransferencia.tsx` os avisos (`Aviso`) e erros de campo, com foco movido para o
   primeiro erro ou aviso após cada recusa
 
@@ -246,19 +246,19 @@ mobile e conferir comprovante e saldos (quickstart, cenário 3)
 
 ### Tests for User Story 3
 
-- [ ] T034 [P] [US3] Acrescentar a `ConfirmarTransferencia.test.tsx`: duplo clique → um único
+- [X] T034 [P] [US3] Acrescentar a `ConfirmarTransferencia.test.tsx`: duplo clique → um único
   POST; falha de rede e nova tentativa → mesma `Idempotency-Key`; resposta 200 → aviso
   informativo "Essa transferência já foi feita — Nada foi cobrado de novo." com "Ver
   comprovante" para `/transferencias/{id}`; recarregar a confirmação mantém a chave; editar
   valor/descrição/documento → nova chave; nova transferência após concluída → formulário vazio e
   nova chave
-- [ ] T035 [P] [US3] Acrescentar a `front/e2e/transferencia.spec.ts`: concluir, voltar pelo
+- [X] T035 [P] [US3] Acrescentar a `front/e2e/transferencia.spec.ts`: concluir, voltar pelo
   navegador até a confirmação e enviar de novo → aviso de reenvio e saldo inalterado; recarregar
   a confirmação e enviar; duplo clique numa nova → um lançamento no extrato (conferido pela API)
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Em `front/src/transferencia/useTransferencia.ts` e
+- [X] T036 [US3] Em `front/src/transferencia/useTransferencia.ts` e
   `front/src/paginas/ConfirmarTransferencia.tsx`, tratar `repetida: true` (marcar `concluida`,
   guardar comprovante, exibir o aviso com link em vez de navegar), manter a chave ao recarregar e
   após falha de rede, e limpar a transferência em andamento ao abrir `/transferir` depois de uma

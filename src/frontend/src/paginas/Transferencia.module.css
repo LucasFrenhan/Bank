@@ -1,0 +1,225 @@
+/* Transferir, Confirmação e Comprovante (specs/007; protótipo desktop/mobile 06 a 08). */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+  padding: var(--espaco-6);
+}
+
+.statusBusca {
+  min-height: 20px;
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}
+
+.statusBusca:empty {
+  display: none;
+}
+
+/* ---------- Titular encontrado ---------- */
+.titular {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--raio-controle);
+  background: var(--cor-fundo);
+}
+
+.iniciais {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--cor-primaria-suave);
+  color: var(--cor-primaria);
+  font: var(--texto-rotulo);
+  font-weight: 700;
+}
+
+.dadosTitular {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nomeTitular {
+  font: var(--texto-rotulo);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.detalheTitular {
+  color: var(--cor-texto-suave);
+  font: var(--texto-legenda);
+  overflow-wrap: anywhere;
+}
+
+.confirmado {
+  flex: none;
+  color: var(--cor-entrada);
+}
+
+.contador {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Confirmação ---------- */
+.destaque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: var(--espaco-6);
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: center;
+}
+
+.rotuloDestaque {
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}
+
+.valorDestaque {
+  font: var(--texto-display);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.linhas {
+  margin: 0;
+  padding: var(--espaco-2) var(--espaco-6);
+  list-style: none;
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espaco-1) var(--espaco-4);
+  padding: var(--espaco-3) 0;
+  font: var(--texto-corpo-m);
+}
+
+.linha + .linha {
+  border-top: 1px solid var(--cor-borda);
+}
+
+.rotuloLinha {
+  color: var(--cor-texto-suave);
+}
+
+.valorLinha {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.valorLinhaForte {
+  font-weight: 700;
+}
+
+.identificador {
+  font: var(--texto-mono);
+}
+
+.nota {
+  color: var(--cor-texto-suave);
+  font: var(--texto-legenda);
+}
+
+.acoes {
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+/* ---------- Comprovante ---------- */
+.sucesso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-2);
+  text-align: center;
+}
+
+.iconeSucesso {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--cor-entrada-suave);
+  color: var(--cor-entrada);
+}
+
+.iconeSucesso svg {
+  width: 28px;
+  height: 28px;
+}
+
+.resumoSucesso {
+  color: var(--cor-texto-suave);
+  overflow-wrap: anywhere;
+}
+
+.statusCopia {
+  min-height: 20px;
+  color: var(--cor-entrada);
+  font: var(--texto-corpo-m);
+  text-align: center;
+}
+
+@media (min-width: 480px) {
+  .acoes {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  }
+}
+
+.seloConcluida {
+  display: inline-block;
+  padding: 2px var(--espaco-2);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-entrada-suave);
+  color: var(--cor-entrada);
+  font: var(--texto-legenda);
+  font-weight: 600;
+}
+
+/* Link com aparência de botão principal (mesmas medidas do componente Botao). */
+.botaoPrincipal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--altura-botao);
+  padding: 0 var(--espaco-6);
+  border-radius: var(--raio-controle);
+  background: var(--cor-primaria);
+  color: #fff;
+  font: var(--texto-rotulo);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.botaoPrincipal:hover {
+  background: var(--cor-primaria-escura);
+  color: #fff;
+}
