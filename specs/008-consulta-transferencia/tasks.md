@@ -73,7 +73,8 @@ identificador
   `ObterComprovantePorIdAsync` (filtro por `t.Id`, `AsNoTracking`)
 - [ ] T007 Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`, preencher
   `Pagador.Documento` com `Documento.Ocultar` do documento do titular
-  (`IUsuarioConsultas.ObterTitularAsync`) na transferência nova e mascarar o documento vindo do
+  (`IUsuarioConsultas.ObterTitularAsync`, lido **antes** de iniciar a transação, junto com a carteira
+  do pagador, para não alongar o bloqueio) na transferência nova e mascarar o documento vindo do
   repositório no reenvio (R4)
 - [ ] T008 Em `back/src/Bank.Api/Endpoints/TransferenciasEndpoints.cs`:
   `PagadorResposta(Guid UsuarioId, string Nome, string Documento)`, `ComprovanteResposta.ChaveIdempotencia`
@@ -101,8 +102,9 @@ envio (quickstart, cenário 2, linha A)
 - [ ] T011 [P] [US1] Criar `back/tests/Bank.IntegrationTests/ConsultaTransferenciaTests.cs`: PF
   transfere para PJ; o pagador, com um **novo login**, faz
   `GET /api/v1/transferencias/{id}` → 200 com corpo igual ao do `POST` (todos os campos); duas
-  consultas seguidas devolvem o mesmo corpo; saldos e total de lançamentos das duas carteiras
-  inalterados (SC-006)
+  consultas seguidas devolvem o mesmo corpo; saldos, total de lançamentos das duas carteiras e
+  total de `outbox_eventos` inalterados (SC-006); 20 consultas seguidas com pelo menos 19 abaixo
+  de 1 s (SC-004)
 
 ### Implementation for User Story 1
 
@@ -138,9 +140,8 @@ envio (quickstart, cenário 2, linha A)
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Em `ConsultarTransferencia.cs`, devolver o comprovante com `ChaveIdempotencia =
-  null` quando o usuário é o recebedor (já coberto pela regra de acesso de T012; ajustar se T015–T016
-  falharem)
+- [ ] T017 [US2] Garantir que T015–T016 passam com a regra de acesso de T012 (`ChaveIdempotencia =
+  null` para o recebedor em `ConsultarTransferencia.cs`); ajustar o caso de uso só se falharem
 
 **Checkpoint**: pagador e recebedor consultam
 
@@ -157,7 +158,7 @@ envio (quickstart, cenário 2, linha A)
 - [ ] T018 [P] [US3] Acrescentar a `ConsultarTransferenciaTests.cs`: terceiro e inexistente →
   mesmo `Erro` (`transferencia-nao-encontrada`) e métrica `nao-encontrada`; `"abc"`, vazio e
   nulo → erro de validação no campo `transferenciaId` e métrica `invalida`; UUID em maiúsculas
-  aceito; o repositório não é chamado com id inválido
+  e sem hífens aceito; o repositório não é chamado com id inválido
 - [ ] T019 [P] [US3] Acrescentar a `ConsultaTransferenciaTests.cs`: terceiro (PF e PJ) → 404
   `urn:bank:problema:transferencia-nao-encontrada`; UUID aleatório → 404 com `status`, `type`,
   `title` e `detail` **idênticos** aos do terceiro (só o `traceId` muda); `abc` → 400 com

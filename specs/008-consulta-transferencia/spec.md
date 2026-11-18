@@ -175,7 +175,7 @@ e com um identificador aleatório; comparar as duas respostas.
 
 ## Assumptions
 
-- **Base**: usa as transferências e o razão da spec 006 sem alterações de modelo; nenhuma
+- **Base**: usa as transferências e o razão da spec 006 sem alterações no modelo de dados persistido; nenhuma
   migração de dados é esperada.
 - **Chave para o recebedor** (FR-003): omitida por ser um dado técnico do envio do pagador, sem
   uso para quem recebe; o campo continua no contrato (vazio para o recebedor) para que pagador e
@@ -185,6 +185,7 @@ e com um identificador aleatório; comparar as duas respostas.
   é sempre um CPF. A fase 10 da spec 007 passa a usar esse campo no comprovante, e a FR-011 da
   spec 007 (CPF do pagador só para o próprio pagador) é atualizada no PR que finaliza a issue #32.
 - **Nomes atuais**: pagador e recebedor aparecem com o nome atual do cadastro, como no extrato.
+  Hoje não há edição de cadastro, então esse caso não é coberto por testes.
 - **Sem histórico de consultas**: a consulta não é auditada individualmente; a métrica por
   resultado é suficiente para detectar abuso nesta fase.
 - **Consumidor**: a fase 10 da spec 007 (issue #32) consome esta consulta depois do merge.
