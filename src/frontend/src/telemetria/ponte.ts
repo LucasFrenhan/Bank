@@ -15,7 +15,16 @@ export function definirTelemetria(impl: ImplementacaoTelemetria | null): void {
 }
 
 export function registrarNavegacao(rota: string): void {
-  implementacao?.registrarNavegacao(rota);
+  implementacao?.registrarNavegacao(padraoDaRota(rota));
+}
+
+/**
+ * Rota sem query string e com identificadores trocados pelo parâmetro (specs/007, contrato
+ * "Telemetria"): `/transferencias/{uuid}` → `/transferencias/:id`.
+ */
+export function padraoDaRota(rota: string): string {
+  const caminho = rota.split(/[?#]/)[0] ?? rota;
+  return caminho.replace(/^\/transferencias\/[^/]+$/, '/transferencias/:id');
 }
 
 export function registrarFalhaApi(falha: { codigo: string; status?: number; traceId?: string }): void {

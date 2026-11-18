@@ -73,3 +73,50 @@ function aplicarPadrao(valor: string, blocos: number[], separadores: string[]): 
 
   return resultado;
 }
+
+/* ---------- Documento do destinatário (specs/007-frontend-transferencias, research R6) ---------- */
+
+export type TipoDocumento = 'cpf' | 'cnpj';
+
+/** Só `[0-9A-Z]`, em maiúsculas — a mesma normalização da API. */
+export function normalizarDocumento(valor: string): string {
+  return valor.toUpperCase().replace(/[^0-9A-Z]/g, '');
+}
+
+/** Com letra ou mais de 11 caracteres é CNPJ; caso contrário, CPF. */
+export function tipoDocumento(valor: string): TipoDocumento {
+  const normalizado = normalizarDocumento(valor);
+  return /[A-Z]/.test(normalizado) || normalizado.length > TAMANHO_CPF ? 'cnpj' : 'cpf';
+}
+
+/** Máscara do tipo identificado enquanto a pessoa digita. */
+export function mascararDocumentoDigitado(valor: string): string {
+  return tipoDocumento(valor) === 'cpf' ? mascararCpf(valor) : mascararCnpj(valor);
+}
+
+export function documentoCompleto(valor: string): boolean {
+  const normalizado = normalizarDocumento(valor);
+  return tipoDocumento(valor) === 'cpf' ? normalizado.length === TAMANHO_CPF : normalizado.length === TAMANHO_CNPJ;
+}
+
+/**
+ * Dígitos verificadores do CPF. Usado só para decidir **quando** consultar o titular; quem
+ * valida o documento é a API (FR-006).
+ */
+export function cpfValido(valor: string): boolean {
+  const digitos = valor.replace(/\D/g, '');
+  if (digitos.length !== TAMANHO_CPF || /^(\d)\1+$/.test(digitos)) {
+    return false;
+  }
+
+  const numeros = [...digitos].map(Number);
+  for (const posicao of [9, 10]) {
+    const soma = numeros.slice(0, posicao).reduce((acc, n, i) => acc + n * (posicao + 1 - i), 0);
+    const resto = (soma * 10) % 11;
+    if ((resto === 10 ? 0 : resto) !== numeros[posicao]) {
+      return false;
+    }
+  }
+
+  return true;
+}

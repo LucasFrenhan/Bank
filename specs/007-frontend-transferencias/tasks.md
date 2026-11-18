@@ -34,7 +34,7 @@ Frontend em `src/frontend/` (abreviado abaixo como `front/`). Arquivos de raiz (
 
 **Purpose**: tipos da API atualizados com o contrato da spec 006
 
-- [ ] T001 Subir a API da `main` (`docker compose up -d --build --wait`) e regenerar
+- [X] T001 Subir a API da `main` (`docker compose up -d --build --wait`) e regenerar
   `front/src/api/schema.d.ts` com `npm run api:tipos`; conferir que aparecem
   `/api/v1/transferencias`, `/api/v1/transferencias/destinatarios/consultar` e
   `/api/v1/transferencias/extrato` (com `Idempotency-Key` e `direcao`) e que `npm run typecheck`
@@ -51,32 +51,32 @@ histórias
 
 ### Testes da fundação (escrever primeiro)
 
-- [ ] T002 [P] Criar `front/src/formatacao/valor.test.ts` cobrindo a tabela "Interpretação de
+- [X] T002 [P] Criar `front/src/formatacao/valor.test.ts` cobrindo a tabela "Interpretação de
   valor" do data-model: `45,90`/`45.90`/`R$ 45,90` → 4590; `1.234,56`/`1234,56` → 123456;
   `1.234` → 123400; `10,5` → 1050; `0`/`0,00` → "Informe um valor a partir de R$ 0,01";
   `10,005` → "Use no máximo 2 casas decimais"; vazio → "Informe o valor"; e `saldoEmCentavos`
   para `842.5`, `'842.50'` e `0`; e `centavosParaNumero(4590) === 45.9`
-- [ ] T003 [P] Acrescentar a `front/src/formatacao/mascaras.test.ts`: `tipoDocumento` (com letra
+- [X] T003 [P] Acrescentar a `front/src/formatacao/mascaras.test.ts`: `tipoDocumento` (com letra
   ou mais de 11 caracteres → CNPJ; senão CPF), `mascararDocumentoDigitado` (CPF progressivo e
   CNPJ em maiúsculas), `normalizarDocumento` (só `[0-9A-Z]`) e `cpfValido` (DV correto,
   incorreto e todos os dígitos iguais)
-- [ ] T004 [P] Acrescentar a `front/src/formatacao/data.test.ts` (fuso fixo
+- [X] T004 [P] Acrescentar a `front/src/formatacao/data.test.ts` (fuso fixo
   `America/Sao_Paulo` e `agora` injetado): `formatarDataRelativa` → `Hoje, 14:32`,
   `Ontem, 19:47`, `15 nov, 11:05`, e ano quando diferente do atual; `formatarDataCurta` →
   `17 nov, 14:32`; `rotuloDia` → `Hoje`, `Ontem`, `15 de novembro` (ano quando diferente)
-- [ ] T005 [P] Acrescentar a `front/src/api/erros.test.ts` os códigos da tabela "Tradução de
+- [X] T005 [P] Acrescentar a `front/src/api/erros.test.ts` os códigos da tabela "Tradução de
   erros (acréscimos)" do data-model: `destinatario-nao-encontrado` (campo `documento`),
   `autotransferencia`, `saldo-insuficiente`, `idempotencia-divergente`,
   `transferencia-nao-encontrada`, com título, texto e variante (`erro-campo`, `atencao`,
   `informativo`, `neutro`); `acesso-negado` com contexto `'transferencia'` → "Indisponível para
   Pessoa Jurídica"; e que nenhum usa `detail`
-- [ ] T006 [P] Criar `front/src/transferencia/transferencia.test.ts`: `gerarChave` devolve UUID
+- [X] T006 [P] Criar `front/src/transferencia/transferencia.test.ts`: `gerarChave` devolve UUID
   v4 (também sem `crypto.randomUUID`); `assinatura` = `documento|valorCentavos|descricao`;
   `prepararConfirmacao` mantém a chave com a mesma assinatura e gera outra se documento, valor ou
   descrição mudarem; leitura/gravação de `bank.transferencia` e `bank.comprovantes` (máximo 20,
   mais recentes) com `sessionStorage` indisponível sem lançar erro; `removerSessao()` apaga as
   duas chaves
-- [ ] T007 [P] Acrescentar a `front/src/testes/handlers.ts` handlers MSW para
+- [X] T007 [P] Acrescentar a `front/src/testes/handlers.ts` handlers MSW para
   `POST /api/v1/transferencias/destinatarios/consultar`, `POST /api/v1/transferencias` e
   `GET /api/v1/transferencias/extrato`, com respostas padrão do contrato da spec 006 e
   utilitários para sobrescrever status (200, 201, 400, 403, 404, 409, 422 `autotransferencia`,
@@ -84,49 +84,49 @@ histórias
 
 ### Implementação da fundação
 
-- [ ] T008 Criar `front/src/formatacao/valor.ts` com `interpretarValor(texto)` →
+- [X] T008 Criar `front/src/formatacao/valor.ts` com `interpretarValor(texto)` →
   `{ ok: true; centavos } | { ok: false; erro }` (regras de research R3: com vírgula, pontos são
   milhar; sem vírgula, um ponto seguido de 1–2 dígitos no fim é decimal; mais de 2 casas → erro,
   sem arredondar), `saldoEmCentavos(number | string)` (via texto com 2 casas, nunca
   multiplicação de float), `centavosParaNumero` e `formatarCentavos` (usa `formatarMoeda`)
-- [ ] T009 [P] Acrescentar a `front/src/formatacao/mascaras.ts`: `normalizarDocumento`,
+- [X] T009 [P] Acrescentar a `front/src/formatacao/mascaras.ts`: `normalizarDocumento`,
   `tipoDocumento`, `mascararDocumentoDigitado` (reusa `mascararCpf`/`mascararCnpj`) e `cpfValido`;
   manter `ocultarDocumento` para os documentos fora do campo (FR-021)
-- [ ] T010 [P] Acrescentar a `front/src/formatacao/data.ts`: `formatarDataRelativa`,
+- [X] T010 [P] Acrescentar a `front/src/formatacao/data.ts`: `formatarDataRelativa`,
   `formatarDataCurta`, `rotuloDia` e `chaveDia` (AAAA-MM-DD no fuso do navegador), todos com
   `agora` opcional para testes
-- [ ] T011 Estender `front/src/api/erros.ts`: `MensagemErro` ganha `titulo?` e
+- [X] T011 Estender `front/src/api/erros.ts`: `MensagemErro` ganha `titulo?` e
   `variante?: 'erro-campo' | 'atencao' | 'informativo' | 'neutro' | 'erro'`; novos textos em
   `MENSAGENS` exatamente como no data-model; `traduzirErro(status, corpo, contexto?)` com
   contexto `'transferencia'` para `acesso-negado`; mapear `destinatario-nao-encontrado` para
   `campos.documento`
-- [ ] T012 Estender `front/src/api/cliente.ts`: tipos `Destinatario`, `Comprovante`,
+- [X] T012 Estender `front/src/api/cliente.ts`: tipos `Destinatario`, `Comprovante`,
   `ExtratoPagina`, `ItemExtrato`; `api.consultarDestinatario(documento, sinal?)`,
   `api.transferir({ documentoDestino, valor, descricao? }, chave)` (cabeçalho `Idempotency-Key`;
   devolve `{ comprovante, repetida: response.status === 200 }`) e
   `api.obterExtrato({ pagina?, tamanhoPagina?, direcao? })`; erros traduzidos com contexto
   `'transferencia'` nas duas chamadas de transferência
-- [ ] T013 Criar `front/src/transferencia/chave.ts` (`gerarChave` com `crypto.randomUUID` ou
+- [X] T013 Criar `front/src/transferencia/chave.ts` (`gerarChave` com `crypto.randomUUID` ou
   `crypto.getRandomValues`; `assinatura`) e `front/src/transferencia/armazenamento.ts`
   (`lerTransferencia`, `salvarTransferencia`, `limparTransferencia`, `guardarComprovante`,
   `lerComprovante`, máximo 20 comprovantes), todos com `try/catch` no `sessionStorage`
-- [ ] T014 Alterar `front/src/sessao/armazenamento.ts` para `removerSessao()` também apagar
+- [X] T014 Alterar `front/src/sessao/armazenamento.ts` para `removerSessao()` também apagar
   `bank.transferencia` e `bank.comprovantes` (FR-010)
-- [ ] T015 [P] Acrescentar a `front/src/design/componentes/Feedback.tsx` o componente `Aviso` com
+- [X] T015 [P] Acrescentar a `front/src/design/componentes/Feedback.tsx` o componente `Aviso` com
   as variantes `atencao` (ícone de alerta, cor `#B54708`), `informativo` (ícone "i", primária) e
   `neutro` (cadeado), título + texto + ação opcional (link), `role="alert"` para atenção e
   `role="status"` para informativo; e reaproveitar `EstadoVazio` com "Nenhuma movimentação ainda —
   Quando você enviar ou receber uma transferência, ela aparece aqui."
-- [ ] T016 [P] Criar `front/src/design/componentes/ListaLancamentos.tsx` (+ estilos em
+- [X] T016 [P] Criar `front/src/design/componentes/ListaLancamentos.tsx` (+ estilos em
   `componentes.module.css`): item com ícone de direção (seta para baixo = entrada, para cima =
   saída), nome, linha secundária, valor com "+"/"−" e cor de entrada; link para
   `/transferencias/{id}` quando houver `transferenciaId`; texto alternativo da direção para
   leitores de tela (entrada/saída não só pela cor)
-- [ ] T017 [P] Criar `front/src/paginas/useLarguraDesktop.ts` (`matchMedia('(min-width:
+- [X] T017 [P] Criar `front/src/paginas/useLarguraDesktop.ts` (`matchMedia('(min-width:
   1024px)')` com assinatura de mudanças) e `front/src/paginas/useExtrato.ts` (lê
   `api.obterExtrato` a cada exibição, estados carregando/pronto/erro, `recarregar`, trata 401
   como `useCarteira`)
-- [ ] T018 Alterar `front/src/telemetria/ponte.ts` para registrar a navegação pelo **padrão** da
+- [X] T018 Alterar `front/src/telemetria/ponte.ts` para registrar a navegação pelo **padrão** da
   rota (`/transferencias/:id`), sem identificador nem query string; acrescentar caso em
   `front/src/telemetria/telemetria.test.ts`
 

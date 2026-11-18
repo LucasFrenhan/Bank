@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import type { TipoConta } from '../sessao/claims';
 
-/** Respostas simuladas da API da spec 003 para testes de componentes (research R3). */
+/** Respostas simuladas da API (specs 003, 005 e 006) para testes de componentes (research R3). */
 
 export const TRACE_ID = '4bf92f3577b34da6a3ce929d0e0e4736';
 
@@ -51,6 +51,76 @@ export function titular(tipoConta: TipoConta = 'PessoaFisica') {
   };
 }
 
+export const ID_TRANSFERENCIA = '019a8f55-2222-7890-abcd-ef1234567890';
+
+/** Destinatário PJ de exemplo (CNPJ alfanumérico do contrato da spec 006). */
+export const CNPJ_DESTINO = '12ABC34501DE35';
+
+export function destinatario(tipoConta: TipoConta = 'PessoaJuridica') {
+  return { nome: tipoConta === 'PessoaJuridica' ? 'Padaria Boa Massa Ltda' : 'Mariana Costa', tipoConta };
+}
+
+export function comprovante(extra: object = {}) {
+  return {
+    transferenciaId: ID_TRANSFERENCIA,
+    chaveIdempotencia: '019a8f50-1111-4890-abcd-ef1234567890',
+    pagador: { usuarioId: 'usuario-1', nome: 'Lucas Silva' },
+    recebedor: { usuarioId: 'usuario-2', nome: 'Padaria Boa Massa Ltda', documento: CNPJ_DESTINO, tipoConta: 'PessoaJuridica' },
+    valor: 4.5,
+    descricao: 'Café',
+    status: 'Concluida',
+    criadoEm: '2026-11-17T11:10:00Z',
+    ...extra,
+  };
+}
+
+export function itemExtrato(indice: number, extra: object = {}) {
+  return {
+    lancamentoId: `019a8f55-4444-7890-abcd-${String(indice).padStart(12, '0')}`,
+    tipo: 'Transferencia',
+    direcao: indice % 2 === 0 ? 'Entrada' : 'Saida',
+    transferenciaId: `019a8f55-2222-7890-abcd-${String(indice).padStart(12, '0')}`,
+    contraparte: { nome: `Contraparte ${indice}`, documento: '•••.982.247-••', tipoConta: 'PessoaFisica' },
+    valor: 1 + indice,
+    descricao: `Descrição ${indice}`,
+    criadoEm: new Date(Date.UTC(2026, 10, 17, 12, 0, 0) - indice * 3_600_000).toISOString(),
+    ...extra,
+  };
+}
+
+export const ITEM_ABERTURA = {
+  lancamentoId: '019a8f12-5555-7890-abcd-ef1234567890',
+  tipo: 'Abertura',
+  direcao: 'Entrada',
+  transferenciaId: null,
+  contraparte: null,
+  valor: 10,
+  descricao: 'Saldo inicial de demonstração',
+  criadoEm: '2026-11-09T12:00:00Z',
+};
+
+/** Extrato paginado como a API: aplica direcao, pagina e tamanhoPagina sobre os itens dados. */
+export function extratoDe(itens: object[]) {
+  return http.get('*/api/v1/transferencias/extrato', ({ request }) => {
+    const url = new URL(request.url);
+    const pagina = Number(url.searchParams.get('pagina') ?? '1');
+    const tamanho = Number(url.searchParams.get('tamanhoPagina') ?? '20');
+    const direcao = url.searchParams.get('direcao');
+    const filtrados = direcao ? itens.filter((i) => (i as { direcao: string }).direcao === direcao) : itens;
+    return HttpResponse.json({
+      itens: filtrados.slice((pagina - 1) * tamanho, pagina * tamanho),
+      paginaAtual: pagina,
+      tamanhoPagina: tamanho,
+      totalItens: filtrados.length,
+    });
+  });
+}
+
+/** Sobrescreve uma rota da spec 006 com um problema (ou falha de rede). */
+export function falhaEm(metodo: 'get' | 'post', caminho: string, codigo: string, status = 400, extra: object = {}) {
+  return http[metodo](`*${caminho}`, () => (codigo === 'rede' ? HttpResponse.error() : problema(codigo, status, extra)));
+}
+
 export const handlersPadrao = [
   http.post('*/api/v1/autenticacao/login', () =>
     HttpResponse.json({ tokenAcesso: tokenFalso(), tipoToken: 'Bearer', expiraEmSegundos: 3600 }),
@@ -72,4 +142,7 @@ export const handlersPadrao = [
   ),
   http.get('*/api/v1/carteiras/minha', () => HttpResponse.json(carteira())),
   http.get('*/api/v1/usuarios/me', () => HttpResponse.json(titular())),
+  http.post('*/api/v1/transferencias/destinatarios/consultar', () => HttpResponse.json(destinatario())),
+  http.post('*/api/v1/transferencias', () => HttpResponse.json(comprovante(), { status: 201 })),
+  extratoDe([ITEM_ABERTURA]),
 ];

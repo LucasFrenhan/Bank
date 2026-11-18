@@ -2,20 +2,55 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import type { MensagemErro } from '../../api/erros';
 import estilos from './componentes.module.css';
+import { IconeAlerta, IconeCadeado, IconeErro, IconeInformacao } from './Icones';
 
-type VarianteAviso = 'erro' | 'atencao' | 'info' | 'sucesso';
+export type VarianteAviso = 'erro' | 'atencao' | 'info' | 'sucesso' | 'neutro';
 
 const classeAviso: Record<VarianteAviso, string | undefined> = {
   erro: estilos.avisoErro,
   atencao: estilos.avisoAtencao,
   info: estilos.avisoInfo,
   sucesso: estilos.avisoSucesso,
+  neutro: estilos.avisoNeutro,
 };
 
-/** Mensagem de feedback; erros são anunciados imediatamente por leitores de tela. */
-export function Aviso({ variante, titulo, children }: { variante: VarianteAviso; titulo?: string; children?: ReactNode }) {
+const iconeAviso: Partial<Record<VarianteAviso, () => ReactNode>> = {
+  erro: IconeErro,
+  atencao: IconeAlerta,
+  info: IconeInformacao,
+  neutro: IconeCadeado,
+};
+
+/**
+ * Mensagem de feedback no estilo do protótipo (estados de erro e feedback). Erros e avisos de
+ * regra de negócio são anunciados imediatamente por leitores de tela (`alert`); os demais, como
+ * status.
+ */
+export function Aviso({
+  variante,
+  titulo,
+  children,
+  id,
+}: {
+  variante: VarianteAviso;
+  titulo?: string;
+  children?: ReactNode;
+  id?: string;
+}) {
+  const Icone = iconeAviso[variante];
+
   return (
-    <div className={[estilos.aviso, classeAviso[variante]].join(' ')} role={variante === 'erro' ? 'alert' : 'status'}>
+    <div
+      id={id}
+      className={[estilos.aviso, classeAviso[variante]].join(' ')}
+      role={variante === 'erro' || variante === 'atencao' ? 'alert' : 'status'}
+      tabIndex={-1}
+    >
+      {Icone ? (
+        <span className={estilos.avisoIcone}>
+          <Icone />
+        </span>
+      ) : null}
       <div>
         {titulo ? <p className={estilos.avisoTitulo}>{titulo}</p> : null}
         {children}
@@ -24,10 +59,17 @@ export function Aviso({ variante, titulo, children }: { variante: VarianteAviso;
   );
 }
 
+const variantePorErro: Record<string, VarianteAviso> = {
+  atencao: 'atencao',
+  neutro: 'neutro',
+  info: 'info',
+};
+
 /** Erro da API traduzido (FR-018/FR-019): mensagem, código de suporte e ação sugerida. */
-export function AvisoErro({ erro, aoTentarDeNovo }: { erro: MensagemErro; aoTentarDeNovo?: () => void }) {
+export function AvisoErro({ erro, aoTentarDeNovo, id }: { erro: MensagemErro; aoTentarDeNovo?: () => void; id?: string }) {
   return (
-    <Aviso variante="erro" titulo={erro.mensagem}>
+    <Aviso variante={variantePorErro[erro.variante ?? ''] ?? 'erro'} titulo={erro.mensagem} {...(id ? { id } : {})}>
+      {erro.detalhe ? <p>{erro.detalhe}</p> : null}
       {erro.traceId && erro.codigo === 'inesperado' ? (
         <p>
           Código para o suporte: <span className={estilos.codigoSuporte}>{erro.traceId}</span>
