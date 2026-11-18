@@ -126,4 +126,5 @@ cabeçalho `Idempotency-Key` (obrigatório, formato uuid) e as respostas 200/201
 
 ## Histórico
 
+- **1.1.0** (2026-11-18): versão atual em [specs/008 — transferencias-api.md](../../008-consulta-transferencia/contracts/transferencias-api.md) — consulta por identificador, `pagador.documento` mascarado e `chaveIdempotencia` anulável (issue #36).
 - **1.0.0** (2026-11-17): versão inicial (issues #8 e #13).

@@ -152,9 +152,19 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
             Assert.Equal(System.Net.HttpStatusCode.OK, consulta.StatusCode);
         }
 
+        Guid transferenciaId;
         using (var transferencia = await ApiTransferencias.TransferirAsync(client, pagador, Dados.CnpjComMascara(cnpjRecebedor), 2m))
         {
             Assert.Equal(System.Net.HttpStatusCode.Created, transferencia.StatusCode);
+            transferenciaId = (await ApiBank.LerJsonAsync(transferencia)).GetProperty("transferenciaId").GetGuid();
+        }
+
+        // Consulta por identificador (spec 008): pagador, recebedor, terceiro e identificador inválido.
+        var tokenRecebedor = await ApiBank.ObterTokenAsync(client, emailRecebedor);
+        var terceiro = await ApiTransferencias.CriarPfAsync(client);
+        foreach (var (tokenConsulta, id) in new[] { (token, transferenciaId.ToString()), (tokenRecebedor, transferenciaId.ToString()), (terceiro.Token, transferenciaId.ToString()), (token, "abc") })
+        {
+            (await ApiTransferencias.GetComTokenAsync(client, tokenConsulta, $"/api/v1/transferencias/{id}")).Dispose();
         }
 
         (await ApiTransferencias.TransferirAsync(client, pagador, cnpjRecebedor, 100m)).Dispose();
@@ -172,6 +182,14 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
         AssertMetrica("bank.transferencias.concluidas", "tipo_destino", "PessoaJuridica");
         AssertMetrica("bank.transferencias.recusadas", "motivo", "saldo-insuficiente");
         AssertMetrica("bank.transferencias.destinatario.consultas", "resultado", "encontrado");
+
+        // Spec 008, FR-007: consultas por resultado, só com o rótulo "resultado" (nunca o identificador).
+        foreach (var resultado in new[] { "encontrada", "nao-encontrada", "invalida" })
+        {
+            AssertMetrica("bank.transferencias.consultas", "resultado", resultado);
+        }
+
+        Assert.All(factory.Medicoes.Where(m => m.Nome == "bank.transferencias.consultas"), m => Assert.Equal(["resultado"], m.Tags.Keys));
     }
 
     private void ForcarExportacao()

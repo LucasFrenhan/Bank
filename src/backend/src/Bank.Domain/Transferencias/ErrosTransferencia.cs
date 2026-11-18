@@ -16,4 +16,11 @@ public static class ErrosTransferencia
 
     public static readonly Erro IdempotenciaDivergente =
         new("idempotencia-divergente", "Esta chave de idempotência já foi usada com outro destinatário ou valor.", TipoErro.Conflito);
+
+    /// <summary>
+    /// Transferência inexistente ou de que o usuário não participa — mesma resposta nos dois casos
+    /// (specs/008-consulta-transferencia, FR-004).
+    /// </summary>
+    public static readonly Erro TransferenciaNaoEncontrada =
+        new("transferencia-nao-encontrada", "Transferência não encontrada.", TipoErro.NaoEncontrado);
 }

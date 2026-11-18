@@ -131,6 +131,13 @@ Definidos em [`specs/006-transferencias`](../specs/006-transferencias/spec.md) �
 - **Extrato** (`GET /api/v1/transferencias/extrato`, PF e PJ): `pagina` (padrão 1),
   `tamanhoPagina` (padrão 20, máximo 100) e `direcao` (`Entrada`/`Saida`), mais recente
   primeiro; CPF de terceiros mascarado, CNPJ completo.
+- **Consultar transferência** (`GET /api/v1/transferencias/{transferenciaId}`, PF e PJ —
+  [spec 008](../specs/008-consulta-transferencia/spec.md)): reabre o comprovante. Só o pagador e
+  o recebedor enxergam; para qualquer outra conta, a resposta é o mesmo `404
+  transferencia-nao-encontrada` de um identificador inexistente. Para o recebedor,
+  `chaveIdempotencia` vem `null`. Identificador que não é UUID → `400`.
+- **Comprovante** (envio e consulta, contrato v1.1.0): traz `pagador.documento` com o CPF
+  mascarado (`•••.982.247-••`) e `criadoEm` com precisão de microssegundos, igual ao gravado.
 - **Razão**: transferências e lançamentos são imutáveis (trigger no banco) e toda carteira tem
   saldo = soma dos lançamentos. O evento `transferencia.concluida` é gravado em `outbox_eventos`
   na mesma transação (a publicação no broker fica para a issue #9).

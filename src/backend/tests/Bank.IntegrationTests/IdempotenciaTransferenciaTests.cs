@@ -21,9 +21,13 @@ public class IdempotenciaTransferenciaTests(BankApiFactory factory) : IClassFixt
         using var segunda = await TransferirAsync(client, pf, Dados.CnpjComMascara(pj.Documento), 3m, chave, "descrição diferente");
 
         Assert.Equal((HttpStatusCode.Created, HttpStatusCode.OK), (primeira.StatusCode, segunda.StatusCode));
-        Assert.Equal(
-            (await ApiBank.LerJsonAsync(primeira)).GetProperty("transferenciaId").GetGuid(),
-            (await ApiBank.LerJsonAsync(segunda)).GetProperty("transferenciaId").GetGuid());
+        var (original, reenvio) = (await ApiBank.LerJsonAsync(primeira), await ApiBank.LerJsonAsync(segunda));
+        Assert.Equal(original.GetProperty("transferenciaId").GetGuid(), reenvio.GetProperty("transferenciaId").GetGuid());
+        // Spec 008, FR-002a: o reenvio traz o mesmo pagador, com o documento mascarado.
+        Assert.Equal(original.GetProperty("pagador").GetRawText(), reenvio.GetProperty("pagador").GetRawText());
+        // Mesma data/hora no 201 e no 200 (precisão de microssegundos, como no banco).
+        Assert.Equal(original.GetProperty("criadoEm").GetRawText(), reenvio.GetProperty("criadoEm").GetRawText());
+        Assert.StartsWith("•••.", reenvio.GetProperty("pagador").GetProperty("documento").GetString(), StringComparison.Ordinal);
         Assert.Equal(7m, await SaldoAsync(client, pf));
     }
 

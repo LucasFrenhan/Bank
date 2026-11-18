@@ -36,6 +36,9 @@ public sealed class RealizarTransferenciaTests : IDisposable
         Assert.Equal(("Lucas Silva", "Cafeteria Ltda", "12ABC34501DE35", 4.5m, "Almoço", StatusTransferencia.Concluida),
             (comprovante.Pagador.Nome, comprovante.Recebedor.Nome, comprovante.Recebedor.Documento, comprovante.Valor, comprovante.Descricao, comprovante.Status));
         Assert.Equal((5.5m, 4.5m), (_pf.Carteira.Saldo, _pj.Carteira.Saldo));
+        // Spec 008, FR-002a: documento do pagador mascarado; chave sempre preenchida no envio.
+        Assert.Equal("•••.982.247-••", comprovante.Pagador.Documento);
+        Assert.NotNull(comprovante.ChaveIdempotencia);
         Assert.Single(_banco.Gravadas);
         Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.concluidas" && m.Tags["tipo_destino"] == "PessoaJuridica");
         Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.valor");
@@ -100,6 +103,8 @@ public sealed class RealizarTransferenciaTests : IDisposable
 
         Assert.True(segunda.Valor.Replay);
         Assert.Equal(primeira.Valor.Comprovante.TransferenciaId, segunda.Valor.Comprovante.TransferenciaId);
+        Assert.Equal("•••.982.247-••", segunda.Valor.Comprovante.Pagador.Documento);
+        Assert.Equal(chave, segunda.Valor.Comprovante.ChaveIdempotencia);
         Assert.Equal(6m, _pf.Carteira.Saldo);
         Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.replays");
     }
