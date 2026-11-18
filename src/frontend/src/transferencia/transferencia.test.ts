@@ -18,7 +18,7 @@ function comprovante(id: string): ComprovanteGuardado {
   return {
     transferenciaId: id,
     chaveIdempotencia: 'chave',
-    pagador: { usuarioId: 'usuario-1', nome: 'Lucas Silva' },
+    pagador: { usuarioId: 'usuario-1', nome: 'Lucas Silva', documento: '•••.982.247-••' },
     recebedor: { usuarioId: 'usuario-2', nome: 'Padaria Boa Massa Ltda', documento: '12ABC34501DE35', tipoConta: 'PessoaJuridica' },
     valor: 45.9,
     descricao: 'Café e pães',

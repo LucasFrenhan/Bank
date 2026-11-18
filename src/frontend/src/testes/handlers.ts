@@ -64,7 +64,7 @@ export function comprovante(extra: object = {}) {
   return {
     transferenciaId: ID_TRANSFERENCIA,
     chaveIdempotencia: '019a8f50-1111-4890-abcd-ef1234567890',
-    pagador: { usuarioId: 'usuario-1', nome: 'Lucas Silva' },
+    pagador: { usuarioId: 'usuario-1', nome: 'Lucas Silva', documento: '•••.982.247-••' },
     recebedor: { usuarioId: 'usuario-2', nome: 'Padaria Boa Massa Ltda', documento: CNPJ_DESTINO, tipoConta: 'PessoaJuridica' },
     valor: 4.5,
     descricao: 'Café',
@@ -145,4 +145,14 @@ export const handlersPadrao = [
   http.post('*/api/v1/transferencias/destinatarios/consultar', () => HttpResponse.json(destinatario())),
   http.post('*/api/v1/transferencias', () => HttpResponse.json(comprovante(), { status: 201 })),
   extratoDe([ITEM_ABERTURA]),
+  // Depois do extrato: a rota literal /extrato tem precedência, como na API (spec 008).
+  consultaDe({ [ID_TRANSFERENCIA]: comprovante() }),
 ];
+
+/** Consulta por identificador (spec 008): comprovantes conhecidos → 200; demais → 404. */
+export function consultaDe(comprovantes: Record<string, object>) {
+  return http.get('*/api/v1/transferencias/:transferenciaId', ({ params }) => {
+    const id = String(params.transferenciaId);
+    return comprovantes[id] ? HttpResponse.json(comprovantes[id]) : problema('transferencia-nao-encontrada', 404);
+  });
+}

@@ -1,6 +1,5 @@
 import type { ItemExtrato } from '../api/cliente';
 import { saldoEmCentavos, formatarCentavos } from '../formatacao/valor';
-import { lerComprovante } from '../transferencia/armazenamento';
 
 /**
  * Visão de um lançamento do extrato (specs/007-frontend-transferencias, data-model "Item de
@@ -33,13 +32,9 @@ export function valorComSinal(item: ItemExtrato): string {
 }
 
 /**
- * Endereço do comprovante. Até a issue #36, só para comprovantes guardados nesta aba (data-model
- * "Item de extrato"); depois dela, para todo lançamento de transferência.
+ * Endereço do comprovante de todo lançamento de transferência; o comprovante é carregado pela
+ * consulta por identificador (spec 007 FR-014; spec 008). O saldo inicial não tem comprovante.
  */
 export function linkComprovante(item: ItemExtrato): string | undefined {
-  if (item.tipo !== 'Transferencia' || !item.transferenciaId) {
-    return undefined;
-  }
-
-  return lerComprovante(item.transferenciaId) ? `/transferencias/${item.transferenciaId}` : undefined;
+  return item.tipo === 'Transferencia' && item.transferenciaId ? `/transferencias/${item.transferenciaId}` : undefined;
 }

@@ -381,17 +381,17 @@ recebimentos; navegação ativa
 
 **Purpose**: FR-014 e US4 cenário 9 após o merge de `GET /api/v1/transferencias/{id}`
 
-- [ ] T051 Regenerar `front/src/api/schema.d.ts` (`npm run api:tipos`) e acrescentar
+- [X] T051 Regenerar `front/src/api/schema.d.ts` (`npm run api:tipos`) e acrescentar
   `api.obterTransferencia(id)` a `front/src/api/cliente.ts` (404 →
   `transferencia-nao-encontrada`) e o handler MSW em `front/src/testes/handlers.ts`
-- [ ] T052 [P] [US1] Acrescentar a `front/src/paginas/Comprovante.test.tsx`: sem cache, carrega pela
+- [X] T052 [P] [US1] Acrescentar a `front/src/paginas/Comprovante.test.tsx`: sem cache, carrega pela
   API; sessão como recebedor → "Transferência recebida"; 404 → "Comprovante não encontrado" com
   "Ir para o extrato"; carregando e erro com `traceId`
-- [ ] T053 [US1] Alterar `front/src/paginas/Comprovante.tsx` para buscar pela API quando o cache
+- [X] T053 [US1] Alterar `front/src/paginas/Comprovante.tsx` para buscar pela API quando o cache
   da aba não tiver o comprovante, distinguir pagador/recebedor pelo `usuarioId` da sessão e obter
   o CPF do pagador só quando a sessão for o pagador; em `front/src/paginas/Extrato.tsx` e
   `Inicio.tsx`, liberar o link para o comprovante em todo lançamento de transferência
-- [ ] T054 [P] [US4] Criar `front/e2e/comprovante.spec.ts`: abrir pelo extrato; abrir o endereço após
+- [X] T054 [P] [US4] Criar `front/e2e/comprovante.spec.ts`: abrir pelo extrato; abrir o endereço após
   sair e entrar de novo; recebedor PJ; terceiro → "Comprovante não encontrado" (quickstart,
   cenário 7)
 

@@ -307,8 +307,8 @@ automática de acessibilidade.
 **Comprovante**
 
 - **FR-011**: Após uma transferência concluída, o frontend MUST exibir o comprovante com valor,
-  pagador (nome; o CPF mascarado aparece só quando quem vê é o próprio pagador, pois o Bank não
-  devolve o documento do pagador), recebedor (nome e documento mascarado), descrição, data/hora no
+  pagador (nome e CPF mascarado, como devolvido pelo Bank para pagador e recebedor — spec 008,
+  FR-002a), recebedor (nome e documento mascarado), descrição, data/hora no
   fuso do navegador, situação "Concluída" e identificador da transferência em fonte monoespaçada,
   além de "Voltar ao início".
 - **FR-012**: Um reenvio que o Bank responde como já realizado MUST mostrar "Essa transferência já
@@ -320,11 +320,10 @@ automática de acessibilidade.
 - **FR-014**: O comprovante MUST ter endereço próprio, identificado pela transferência, e poder
   ser reaberto a qualquer momento por pagador e recebedor — a partir de um lançamento de
   transferência do extrato ou do início, após recarregar a página ou em outra sessão —,
-  carregando os dados pela consulta de transferência por identificador (issue #36). Transferência
-  inexistente ou de que a pessoa não participa mostra "Comprovante não encontrado" com link para o
-  extrato. Para quem recebe, o comprovante é o mesmo, com o título "Transferência recebida".
-  Até o merge da #36, só os lançamentos cujo comprovante está guardado na aba levam ao
-  comprovante.
+  carregando os dados pela consulta de transferência por identificador (spec 008, issue #36) quando
+  o comprovante não está guardado na aba. Transferência inexistente ou de que a pessoa não
+  participa mostra "Comprovante não encontrado" com link para o extrato. Para quem recebe, o
+  comprovante é o mesmo, com o título "Transferência recebida".
 
 **Extrato**
 
@@ -424,14 +423,13 @@ automática de acessibilidade.
 
 ## Assumptions
 
-- **Contrato**: consome sem alterações o contrato v1.0.0 da spec 006 (consulta de destinatário,
-  transferência com `Idempotency-Key`, extrato com `direcao`) e o `GET /api/v1/usuarios/me` da
-  spec 005 (documento do próprio pagador no comprovante).
-- **Dependência da issue #36**: `GET /api/v1/transferencias/{id}` (contrato proposto na issue)
-  é implementado no backend por uma spec própria, feita depois. O restante desta spec não
-  depende dele; US4 cenário 9 e FR-014 (reabrir o comprovante pelo extrato, pelo endereço ou em
-  outra sessão) só são concluídos após o merge da #36. Até lá, o comprovante exibido logo após a
-  transferência ou o reenvio usa os dados da própria resposta do envio.
+- **Contrato**: consome o contrato de transferências v1.1.0 (spec 006, com as mudanças aditivas
+  da spec 008: consulta por identificador, `pagador.documento` mascarado e `chaveIdempotencia`
+  anulável).
+- **Issue #36 (concluída)**: `GET /api/v1/transferencias/{id}` foi entregue pela spec
+  [008-consulta-transferencia](../008-consulta-transferencia/spec.md); US4 cenário 9 e FR-014 foram
+  concluídos na fase 10. O comprovante exibido logo após a transferência ou o reenvio continua
+  usando os dados da própria resposta do envio, guardados na aba.
 - **Protótipo**: telas e textos de `docs/design/prototipo.md` (capturas 03 a 08 e estados); onde
   o protótipo e o contrato divergem, vale o contrato (por exemplo, o lançamento de abertura usa a
   descrição "Saldo inicial de demonstração" em vez de "Abertura da conta").

@@ -139,6 +139,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/transferencias/{transferenciaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reabre o comprovante de uma transferência (pagador ou recebedor).
+         * @description Para o recebedor, chaveIdempotencia vem nula. Transferência inexistente ou de que o usuário não participa recebe o mesmo 404.
+         */
+        get: operations["ConsultarTransferencia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -147,7 +167,7 @@ export interface components {
             /** Format: uuid */
             transferenciaId: string;
             /** Format: uuid */
-            chaveIdempotencia: string;
+            chaveIdempotencia: null | string;
             pagador: components["schemas"]["PagadorResposta"];
             recebedor: components["schemas"]["RecebedorResposta"];
             /** Format: double */
@@ -230,6 +250,7 @@ export interface components {
             /** Format: uuid */
             usuarioId: string;
             nome: string;
+            documento: string;
         };
         ProblemDetails: {
             type?: null | string;
@@ -699,6 +720,64 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ConsultarTransferencia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transferenciaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComprovanteResposta"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

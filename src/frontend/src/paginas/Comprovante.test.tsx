@@ -1,14 +1,70 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { guardarComprovante } from '../transferencia/armazenamento';
-import { comprovante, ID_TRANSFERENCIA } from '../testes/handlers';
+import { http, HttpResponse } from 'msw';
+import { comprovante, consultaDe, ID_TRANSFERENCIA, problema, TRACE_ID } from '../testes/handlers';
+import { servidor } from '../testes/setup';
 import { renderizarApp } from '../testes/renderizar';
 
-/** Comprovante (specs/007: US1; FR-011, FR-013, FR-014; research R5, R10). */
+/** Comprovante (specs/007: US1; FR-011, FR-013, FR-014; research R5, R10; consulta da spec 008). */
+
+const ROTA_COMPROVANTE = '/transferencias/' + ID_TRANSFERENCIA;
 
 function abrir(extra: object = {}) {
   guardarComprovante({ ...comprovante({ valor: 45.9, descricao: 'Café e pães' }), ...extra });
-  return renderizarApp(`/transferencias/${ID_TRANSFERENCIA}`, { sessao: 'PessoaFisica' });
+  return renderizarApp(ROTA_COMPROVANTE, { sessao: 'PessoaFisica' });
 }
+
+describe('Comprovante reaberto pela API (spec 007, fase 10; spec 008)', () => {
+  it('sem comprovante na aba, carrega pela consulta por identificador', async () => {
+    renderizarApp(ROTA_COMPROVANTE, { sessao: 'PessoaFisica' });
+
+    expect(screen.getByText('Carregando comprovante…')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Transferência concluída' })).toBeInTheDocument();
+    expect(screen.getByText('Lucas Silva · CPF •••.982.247-••')).toBeInTheDocument();
+  });
+
+  it('recebedor PJ reabre pela API e vê "Transferência recebida"', async () => {
+    servidor.use(
+      consultaDe({
+        [ID_TRANSFERENCIA]: comprovante({
+          chaveIdempotencia: null,
+          recebedor: { usuarioId: 'usuario-1', nome: 'Empresa Exemplo Ltda', documento: '12ABC34501DE35', tipoConta: 'PessoaJuridica' },
+          pagador: { usuarioId: 'outro', nome: 'Mariana Costa', documento: '•••.444.777-••' },
+        }),
+      }),
+    );
+    renderizarApp(ROTA_COMPROVANTE, { sessao: 'PessoaJuridica' });
+
+    expect(await screen.findByRole('heading', { name: 'Transferência recebida' })).toBeInTheDocument();
+    expect(screen.getByText('Mariana Costa · CPF •••.444.777-••')).toBeInTheDocument();
+  });
+
+  it('404 da API → "Comprovante não encontrado" com link para o extrato', async () => {
+    renderizarApp('/transferencias/019a8f55-9999-7890-abcd-ef1234567890', { sessao: 'PessoaFisica' });
+
+    expect(await screen.findByText('Comprovante não encontrado')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ir para o extrato' })).toHaveAttribute('href', '/extrato');
+  });
+
+  it('erro inesperado mostra o código de suporte e permite tentar de novo', async () => {
+    let falhar = true;
+    servidor.use(
+      http.get('*/api/v1/transferencias/:transferenciaId', () => {
+        if (falhar) {
+          falhar = false;
+          return problema('erro-interno', 500);
+        }
+        return HttpResponse.json(comprovante());
+      }),
+    );
+    const { usuario } = renderizarApp(ROTA_COMPROVANTE, { sessao: 'PessoaFisica' });
+
+    expect(await screen.findByText('Algo deu errado')).toBeInTheDocument();
+    expect(screen.getByText(TRACE_ID)).toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Tentar de novo' }));
+    expect(await screen.findByRole('heading', { name: 'Transferência concluída' })).toBeInTheDocument();
+  });
+});
 
 describe('Comprovante (US1)', () => {
   it('pagador vê "Transferência concluída" com todos os dados', async () => {
@@ -29,12 +85,16 @@ describe('Comprovante (US1)', () => {
     expect(screen.queryByText(/019a8f50-1111/)).not.toBeInTheDocument();
   });
 
-  it('recebedor vê "Transferência recebida" sem o CPF do pagador', async () => {
-    abrir({ pagador: { usuarioId: 'outro', nome: 'Mariana Costa' }, recebedor: { usuarioId: 'usuario-1', nome: 'Lucas Silva', documento: '52998224725', tipoConta: 'PessoaFisica' } });
+  it('recebedor vê "Transferência recebida" com o CPF do pagador mascarado (FR-011)', async () => {
+    abrir({
+      chaveIdempotencia: null,
+      pagador: { usuarioId: 'outro', nome: 'Mariana Costa', documento: '•••.444.777-••' },
+      recebedor: { usuarioId: 'usuario-1', nome: 'Lucas Silva', documento: '52998224725', tipoConta: 'PessoaFisica' },
+    });
 
     expect(await screen.findByRole('heading', { name: 'Transferência recebida' })).toBeInTheDocument();
     expect(screen.getByText(/R\$\s45,90 recebidos de Mariana Costa\./)).toBeInTheDocument();
-    expect(screen.getByText('Mariana Costa')).toBeInTheDocument();
+    expect(screen.getByText('Mariana Costa · CPF •••.444.777-••')).toBeInTheDocument();
   });
 
   it('sem descrição, a linha é omitida', async () => {
