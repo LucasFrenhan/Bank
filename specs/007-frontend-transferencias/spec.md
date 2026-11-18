@@ -275,7 +275,11 @@ automática de acessibilidade.
   maiúsculas.
 - **FR-003**: Quando o documento estiver completo e com formato válido, o frontend MUST consultar
   o titular no Bank e exibir nome, iniciais, tipo de conta e documento mascarado; o envio só é
-  permitido com o titular confirmado para o documento atual.
+  permitido com o titular confirmado para o documento atual. Enquanto a busca acontece, o campo
+  mostra "Buscando titular…" (anunciado a leitores de tela). Ao sair do campo com um documento
+  completo, a busca acontece mesmo que o formato pareça inválido, para que o erro venha do Bank e
+  apareça no campo. "Continuar" com documento incompleto mostra no campo "Informe o CPF ou CNPJ
+  completo"; com a busca em andamento, aguarda o resultado.
 - **FR-004**: O campo "Valor" MUST aceitar valores em reais no formato brasileiro, com mínimo
   R$ 0,01 e no máximo 2 casas decimais, mostrando o saldo disponível e o mínimo como texto de
   ajuda; valor acima do saldo conhecido MUST mostrar o aviso de saldo insuficiente antes do
@@ -303,7 +307,8 @@ automática de acessibilidade.
 **Comprovante**
 
 - **FR-011**: Após uma transferência concluída, o frontend MUST exibir o comprovante com valor,
-  pagador (nome e CPF mascarado), recebedor (nome e documento mascarado), descrição, data/hora no
+  pagador (nome; o CPF mascarado aparece só quando quem vê é o próprio pagador, pois o Bank não
+  devolve o documento do pagador), recebedor (nome e documento mascarado), descrição, data/hora no
   fuso do navegador, situação "Concluída" e identificador da transferência em fonte monoespaçada,
   além de "Voltar ao início".
 - **FR-012**: Um reenvio que o Bank responde como já realizado MUST mostrar "Essa transferência já
@@ -317,8 +322,9 @@ automática de acessibilidade.
   transferência do extrato ou do início, após recarregar a página ou em outra sessão —,
   carregando os dados pela consulta de transferência por identificador (issue #36). Transferência
   inexistente ou de que a pessoa não participa mostra "Comprovante não encontrado" com link para o
-  extrato. Para quem recebe, o título é "Transferência recebida" e não há ação de nova
-  transferência.
+  extrato. Para quem recebe, o comprovante é o mesmo, com o título "Transferência recebida".
+  Até o merge da #36, só os lançamentos cujo comprovante está guardado na aba levam ao
+  comprovante.
 
 **Extrato**
 
@@ -439,5 +445,5 @@ automática de acessibilidade.
 - **Navegação mobile**: segue a barra inferior do protótipo (Início, Extrato, Perfil para PF;
   "Transferir" acessível pelo cartão de saldo).
 - **Dados de teste**: os testes ponta a ponta criam contas pela API e, quando precisam de mais
-  saldo que o de demonstração, usam transferências entre contas de teste ou o mesmo preparo de
-  base já usado na spec 006.
+  saldo que o de demonstração, recebem transferências de contas de apoio criadas pela API, sem
+  acesso direto à base.

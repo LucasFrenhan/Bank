@@ -80,7 +80,10 @@ Base: o frontend da spec [004](../004-frontend-base/plan.md) (React 19, TypeScri
   caracteres → CNPJ (máscara da spec 004); senão, CPF. A consulta
   (`POST /transferencias/destinatarios/consultar`) é disparada: (a) imediatamente com 14
   caracteres de CNPJ; (b) com 11 dígitos de CPF cujo dígito verificador confere localmente,
-  após 500 ms sem digitação ou ao sair do campo. Cada consulta tem um número de sequência e um
+  após 500 ms sem digitação ou ao sair do campo; (c) ao sair do campo com 11 ou 14 caracteres,
+  **mesmo com dígito verificador inválido**, para que o 400 da API apareça no campo. Documento
+  incompleto ao continuar → erro local "Informe o CPF ou CNPJ completo"; durante a consulta, o
+  campo mostra "Buscando titular…" (`aria-live="polite"`) e "Continuar" aguarda. Cada consulta tem um número de sequência e um
   `AbortController`; respostas que não correspondem ao documento atual são descartadas. Alterar
   o documento descarta o titular confirmado.
 - **Rationale**: FR-003 e SC-004 (nome em até 2 s), sem consultar CPFs incompletos de quem ainda

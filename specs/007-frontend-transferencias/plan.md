@@ -109,6 +109,8 @@ specs/007-frontend-transferencias/
     │   │   └── useTransferencia.ts         # estado das etapas e envio
     │   ├── design/componentes/
     │   │   ├── Layout.tsx                  # navegação ativa por perfil (R8)
+    │   │   ├── LayoutEtapas.tsx            # sem menu: cabeçalho com "Voltar"/"Editar dados" + Etapas (Transferir, Confirmação)
+    │   │   │                               # ou só a marca (Comprovante), conforme desktop-06..08/mobile-06..08
     │   │   ├── Etapas.tsx                  # indicador Dados → Confirmar → Comprovante
     │   │   ├── CampoValor.tsx              # "R$" + teclado decimal
     │   │   ├── Feedback.tsx                # + variantes atenção/informativo/neutro do protótipo
@@ -118,6 +120,7 @@ specs/007-frontend-transferencias/
     │       ├── ConfirmarTransferencia.tsx  # etapa Confirmação e envio
     │       ├── Comprovante.tsx             # comprovante (pagador/recebedor), compartilhar
     │       ├── Extrato.tsx                 # tabela (desktop) e lista agrupada (mobile)
+    │       ├── Transferencia.module.css, Extrato.module.css
     │       ├── useExtrato.ts, useLarguraDesktop.ts
     │       ├── Inicio.tsx                  # ações ativas, últimas movimentações/recebimentos
     │       └── **/*.test.tsx

@@ -44,7 +44,7 @@ mapa `transferenciaId → comprovante`).
 | --- | --- |
 | Título | "Transferência concluída" (sessão = pagador) ou "Transferência recebida" (sessão = recebedor) |
 | Valor | `valor` |
-| De | `pagador.nome` · CPF mascarado (`GET /usuarios/me` quando a sessão é o pagador) |
+| De | `pagador.nome`; + ` · CPF {mascarado}` só quando a sessão é o pagador (`GET /usuarios/me`) — a API não devolve o documento do pagador |
 | Para | `recebedor.nome` · `ocultarDocumento(recebedor.documento)` |
 | Descrição | `descricao` (linha omitida quando vazia) |
 | Data | `criadoEm` no fuso do navegador (`17 nov 2026, 08:10`) |
@@ -64,7 +64,7 @@ Do `GET /transferencias/extrato`.
 | Data (desktop) | `17 nov, 14:32` (ano quando diferente do atual) |
 | Data (início) | `Hoje, 14:32` · `Ontem, 19:47` · `15 nov, 11:05` |
 | Grupo (mobile) | `HOJE` · `ONTEM` · `15 DE NOVEMBRO` (ano quando diferente do atual) |
-| Link | `tipo = Transferencia` → `/transferencias/{transferenciaId}`; abertura sem link |
+| Link | `tipo = Transferencia` → `/transferencias/{transferenciaId}`; abertura sem link. Até a issue #36, só quando o comprovante está no cache da aba |
 
 Datas e agrupamentos usam o fuso do navegador.
 
@@ -91,6 +91,8 @@ Datas e agrupamentos usam o fuso do navegador.
 
 | `type` (sufixo) | Onde aparece | Variante | Texto |
 | --- | --- | --- | --- |
+| (local) documento incompleto | Campo do documento | Erro de campo | "Informe o CPF ou CNPJ completo" |
+| (local) consulta em andamento | Abaixo do campo do documento | Status | "Buscando titular…" |
 | `destinatario-nao-encontrado` | Campo do documento | Erro de campo | "Nenhuma conta Bank com esse documento." |
 | `autotransferencia` | Abaixo do cartão do documento | Atenção | "Esse documento é o seu" — "Não é possível transferir para a própria carteira." |
 | `saldo-insuficiente` | Etapa Dados (antecipado) ou Confirmação | Atenção | "Saldo insuficiente" — "Você tem R$ {saldo} disponíveis. Ajuste o valor para continuar." |

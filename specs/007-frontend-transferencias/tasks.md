@@ -145,31 +145,38 @@ mobile e conferir comprovante e saldos (quickstart, cenário 3)
 
 - [ ] T019 [P] [US1] Criar `front/src/paginas/Transferir.test.tsx`: título "Transferir dinheiro"
   e etapas; máscara CPF/CNPJ (CNPJ minúsculo vira maiúsculo); consulta só com CNPJ de 14
-  caracteres ou CPF com DV válido após 500 ms/ao sair do campo; cartão com iniciais, nome, tipo
-  e documento mascarado; alterar o documento descarta o titular; resposta atrasada de consulta
-  anterior é ignorada; texto "Disponível: R$ … · mínimo R$ 0,01"; contador "N/200"; "Continuar"
+  caracteres ou CPF com DV válido após 500 ms/ao sair do campo; ao sair do campo com CPF de DV
+  inválido, consulta mesmo assim e mostra o 400 da API no campo; "Buscando titular…" durante a
+  consulta; "Continuar" com documento incompleto → "Informe o CPF ou CNPJ completo"; cartão com
+  iniciais, nome, tipo e documento mascarado; alterar o documento descarta o titular; resposta
+  atrasada de consulta anterior é ignorada; texto "Disponível: R$ … · mínimo R$ 0,01"; contador "N/200"; "Continuar"
   indisponível sem titular confirmado; dados restaurados de `bank.transferencia`
 - [ ] T020 [P] [US1] Criar `front/src/paginas/ConfirmarTransferencia.test.tsx`: "Confira antes
   de enviar", valor em destaque, linhas Para/Documento/Tipo de conta/Descrição (omitida se vazia)/
-  Saldo depois (em centavos: 842,50 − 45,90 = R$ 796,60); aviso de que não pode ser desfeita;
+  Saldo depois (em centavos: 842,50 − 45,90 = R$ 796,60); descrição só com espaços não aparece e
+  não é enviada; aviso de que não pode ser desfeita;
   "Voltar"/"Editar dados" voltam com tudo preenchido; botão "Transferir R$ 45,90" envia com
   `Idempotency-Key` e leva a `/transferencias/{id}`; sem transferência em andamento →
   `/transferir`
 - [ ] T021 [P] [US1] Criar `front/src/paginas/Comprovante.test.tsx`: a partir do cache da aba,
   "Transferência concluída", "R$ 45,90 enviados para {nome}", linhas Valor, De (nome · CPF
-  mascarado de `/usuarios/me`), Para (nome · documento mascarado), Descrição, Data, Status
+  mascarado de `/usuarios/me`, só quando a sessão é o pagador), Para (nome · documento mascarado), Descrição, Data, Status
   "Concluída", ID monoespaçado; "Voltar ao início"; "Compartilhar" usa `navigator.share` e, sem
   ele, copia o texto (sem chave de idempotência) e anuncia "Comprovante copiado"
 - [ ] T022 [P] [US1] Criar `front/e2e/transferencia.spec.ts` (caminho feliz) e acrescentar a
   `front/e2e/apoio.ts` `transferirPelaApi(page, token, documento, valor)` e
   `acumularSaldo(page, conta, contasDeApoio)`: PF→PJ (CNPJ alfanumérico digitado em minúsculas) e
   PF→PF, comprovante, saldo reduzido no início e transferência em "Últimas movimentações", nos
-  projetos desktop e mobile
+  projetos desktop e mobile; o cartão do titular aparece em até 2 s após o documento completo
+  (SC-004)
 
 ### Implementation for User Story 1
 
 - [ ] T023 [P] [US1] Criar `front/src/design/componentes/Etapas.tsx` (Dados → Confirmar →
-  Comprovante; etapa atual com `aria-current="step"`, concluídas com ✓) e
+  Comprovante; etapa atual com `aria-current="step"`, concluídas com ✓),
+  `front/src/design/componentes/LayoutEtapas.tsx` (sem menu; variante `etapas` com link de volta
+  — "Voltar ao início"/"Editar dados" — e `Etapas`; variante `marca` só com a marca, para o
+  comprovante; `main#conteudo` e "Pular para o conteúdo" como no `Layout`) e
   `front/src/design/componentes/CampoValor.tsx` (prefixo "R$", `inputMode="decimal"`, texto de
   ajuda e erro associados por `aria-describedby`)
 - [ ] T024 [US1] Criar `front/src/transferencia/useTransferencia.ts`: estado da transferência em
@@ -187,8 +194,8 @@ mobile e conferir comprovante e saldos (quickstart, cenário 3)
   cache da aba por `:transferenciaId`; sem comprovante → "Comprovante não encontrado" com link
   "Ir para o extrato"; "Compartilhar" conforme research R10)
 - [ ] T028 [US1] Registrar em `front/src/App.tsx` as rotas protegidas `/transferir`,
-  `/transferir/confirmar` e `/transferencias/:transferenciaId` (com `Layout` nas duas primeiras
-  como cabeçalho de etapas e no comprovante como cabeçalho com a marca, conforme protótipo)
+  `/transferir/confirmar` e `/transferencias/:transferenciaId`, envolvidas por `LayoutEtapas`
+  (variante `etapas` nas duas primeiras e `marca` no comprovante), conforme o protótipo
 - [ ] T029 [US1] Em `front/src/paginas/Transferir.tsx` e `ConfirmarTransferencia.tsx`, mostrar
   para PJ (claim `tipo_conta`) o aviso neutro "Indisponível para Pessoa Jurídica — Contas PJ
   recebem transferências e geram cobranças, mas não enviam." com link para o início, sem
@@ -281,7 +288,7 @@ agrupada (mobile)
 - [ ] T038 [P] [US4] Criar `front/e2e/extrato.spec.ts` e acrescentar a `apoio.ts`
   `criarLancamentos(page, conta, n)` (transferências de R$ 0,01 pela API): PF recém-criada com
   "Saldo inicial"; filtros; 21+ lançamentos com paginação no desktop e "Carregar mais" no
-  mobile; recarregar mantém filtro e página
+  mobile; recarregar mantém filtro e página; primeira página visível em até 2 s (SC-004)
 
 ### Implementation for User Story 4
 
@@ -290,7 +297,9 @@ agrupada (mobile)
   alternáveis (`aria-pressed`); desktop em tabela com cabeçalhos Data, Contraparte, Descrição,
   Status, Valor (layout `desktop-05`); mobile em `ListaLancamentos` agrupada por `rotuloDia` com
   "Carregar mais" (layout `mobile-05`); itens de transferência levam a
-  `/transferencias/{transferenciaId}`
+  `/transferencias/{transferenciaId}` **somente quando o comprovante está no cache da aba**
+  (`lerComprovante`) — a Fase 10 libera o link para todos; estilos em
+  `front/src/paginas/Extrato.module.css`
 - [ ] T040 [US4] Registrar a rota protegida `/extrato` em `front/src/App.tsx`
 
 **Checkpoint**: extrato completo nos dois layouts
@@ -344,10 +353,12 @@ recebimentos; navegação ativa
 - [ ] T046 [P] [US6] Acrescentar a `front/e2e/teclado.spec.ts`: transferência completa e uso
   dos filtros/paginação do extrato só com teclado, com foco visível; etapa atual, titular
   encontrado, avisos e conclusão anunciados (regiões `aria-live`/`role` verificadas)
-- [ ] T047 [US6] Ajustar estilos em `front/src/paginas/Autenticado.module.css` e
-  `front/src/design/componentes/componentes.module.css` até os testes de T045–T046 passarem
-  (botões principais 48/52 px, alvos ≥ 44 px, nomes longos quebrando linha, teclado `numeric`
-  para CPF e `text` quando o CNPJ tem letra)
+- [ ] T047 [US6] Ajustar `front/src/paginas/Transferencia.module.css`,
+  `front/src/paginas/Extrato.module.css`, `front/src/paginas/Autenticado.module.css` e
+  `front/src/design/componentes/componentes.module.css` às medidas do protótipo: conteúdo das
+  etapas com até 560 px centralizado; botões principais 48 px (desktop) e 52 px (mobile); alvos
+  ≥ 44 px; raios 10/16 px; valores com `tabular-nums`; nomes longos quebrando linha; teclado
+  `numeric` para CPF e `text` quando o CNPJ tem letra; até T045–T046 passarem
 
 **Checkpoint**: US6 verificada nos dois projetos do Playwright
 
@@ -373,13 +384,14 @@ recebimentos; navegação ativa
 - [ ] T051 Regenerar `front/src/api/schema.d.ts` (`npm run api:tipos`) e acrescentar
   `api.obterTransferencia(id)` a `front/src/api/cliente.ts` (404 →
   `transferencia-nao-encontrada`) e o handler MSW em `front/src/testes/handlers.ts`
-- [ ] T052 [P] Acrescentar a `front/src/paginas/Comprovante.test.tsx`: sem cache, carrega pela
+- [ ] T052 [P] [US1] Acrescentar a `front/src/paginas/Comprovante.test.tsx`: sem cache, carrega pela
   API; sessão como recebedor → "Transferência recebida"; 404 → "Comprovante não encontrado" com
   "Ir para o extrato"; carregando e erro com `traceId`
-- [ ] T053 Alterar `front/src/paginas/Comprovante.tsx` para buscar pela API quando o cache da aba
-  não tiver o comprovante, distinguir pagador/recebedor pelo `usuarioId` da sessão e obter o CPF
-  do pagador só quando a sessão for o pagador
-- [ ] T054 [P] Criar `front/e2e/comprovante.spec.ts`: abrir pelo extrato; abrir o endereço após
+- [ ] T053 [US1] Alterar `front/src/paginas/Comprovante.tsx` para buscar pela API quando o cache
+  da aba não tiver o comprovante, distinguir pagador/recebedor pelo `usuarioId` da sessão e obter
+  o CPF do pagador só quando a sessão for o pagador; em `front/src/paginas/Extrato.tsx` e
+  `Inicio.tsx`, liberar o link para o comprovante em todo lançamento de transferência
+- [ ] T054 [P] [US4] Criar `front/e2e/comprovante.spec.ts`: abrir pelo extrato; abrir o endereço após
   sair e entrar de novo; recebedor PJ; terceiro → "Comprovante não encontrado" (quickstart,
   cenário 7)
 
