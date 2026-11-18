@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import { Layout } from './design/componentes/Layout';
+import { Comprovante } from './paginas/Comprovante';
+import { ConfirmarTransferencia } from './paginas/ConfirmarTransferencia';
 import { CriarConta } from './paginas/CriarConta';
+import { Transferir } from './paginas/Transferir';
 import { Entrar } from './paginas/Entrar';
+import { Extrato } from './paginas/Extrato';
 import { Inicio } from './paginas/Inicio';
 import { NaoEncontrada } from './paginas/NaoEncontrada';
 import { Perfil } from './paginas/Perfil';
@@ -24,6 +28,10 @@ export function Rotas() {
       <Route path="/criar-conta" element={<RotaPublica><CriarConta /></RotaPublica>} />
       <Route path="/" element={<RotaProtegida><Layout><Inicio /></Layout></RotaProtegida>} />
       <Route path="/perfil" element={<RotaProtegida><Layout><Perfil /></Layout></RotaProtegida>} />
+      <Route path="/extrato" element={<RotaProtegida><Layout><Extrato /></Layout></RotaProtegida>} />
+      <Route path="/transferir" element={<RotaProtegida><Transferir /></RotaProtegida>} />
+      <Route path="/transferir/confirmar" element={<RotaProtegida><ConfirmarTransferencia /></RotaProtegida>} />
+      <Route path="/transferencias/:transferenciaId" element={<RotaProtegida><Comprovante /></RotaProtegida>} />
       <Route path="*" element={<NaoEncontrada />} />
     </Routes>
   );

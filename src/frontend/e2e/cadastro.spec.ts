@@ -15,7 +15,7 @@ test.describe('Criar conta', () => {
 
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole('heading', { name: 'Olá, Lucas' })).toBeVisible();
-    await expect(page.getByText(/R\$\s10,00/)).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Saldo disponível' }).getByText(/R\$\s10,00/)).toBeVisible();
   });
 
   test('PJ com CNPJ alfanumérico minúsculo mostra maiúsculas e início com R$ 0,00', async ({ page }) => {

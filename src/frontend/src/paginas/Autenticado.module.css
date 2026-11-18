@@ -163,3 +163,20 @@
   color: var(--cor-entrada);
   font: var(--texto-corpo-m);
 }
+
+/* ---------- Movimentações no início (specs/007) ---------- */
+.cabecalhoComAcao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
+
+.verTudo {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--altura-alvo-minimo);
+  font: var(--texto-rotulo);
+  font-weight: 600;
+}

@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { Link } from 'react-router';
 import estilos from './componentes.module.css';
 
 type Variante = 'primario' | 'secundario' | 'claro' | 'contornoClaro';
@@ -21,13 +22,12 @@ export function Botao({ variante = 'primario', largo, carregando, disabled, clas
   );
 }
 
-/** Ação ainda indisponível: visível, anunciada como desabilitada, sem efeito (FR-003). */
-export function AcaoEmBreve({ rotulo, variante = 'secundario', icone }: { rotulo: string; variante?: Variante; icone?: ReactNode }) {
+/** Navegação com aparência de botão (ex.: "Transferir" e "Ver extrato" no cartão de saldo). */
+export function BotaoLink({ para, variante = 'primario', largo, icone, children }: { para: string; variante?: Variante; largo?: boolean; icone?: ReactNode; children: ReactNode }) {
   return (
-    <span className={[estilos.botao, estilos[variante]].join(' ')} role="button" aria-disabled="true" tabIndex={-1}>
+    <Link to={para} className={[estilos.botao, estilos[variante], largo ? estilos.botaoLargo : ''].join(' ')}>
       {icone}
-      {rotulo}
-      <span className={estilos.selo}>Em breve</span>
-    </span>
+      {children}
+    </Link>
   );
 }

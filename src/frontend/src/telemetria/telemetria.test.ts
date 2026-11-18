@@ -38,4 +38,15 @@ describe('configuração da telemetria (FR-019a–d; research R7)', () => {
 
     expect(eventos).toEqual(['nav:/perfil', 'falha:inesperado']);
   });
+
+  it('navegação registrada pelo padrão da rota, sem identificador nem query (specs/007, FR-029)', () => {
+    const eventos: string[] = [];
+    definirTelemetria({ registrarNavegacao: (rota) => eventos.push(rota), registrarFalhaApi: () => undefined });
+    registrarNavegacao('/transferencias/019a8f55-2222-7890-abcd-ef1234567890');
+    registrarNavegacao('/extrato?direcao=entradas&pagina=2');
+    registrarNavegacao('/transferir/confirmar');
+    definirTelemetria(null);
+
+    expect(eventos).toEqual(['/transferencias/:id', '/extrato', '/transferir/confirmar']);
+  });
 });

@@ -1,19 +1,24 @@
 import { useState, type ReactNode } from 'react';
-import { AcaoEmBreve, Botao } from '../design/componentes/Botao';
+import { Botao, BotaoLink } from '../design/componentes/Botao';
 import { mascararCnpj } from '../formatacao/mascaras';
 import { useTitular } from './useTitular';
 import { AvisoErro, Cartao, Carregando, EstadoVazio, Selo } from '../design/componentes/Feedback';
 import { IconeExtrato, IconeTransferir } from '../design/componentes/Icones';
 import { formatarDataHora } from '../formatacao/data';
 import { formatarMoeda } from '../formatacao/moeda';
-import type { MinhaCarteira } from '../api/cliente';
+import type { ConsultaExtrato, ItemExtrato, MinhaCarteira } from '../api/cliente';
+import { Link } from 'react-router';
+import { ListaLancamentos } from '../design/componentes/ListaLancamentos';
+import { formatarDataRelativa } from '../formatacao/data';
+import { descricaoItem, ehEntrada, linkComprovante, nomeContraparte, valorComSinal } from './lancamentos';
+import { useExtrato } from './useExtrato';
 import { useSessaoAtiva } from '../sessao/ContextoSessao';
 import { NOME_TIPO_CONTA } from '../sessao/permissoes';
 import estilos from './Autenticado.module.css';
 import { primeiroNome, useTitulo } from './comum';
 import { useCarteira } from './useCarteira';
 
-/** Tela inicial PF/PJ (US3; FR-014 a FR-016). */
+/** Tela inicial PF/PJ (spec 004 US3; specs/007 US5, FR-022 a FR-024). */
 export function Inicio() {
   useTitulo('Início');
   const sessao = useSessaoAtiva();
@@ -60,21 +65,17 @@ function InicioPf({ carteira }: { carteira: MinhaCarteira }) {
       <div className={estilos.resumo}>
         <Saldo carteira={carteira}>
           <div className={estilos.acoes}>
-            <AcaoEmBreve rotulo="Transferir" variante="claro" icone={<IconeTransferir />} />
-            <AcaoEmBreve rotulo="Ver extrato" variante="contornoClaro" icone={<IconeExtrato />} />
+            <BotaoLink para="/transferir" variante="claro" icone={<IconeTransferir />}>
+              Transferir
+            </BotaoLink>
+            <BotaoLink para="/extrato" variante="contornoClaro" icone={<IconeExtrato />}>
+              Ver extrato
+            </BotaoLink>
           </div>
         </Saldo>
       </div>
 
-      <Cartao className={estilos.secao}>
-        <div className={estilos.cabecalhoSecao}>
-          <h2>Últimas movimentações</h2>
-        </div>
-        <EstadoVazio
-          titulo="Suas movimentações aparecerão aqui"
-          descricao="Transferências enviadas e recebidas ficam disponíveis em breve."
-        />
-      </Cartao>
+      <Movimentacoes titulo="Últimas movimentações" consulta={CONSULTA_PF} verTudo="/extrato" detalhe={detalhePf} />
     </div>
   );
 }
@@ -101,12 +102,12 @@ function InicioPj({ carteira }: { carteira: MinhaCarteira }) {
         </Cartao>
       </div>
 
-      <Cartao className={estilos.secao}>
-        <div className={estilos.cabecalhoSecao}>
-          <h2>Últimos recebimentos</h2>
-        </div>
-        <EstadoVazio titulo="Suas movimentações aparecerão aqui" descricao="Os recebimentos ficam disponíveis em breve." />
-      </Cartao>
+      <Movimentacoes
+        titulo="Últimos recebimentos"
+        consulta={CONSULTA_PJ}
+        verTudo="/extrato?direcao=entradas"
+        detalhe={detalhePj}
+      />
     </div>
   );
 }
@@ -151,5 +152,71 @@ function CnpjParaReceber() {
         {aviso}
       </p>
     </div>
+  );
+}
+
+/* ---------- Movimentações reais (specs/007, US5; research R8) ---------- */
+
+const CONSULTA_PF: ConsultaExtrato = { tamanhoPagina: 5 };
+const CONSULTA_PJ: ConsultaExtrato = { tamanhoPagina: 5, direcao: 'Entrada' };
+
+export const VAZIO_MOVIMENTACOES = {
+  titulo: 'Nenhuma movimentação ainda',
+  descricao: 'Quando você enviar ou receber uma transferência, ela aparece aqui.',
+};
+
+function detalhePf(item: ItemExtrato): string {
+  const tipo = item.tipo === 'Abertura' ? descricaoItem(item) : ehEntrada(item) ? 'Transferência recebida' : 'Transferência enviada';
+  return `${tipo} · ${formatarDataRelativa(item.criadoEm)}`;
+}
+
+function detalhePj(item: ItemExtrato): string {
+  return `${descricaoItem(item)} · ${formatarDataRelativa(item.criadoEm)}`;
+}
+
+function Movimentacoes({
+  titulo,
+  consulta,
+  verTudo,
+  detalhe,
+}: {
+  titulo: string;
+  consulta: ConsultaExtrato;
+  verTudo: string;
+  detalhe: (item: ItemExtrato) => string;
+}) {
+  const extrato = useExtrato(consulta);
+
+  return (
+    <Cartao className={estilos.secao} rotulo={titulo}>
+      <div className={[estilos.cabecalhoSecao, estilos.cabecalhoComAcao].join(' ')}>
+        <h2>{titulo}</h2>
+        <Link to={verTudo} className={estilos.verTudo}>
+          Ver tudo
+        </Link>
+      </div>
+      {extrato.estado === 'carregando' ? <Carregando texto="Carregando movimentações…" /> : null}
+      {extrato.estado === 'erro' ? (
+        <div className={estilos.avisoPj}>
+          <AvisoErro erro={extrato.erro} aoTentarDeNovo={extrato.recarregar} />
+        </div>
+      ) : null}
+      {extrato.estado === 'pronto' && extrato.extrato.itens.length === 0 ? (
+        <EstadoVazio titulo={VAZIO_MOVIMENTACOES.titulo} descricao={VAZIO_MOVIMENTACOES.descricao} />
+      ) : null}
+      {extrato.estado === 'pronto' && extrato.extrato.itens.length > 0 ? (
+        <ListaLancamentos
+          rotulo={titulo}
+          linhas={extrato.extrato.itens.map((item) => ({
+            id: item.lancamentoId,
+            entrada: ehEntrada(item),
+            nome: nomeContraparte(item),
+            detalhe: detalhe(item),
+            valor: valorComSinal(item),
+            para: linkComprovante(item),
+          }))}
+        />
+      ) : null}
+    </Cartao>
   );
 }

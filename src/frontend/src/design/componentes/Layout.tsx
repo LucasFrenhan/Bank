@@ -19,19 +19,21 @@ interface ItemNavegacao {
   icone: () => ReactNode;
   /** Rota; ausente = "Em breve" (visível, não navegável — FR-003). */
   para?: string;
+  /** Só no menu lateral (a barra inferior PF segue o protótipo: Início, Extrato, Perfil). */
+  somenteDesktop?: boolean;
 }
 
-/** Itens por perfil (contracts/frontend.md, "Navegação por perfil"). */
+/** Itens por perfil (specs/007, contracts/frontend.md v1.1.0, "Navegação por perfil"). */
 export const ITENS_NAVEGACAO: Record<TipoConta, ItemNavegacao[]> = {
   PessoaFisica: [
     { rotulo: 'Início', icone: IconeInicio, para: '/' },
-    { rotulo: 'Transferir', icone: IconeTransferir },
-    { rotulo: 'Extrato', icone: IconeExtrato },
+    { rotulo: 'Transferir', icone: IconeTransferir, para: '/transferir', somenteDesktop: true },
+    { rotulo: 'Extrato', icone: IconeExtrato, para: '/extrato' },
     { rotulo: 'Perfil', icone: IconePerfil, para: '/perfil' },
   ],
   PessoaJuridica: [
     { rotulo: 'Início', icone: IconeInicio, para: '/' },
-    { rotulo: 'Recebimentos', icone: IconeRecebimentos },
+    { rotulo: 'Recebimentos', icone: IconeRecebimentos, para: '/extrato?direcao=entradas' },
     { rotulo: 'Cobranças', icone: IconeCobrancas },
     { rotulo: 'Perfil', icone: IconePerfil, para: '/perfil' },
   ],
@@ -84,7 +86,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       <nav className={estilos.barraInferior} aria-label="Menu principal (celular)">
         <ul className={estilos.listaInferior}>
-          {itens.map((item) => (
+          {itens.filter((item) => !item.somenteDesktop).map((item) => (
             <li key={item.rotulo}>
               {item.para ? (
                 <NavLink to={item.para} end className={estilos.itemInferior}>

@@ -147,7 +147,8 @@ Aplicação React + TypeScript em `src/frontend/`, definida em
 [`specs/004-frontend-base`](../specs/004-frontend-base/spec.md) —
 [contrato](../specs/004-frontend-base/contracts/frontend.md) e
 [roteiro de validação](../specs/004-frontend-base/quickstart.md). Telas de login, cadastro
-PF/PJ, início e perfil, em desktop e mobile, seguindo o [protótipo](design/prototipo.md).
+PF/PJ, início e perfil, em desktop e mobile, seguindo o [protótipo](design/prototipo.md);
+transferência, comprovante e extrato vêm da [spec 007](#transferências-comprovante-e-extrato-frontend).
 
 **Pré-requisito:** Node.js 26.13.0 (`src/frontend/.nvmrc`). Para só usar o frontend, basta o
 Compose: <http://localhost:3000>.
@@ -182,6 +183,33 @@ npm run api:tipos
   selecionado — escolha `bank-api` (meter `Bank.Usuarios`: cadastros e logins) ou
   `bank-frontend` (carregamento e navegações).
 - Depois de alterar o frontend, reconstrua a imagem: `docker compose up -d --build frontend`.
+
+### Transferências, comprovante e extrato (frontend)
+
+Definidos em [`specs/007-frontend-transferencias`](../specs/007-frontend-transferencias/spec.md) —
+[contrato do frontend v1.1.0](../specs/007-frontend-transferencias/contracts/frontend.md) e
+[roteiro de validação](../specs/007-frontend-transferencias/quickstart.md).
+
+| Rota | Tela |
+| --- | --- |
+| `/transferir` | Etapa Dados (só PF; PJ vê "Indisponível para Pessoa Jurídica") |
+| `/transferir/confirmar` | Confirmação e envio |
+| `/transferencias/:id` | Comprovante |
+| `/extrato?direcao=entradas\|saidas&pagina=N` | Extrato (PF e PJ) |
+
+- **Chave de idempotência**: gerada no navegador ao chegar à confirmação e guardada com a
+  transferência em andamento em `sessionStorage` (`bank.transferencia`). Reenvios dos mesmos dados
+  (duplo clique, falha de rede, recarregar, voltar do navegador) usam a mesma chave; mudar
+  destinatário, valor ou descrição gera outra. Os comprovantes recebidos na aba ficam em
+  `bank.comprovantes`; tudo é apagado ao sair ou quando a sessão expira.
+- **Dinheiro em centavos**: valores digitados e saldos são convertidos para centavos inteiros
+  (`src/formatacao/valor.ts`); nenhuma conta de dinheiro usa ponto flutuante.
+- **Comprovante depois**: até a issue #36 (`GET /api/v1/transferencias/{id}`), o comprovante só
+  abre para transferências feitas na aba atual; os demais lançamentos do extrato não têm link.
+- **Saldo para testar**: toda PF começa com R$ 10,00 de demonstração. Para ter mais, crie outras
+  PF e transfira os R$ 10,00 delas para a conta de teste. Os testes ponta a ponta fazem o mesmo
+  pela API (`acumularSaldo` e `criarLancamentos` em `src/frontend/e2e/apoio.ts`), sem acessar o
+  banco.
 
 ## Fluxo de desenvolvimento (SDD)
 

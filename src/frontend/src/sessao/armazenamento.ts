@@ -1,3 +1,4 @@
+import { limparDadosDeTransferencia } from '../transferencia/armazenamento';
 import { decodificarClaims, type ClaimsSessao } from './claims';
 
 /**
@@ -61,4 +62,7 @@ export function removerSessao(): void {
   } catch {
     // ignorado
   }
+
+  // A transferência em andamento e os comprovantes vivem no escopo da sessão (specs/007, FR-010).
+  limparDadosDeTransferencia();
 }

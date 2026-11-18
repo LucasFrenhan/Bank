@@ -1,7 +1,7 @@
 import createClient, { type Middleware } from 'openapi-fetch';
 import { lerSessao } from '../sessao/armazenamento';
 import { registrarFalhaApi } from '../telemetria/ponte';
-import { traduzirErro, type MensagemErro } from './erros';
+import { traduzirErro, type ContextoErro, type MensagemErro } from './erros';
 import type { components, paths } from './schema';
 
 /**
@@ -10,13 +10,34 @@ import type { components, paths } from './schema';
  */
 
 export type Esquemas = components['schemas'];
-export type Resultado<T> = { ok: true; dados: T } | { ok: false; erro: MensagemErro };
+export type Resultado<T> = { ok: true; dados: T; status: number } | { ok: false; erro: MensagemErro };
 
 export type RegistrarRequisicao = Esquemas['RegistrarRequisicao'];
 export type UsuarioRegistrado = Esquemas['UsuarioRegistradoResposta'];
 export type TokenAcesso = Esquemas['LoginResposta'];
 export type MinhaCarteira = Esquemas['MinhaCarteiraResposta'];
 export type Titular = Esquemas['TitularResposta'];
+// Transferências (specs/006 e specs/007-frontend-transferencias).
+export type Destinatario = Esquemas['DestinatarioResposta'];
+export type Comprovante = Esquemas['ComprovanteResposta'];
+export type ExtratoPagina = Esquemas['ExtratoResposta'];
+export type ItemExtrato = Esquemas['ItemExtratoResposta'];
+export type DirecaoExtrato = 'Entrada' | 'Saida';
+
+export interface NovaTransferencia {
+  documentoDestino: string;
+  valor: number;
+  descricao?: string;
+}
+
+export interface ConsultaExtrato {
+  pagina?: number;
+  tamanhoPagina?: number;
+  direcao?: DirecaoExtrato;
+}
+
+/** Código de uma consulta cancelada (documento alterado): não é erro para a pessoa. */
+export const CODIGO_CANCELADA = 'cancelada';
 
 interface IntegracaoSessao {
   obterToken?: () => string | null;
@@ -58,16 +79,23 @@ const cliente = createClient<paths>({
 });
 cliente.use(middlewareSessao);
 
-async function chamar<T>(requisicao: () => Promise<{ data?: T; error?: unknown; response: Response }>): Promise<Resultado<T>> {
+async function chamar<T>(
+  requisicao: () => Promise<{ data?: T; error?: unknown; response: Response }>,
+  opcoes: { contexto?: ContextoErro; sinal?: AbortSignal } = {},
+): Promise<Resultado<T>> {
   try {
     const { data, error, response } = await requisicao();
     if (response.ok && data !== undefined) {
-      return { ok: true, dados: data };
+      return { ok: true, dados: data, status: response.status };
     }
 
-    return falhar(traduzirErro(response.status, error));
+    return falhar(traduzirErro(response.status, error, opcoes.contexto));
   } catch {
-    return falhar(traduzirErro(null, null));
+    if (opcoes.sinal?.aborted) {
+      return { ok: false, erro: { codigo: CODIGO_CANCELADA, mensagem: '' } };
+    }
+
+    return falhar(traduzirErro(null, null, opcoes.contexto));
   }
 }
 
@@ -91,4 +119,47 @@ export const api = {
 
   /** Dados do titular (specs/005-usuarios-me): documento completo e data de cadastro. */
   obterTitular: () => chamar<Titular>(() => cliente.GET('/api/v1/usuarios/me')),
+
+  /** Nome e tipo de conta do destinatário (US1a da spec 006). O documento vai no corpo. */
+  consultarDestinatario: (documento: string, sinal?: AbortSignal) =>
+    chamar<Destinatario>(
+      () =>
+        cliente.POST('/api/v1/transferencias/destinatarios/consultar', {
+          body: { documento },
+          ...(sinal ? { signal: sinal } : {}),
+        }),
+      { contexto: 'transferencia', ...(sinal ? { sinal } : {}) },
+    ),
+
+  /**
+   * Envia a transferência com a chave de idempotência do cliente. `repetida` indica um reenvio
+   * já processado (200), em vez de uma transferência nova (201).
+   */
+  transferir: async (corpo: NovaTransferencia, chave: string) => {
+    const resultado = await chamar<Comprovante>(
+      () =>
+        cliente.POST('/api/v1/transferencias', {
+          params: { header: { 'Idempotency-Key': chave } },
+          body: { documentoDestino: corpo.documentoDestino, valor: corpo.valor, descricao: corpo.descricao ?? null },
+        }),
+      { contexto: 'transferencia' },
+    );
+
+    return resultado.ok
+      ? { ok: true as const, dados: { comprovante: resultado.dados, repetida: resultado.status === 200 } }
+      : resultado;
+  },
+
+  obterExtrato: ({ pagina, tamanhoPagina, direcao }: ConsultaExtrato = {}) =>
+    chamar<ExtratoPagina>(() =>
+      cliente.GET('/api/v1/transferencias/extrato', {
+        params: {
+          query: {
+            ...(pagina !== undefined ? { pagina: String(pagina) } : {}),
+            ...(tamanhoPagina !== undefined ? { tamanhoPagina: String(tamanhoPagina) } : {}),
+            ...(direcao ? { direcao } : {}),
+          },
+        },
+      }),
+    ),
 };

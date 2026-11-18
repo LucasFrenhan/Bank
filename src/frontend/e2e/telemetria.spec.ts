@@ -1,5 +1,44 @@
 import { expect, test } from '@playwright/test';
-import { cpf, email, SENHA } from './apoio';
+import { cpf, criarContaPelaApi, email, entrar, SENHA } from './apoio';
+
+// Spec 007 FR-029 / SC-007 — transferência sem dados pessoais, valor, descrição nem chave de
+// idempotência na telemetria; a navegação do comprovante aparece pelo padrão da rota.
+test.describe('Telemetria — transferências', () => {
+  test.skip(({ isMobile }) => isMobile, 'verificado no desktop');
+
+  test('transferência e comprovante sem dados sensíveis nos sinais', async ({ page }) => {
+    const corpos: string[] = [];
+    page.on('request', (requisicao) => {
+      if (new URL(requisicao.url()).pathname.startsWith('/otlp/')) {
+        corpos.push(requisicao.postDataBuffer()?.toString('latin1') ?? '');
+      }
+    });
+
+    const pagador = await criarContaPelaApi(page, 'PessoaFisica', 'Lucas Telemetria');
+    const recebedor = await criarContaPelaApi(page, 'PessoaJuridica', 'Padaria Sigilo Ltda');
+    const descricao = `Descricao-secreta-${Date.now()}`;
+    await entrar(page, pagador);
+
+    await page.goto('/transferir');
+    await page.getByLabel('CPF ou CNPJ de quem vai receber').fill(recebedor.documento);
+    await expect(page.getByRole('group', { name: 'Destinatário' })).toBeVisible();
+    await page.getByLabel('Valor').fill('6,17');
+    await page.getByLabel('Descrição (opcional)').fill(descricao);
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    const chave = await page.evaluate(() => (JSON.parse(sessionStorage.getItem('bank.transferencia')!) as { chave: string }).chave);
+    await page.getByRole('button', { name: /^Transferir R\$/ }).click();
+    await expect(page.getByRole('heading', { name: 'Transferência concluída' })).toBeVisible();
+    const transferenciaId = new URL(page.url()).pathname.split('/').at(-1)!;
+
+    await expect.poll(() => corpos.some((c) => c.includes('/transferencias/:id')), { timeout: 15_000 }).toBe(true);
+    const sensiveis = [pagador.documento, recebedor.documento, 'Lucas Telemetria', 'Padaria Sigilo Ltda', descricao, chave, '6,17'];
+    for (const sensivel of sensiveis) {
+      expect(corpos.some((c) => c.includes(sensivel)), `telemetria contém "${sensivel.slice(0, 12)}…"`).toBe(false);
+    }
+    // A rota é registrada pelo padrão: o identificador da transferência não aparece nos sinais.
+    expect(corpos.some((c) => c.includes(transferenciaId)), 'identificador da transferência na telemetria').toBe(false);
+  });
+});
 
 // SC-008 / FR-019a–c — traces e métricas do navegador chegam ao coletor (aceitos), sem dados
 // sensíveis, e a chamada à API leva o traceparent (requer o Compose, que liga a telemetria).

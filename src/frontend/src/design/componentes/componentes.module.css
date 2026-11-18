@@ -259,3 +259,130 @@
   font-size: 18px;
   font-weight: 700;
 }
+
+/* ---------- Aviso: variante neutra e ícone (specs/007) ---------- */
+.avisoNeutro {
+  background: #f1f5f9;
+  border-color: var(--cor-borda);
+  color: var(--cor-texto);
+}
+
+.avisoIcone {
+  display: inline-flex;
+  flex: none;
+  padding-top: 1px;
+}
+
+.aviso:focus {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.avisoAtencao p:not(.avisoTitulo),
+.avisoNeutro p:not(.avisoTitulo) {
+  color: var(--cor-texto-suave);
+}
+
+/* ---------- Lista de lançamentos (início e extrato mobile) ---------- */
+.lancamentos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lancamentos > li + li {
+  border-top: 1px solid var(--cor-borda);
+}
+
+.lancamento {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  min-height: 72px;
+  padding: var(--espaco-3) var(--espaco-6);
+  color: inherit;
+  text-decoration: none;
+}
+
+a.lancamento:hover {
+  background: var(--cor-fundo);
+}
+
+.iconeDirecao {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: var(--cor-texto);
+}
+
+.iconeEntrada {
+  background: var(--cor-entrada-suave);
+  color: var(--cor-entrada);
+}
+
+.textoLancamento {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nomeLancamento {
+  font: var(--texto-corpo-m);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.detalheLancamento {
+  color: var(--cor-texto-suave);
+  font: var(--texto-legenda);
+}
+
+.valorLancamento {
+  flex: none;
+  font: var(--texto-corpo-m);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.valorEntrada {
+  color: var(--cor-entrada);
+}
+
+.seloConcluida {
+  display: inline-block;
+  padding: 2px var(--espaco-2);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-entrada-suave);
+  color: var(--cor-entrada);
+  font: var(--texto-legenda);
+  font-weight: 600;
+}
+
+/* ---------- Campo de valor (specs/007) ---------- */
+.controleValor {
+  align-items: center;
+}
+
+.prefixoValor {
+  position: absolute;
+  left: var(--espaco-4);
+  color: var(--cor-texto-suave);
+  font: var(--texto-h3);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.entradaValor {
+  min-height: 64px;
+  padding-left: 56px;
+  font: var(--texto-display);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+}

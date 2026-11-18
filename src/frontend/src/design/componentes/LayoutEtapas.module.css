@@ -1,0 +1,142 @@
+/* Telas de transferência (specs/007; protótipo desktop/mobile 06 a 08). */
+.estrutura {
+  min-height: 100vh;
+}
+
+.pularConteudo {
+  position: absolute;
+  top: var(--espaco-2);
+  left: var(--espaco-2);
+  z-index: 10;
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--raio-controle);
+  background: var(--cor-primaria);
+  color: #fff;
+  transform: translateY(-200%);
+}
+
+.pularConteudo:focus {
+  transform: none;
+  color: #fff;
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3) var(--espaco-6);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+}
+
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: var(--altura-alvo-minimo);
+  color: var(--cor-texto);
+  font: var(--texto-rotulo);
+  text-decoration: none;
+}
+
+.voltar:hover {
+  text-decoration: underline;
+}
+
+.conteudo {
+  width: 100%;
+  max-width: 592px;
+  margin: 0 auto;
+  padding: var(--espaco-6) var(--espaco-4) var(--espaco-10);
+}
+
+/* ---------- Etapas ---------- */
+.etapas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.etapa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}
+
+.etapa + .etapa::before {
+  width: 24px;
+  height: 1px;
+  background: var(--cor-borda);
+  content: '';
+}
+
+.marcadorEtapa {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #94a3b8;
+  border-radius: 50%;
+  font: var(--texto-legenda);
+}
+
+.marcadorEtapa svg {
+  width: 14px;
+  height: 14px;
+}
+
+.etapaAtual {
+  color: var(--cor-primaria);
+  font-weight: 600;
+}
+
+.etapaAtual .marcadorEtapa {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+.etapaConcluida {
+  color: var(--cor-entrada);
+}
+
+.etapaConcluida .marcadorEtapa {
+  border-color: var(--cor-entrada);
+  background: var(--cor-entrada);
+  color: #fff;
+}
+
+@media (max-width: 479px) {
+  /* No celular, só o rótulo da etapa atual aparece (os demais seguem para leitores de tela). */
+  .etapa:not(.etapaAtual) .rotuloEtapa {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .etapa + .etapa::before {
+    width: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cabecalho {
+    padding: var(--espaco-4) var(--espaco-8);
+  }
+
+  .conteudo {
+    padding-top: var(--espaco-12);
+  }
+}

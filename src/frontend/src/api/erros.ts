@@ -8,10 +8,20 @@ export const PREFIXO_TIPO = 'urn:bank:problema:';
 
 export type AcaoErro = 'ir-para-login' | 'tentar-de-novo' | 'ir-para-inicio';
 
+/** Estilo do protótipo (docs/design: estados de erro e feedback). */
+export type VarianteErro = 'erro' | 'erro-campo' | 'atencao' | 'info' | 'neutro';
+
+/** Contexto da chamada: muda a mensagem de `acesso-negado` (specs/007, research R9). */
+export type ContextoErro = 'transferencia';
+
 export interface MensagemErro {
   /** Código do problema (sufixo do `type`), `rede` ou `inesperado`. */
   codigo: string;
+  /** Texto principal (título do aviso). */
   mensagem: string;
+  /** Texto complementar abaixo do título. */
+  detalhe?: string;
+  variante?: VarianteErro;
   /** Erros por campo (apenas em `validacao`). */
   campos?: Record<string, string[]>;
   traceId?: string;
@@ -31,6 +41,20 @@ export const MENSAGENS = {
   contaNaoEncontrada: 'Não encontramos sua conta. Entre novamente.',
   rede: 'Não foi possível conectar. Verifique sua internet e tente de novo.',
   inesperado: 'Algo deu errado',
+  // Transferências (specs/007-frontend-transferencias, data-model "Tradução de erros").
+  destinatarioNaoEncontrado: 'Nenhuma conta Bank com esse documento.',
+  autotransferencia: 'Esse documento é o seu',
+  autotransferenciaDetalhe: 'Não é possível transferir para a própria carteira.',
+  saldoInsuficiente: 'Saldo insuficiente',
+  saldoInsuficienteDetalhe: 'Ajuste o valor para continuar.',
+  idempotenciaDivergente: 'Essa transferência mudou',
+  idempotenciaDivergenteDetalhe: 'Os dados não batem com o envio anterior. Revise e envie de novo.',
+  indisponivelPj: 'Indisponível para Pessoa Jurídica',
+  indisponivelPjDetalhe: 'Contas PJ recebem transferências e geram cobranças, mas não enviam.',
+  comprovanteNaoEncontrado: 'Comprovante não encontrado',
+  comprovanteNaoEncontradoDetalhe: 'Confira o endereço ou procure a transferência no extrato.',
+  transferenciaRepetida: 'Essa transferência já foi feita',
+  transferenciaRepetidaDetalhe: 'Nada foi cobrado de novo.',
 } as const;
 
 interface ProblemDetailsBruto {
@@ -44,7 +68,7 @@ interface ProblemDetailsBruto {
  * @param status status HTTP, ou `null` quando a requisição nem chegou à API (rede).
  * @param corpo corpo já interpretado como JSON (ou qualquer outro valor).
  */
-export function traduzirErro(status: number | null, corpo: unknown): MensagemErro {
+export function traduzirErro(status: number | null, corpo: unknown, contexto?: ContextoErro): MensagemErro {
   if (status === null) {
     return { codigo: 'rede', mensagem: MENSAGENS.rede, acao: 'tentar-de-novo' };
   }
@@ -69,7 +93,34 @@ export function traduzirErro(status: number | null, corpo: unknown): MensagemErr
     case 'nao-autenticado':
       return { ...base, mensagem: MENSAGENS.sessaoExpirada, encerrarSessao: true, acao: 'ir-para-login' };
     case 'acesso-negado':
-      return { ...base, mensagem: MENSAGENS.acessoNegado, acao: 'ir-para-inicio' };
+      return contexto === 'transferencia'
+        ? { ...base, mensagem: MENSAGENS.indisponivelPj, detalhe: MENSAGENS.indisponivelPjDetalhe, variante: 'neutro', acao: 'ir-para-inicio' }
+        : { ...base, mensagem: MENSAGENS.acessoNegado, acao: 'ir-para-inicio' };
+    case 'destinatario-nao-encontrado':
+      return {
+        ...base,
+        mensagem: MENSAGENS.destinatarioNaoEncontrado,
+        variante: 'erro-campo',
+        campos: { documento: [MENSAGENS.destinatarioNaoEncontrado] },
+      };
+    case 'autotransferencia':
+      return { ...base, mensagem: MENSAGENS.autotransferencia, detalhe: MENSAGENS.autotransferenciaDetalhe, variante: 'atencao' };
+    case 'saldo-insuficiente':
+      return { ...base, mensagem: MENSAGENS.saldoInsuficiente, detalhe: MENSAGENS.saldoInsuficienteDetalhe, variante: 'atencao' };
+    case 'idempotencia-divergente':
+      return {
+        ...base,
+        mensagem: MENSAGENS.idempotenciaDivergente,
+        detalhe: MENSAGENS.idempotenciaDivergenteDetalhe,
+        variante: 'atencao',
+      };
+    case 'transferencia-nao-encontrada':
+      return {
+        ...base,
+        mensagem: MENSAGENS.comprovanteNaoEncontrado,
+        detalhe: MENSAGENS.comprovanteNaoEncontradoDetalhe,
+        variante: 'neutro',
+      };
     case 'carteira-nao-encontrada':
     case 'usuario-nao-encontrado':
       return { ...base, mensagem: MENSAGENS.contaNaoEncontrada, encerrarSessao: true, acao: 'ir-para-login' };

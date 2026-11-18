@@ -93,3 +93,52 @@ export async function semViolacoesA11y(page: Page): Promise<void> {
   const resumo = resultado.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
   expect(resumo).toEqual([]);
 }
+
+/* ---------- Transferências (specs/007-frontend-transferencias, research R11) ---------- */
+
+/** Token de acesso pela API (para preparar dados sem passar pela tela). */
+export async function tokenPelaApi(page: Page, conta: Pick<Conta, 'email'>): Promise<string> {
+  const resposta = await page.request.post('/api/v1/autenticacao/login', { data: { email: conta.email, senha: SENHA } });
+  expect(resposta.status()).toBe(200);
+  return ((await resposta.json()) as { tokenAcesso: string }).tokenAcesso;
+}
+
+/** Transferência pela API com chave nova; devolve o comprovante. */
+export async function transferirPelaApi(page: Page, token: string, documento: string, valor: number, descricao?: string) {
+  const resposta = await page.request.post('/api/v1/transferencias', {
+    headers: { Authorization: `Bearer ${token}`, 'Idempotency-Key': randomUUID() },
+    data: { documentoDestino: documento, valor, descricao: descricao ?? null },
+  });
+  expect(resposta.status(), await resposta.text()).toBe(201);
+  return (await resposta.json()) as { transferenciaId: string };
+}
+
+/**
+ * Acumula saldo na conta: cada conta PF de apoio (R$ 10,00 de demonstração) transfere tudo para
+ * ela. Sem acesso à base (research R11).
+ */
+export async function acumularSaldo(page: Page, conta: Conta, contasDeApoio: number): Promise<void> {
+  for (let i = 0; i < contasDeApoio; i++) {
+    const apoio = await criarContaPelaApi(page, 'PessoaFisica', `Apoio ${i + 1} Silva`);
+    await transferirPelaApi(page, await tokenPelaApi(page, apoio), conta.documento, 10);
+  }
+}
+
+/** Cria `n` lançamentos de saída de R$ 0,01 da conta para um destino. */
+export async function criarLancamentos(page: Page, conta: Conta, destino: Conta, n: number): Promise<void> {
+  const token = await tokenPelaApi(page, conta);
+  for (let i = 0; i < n; i++) {
+    await transferirPelaApi(page, token, destino.documento, 0.01, `Lançamento ${i + 1}`);
+  }
+}
+
+/** Itens do extrato pela API (para conferir débitos sem depender da tela). */
+export async function extratoPelaApi(page: Page, conta: Pick<Conta, 'email'>, direcao?: 'Entrada' | 'Saida') {
+  const token = await tokenPelaApi(page, conta);
+  const filtro = direcao ? `&direcao=${direcao}` : '';
+  const resposta = await page.request.get(`/api/v1/transferencias/extrato?tamanhoPagina=100${filtro}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  expect(resposta.status()).toBe(200);
+  return (await resposta.json()) as { itens: { tipo: string; direcao: string; valor: number }[]; totalItens: number };
+}

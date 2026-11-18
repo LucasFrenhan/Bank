@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { criarContaPelaApi, entrar, mascararCnpj, SENHA, semViolacoesA11y } from './apoio';
+import { criarContaPelaApi, entrar, mascararCnpj, SENHA, semViolacoesA11y, tokenPelaApi, transferirPelaApi } from './apoio';
 
-// US3 — tela inicial PF e PJ com a carteira real (FR-014 a FR-016; SC-005).
+// Spec 004 US3 e spec 007 US5 — tela inicial PF e PJ com a carteira e as movimentações reais.
 test.describe('Início', () => {
-  test('PF: saldo da API em até 2 s após o login, ações "Em breve" e axe', async ({ page }) => {
+  test('PF: saldo da API em até 2 s após o login, ações ativas, saldo inicial nas movimentações e axe', async ({ page }) => {
     const conta = await criarContaPelaApi(page);
     await page.goto('/entrar');
     await page.getByLabel('E-mail').fill(conta.email);
@@ -11,13 +11,15 @@ test.describe('Início', () => {
 
     const inicio = Date.now();
     await page.getByRole('button', { name: 'Entrar' }).click();
-    await expect(page.getByText(/R\$\s10,00/)).toBeVisible();
+    const saldo = page.getByRole('region', { name: 'Saldo disponível' });
+    await expect(saldo.getByText(/R\$\s10,00/)).toBeVisible();
     expect(Date.now() - inicio).toBeLessThanOrEqual(2000);
 
-    const saldo = page.getByRole('region', { name: 'Saldo disponível' });
-    await expect(saldo.getByRole('button', { name: /Transferir/ })).toHaveAttribute('aria-disabled', 'true');
-    await expect(saldo.getByRole('button', { name: /Ver extrato/ })).toHaveAttribute('aria-disabled', 'true');
-    await expect(page.getByText('Suas movimentações aparecerão aqui')).toBeVisible();
+    await expect(saldo.getByRole('link', { name: /Transferir/ })).toHaveAttribute('href', '/transferir');
+    await expect(saldo.getByRole('link', { name: /Ver extrato/ })).toHaveAttribute('href', '/extrato');
+    const movimentacoes = page.getByRole('region', { name: 'Últimas movimentações' });
+    await expect(movimentacoes.getByText('Saldo inicial', { exact: true })).toBeVisible();
+    await expect(movimentacoes.getByText(/^Saldo inicial de demonstração · Hoje, \d{2}:\d{2}$/)).toBeVisible();
     await semViolacoesA11y(page);
   });
 
@@ -54,5 +56,38 @@ test.describe('Início', () => {
 
     const esperado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(carteira.saldo);
     await expect(page.getByRole('region', { name: 'Saldo disponível' })).toContainText(esperado.replace(/\s/g, ' '));
+  });
+});
+
+// Spec 007 US5 — navegação ativa e listas reais depois de transferências.
+test.describe('Início — movimentações e navegação (spec 007, US5)', () => {
+  test('PF vê a transferência enviada; PJ vê o recebimento e "Recebimentos" abre o extrato filtrado', async ({ page, isMobile }) => {
+    const pf = await criarContaPelaApi(page, 'PessoaFisica', 'Lucas Inicio');
+    const pj = await criarContaPelaApi(page, 'PessoaJuridica', 'Livraria Página Ltda');
+    await transferirPelaApi(page, await tokenPelaApi(page, pf), pj.documento, 3.5, 'Livros');
+
+    await entrar(page, pf);
+    const ultimas = page.getByRole('region', { name: 'Últimas movimentações' });
+    await expect(ultimas.getByText('Livraria Página Ltda')).toBeVisible();
+    await expect(ultimas.getByText(/^Transferência enviada · Hoje, \d{2}:\d{2}$/)).toBeVisible();
+    await expect(ultimas.getByText(/−\sR\$\s3,50/)).toBeVisible();
+
+    const menu = page.getByRole('navigation', { name: isMobile ? 'Menu principal (celular)' : 'Menu principal' });
+    await expect(menu.getByRole('link', { name: 'Extrato' })).toBeVisible();
+    await expect(menu.getByRole('link', { name: 'Transferir' })).toHaveCount(isMobile ? 0 : 1);
+    await ultimas.getByRole('link', { name: 'Ver tudo' }).click();
+    await expect(page).toHaveURL(/\/extrato$/);
+
+    await page.evaluate(() => sessionStorage.clear()); // troca de conta sem depender do menu de cada layout
+    await entrar(page, pj);
+    const recebimentos = page.getByRole('region', { name: 'Últimos recebimentos' });
+    await expect(recebimentos.getByText('Lucas Inicio')).toBeVisible();
+    await expect(recebimentos.getByText(/^Livros · Hoje, \d{2}:\d{2}$/)).toBeVisible();
+
+    const menuPj = page.getByRole('navigation', { name: isMobile ? 'Menu principal (celular)' : 'Menu principal' });
+    await menuPj.getByRole('link', { name: 'Recebimentos' }).click();
+    await expect(page).toHaveURL(/\/extrato\?direcao=entradas$/);
+    await expect(page.getByRole('button', { name: 'Entradas' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(menuPj.getByText('Cobranças')).toBeVisible();
   });
 });
