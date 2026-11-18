@@ -347,13 +347,13 @@ recebimentos; navegação ativa
 
 **Independent Test**: quickstart, cenário 8
 
-- [ ] T045 [P] [US6] Acrescentar `/transferir`, `/transferir/confirmar`, o comprovante e
+- [X] T045 [P] [US6] Acrescentar `/transferir`, `/transferir/confirmar`, o comprovante e
   `/extrato` a `front/e2e/responsividade.spec.ts` (320, 390, 768, 1440, 1920 px, sem rolagem
   horizontal) e a verificação axe `semViolacoesA11y` em cada tela e estado de aviso
-- [ ] T046 [P] [US6] Acrescentar a `front/e2e/teclado.spec.ts`: transferência completa e uso
+- [X] T046 [P] [US6] Acrescentar a `front/e2e/teclado.spec.ts`: transferência completa e uso
   dos filtros/paginação do extrato só com teclado, com foco visível; etapa atual, titular
   encontrado, avisos e conclusão anunciados (regiões `aria-live`/`role` verificadas)
-- [ ] T047 [US6] Ajustar `front/src/paginas/Transferencia.module.css`,
+- [X] T047 [US6] Ajustar `front/src/paginas/Transferencia.module.css`,
   `front/src/paginas/Extrato.module.css`, `front/src/paginas/Autenticado.module.css` e
   `front/src/design/componentes/componentes.module.css` às medidas do protótipo: conteúdo das
   etapas com até 560 px centralizado; botões principais 48 px (desktop) e 52 px (mobile); alvos

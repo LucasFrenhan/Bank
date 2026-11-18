@@ -100,7 +100,7 @@
 .textoContraparte a {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: var(--altura-alvo-minimo);
   color: var(--cor-texto);
   font-weight: 500;
 }

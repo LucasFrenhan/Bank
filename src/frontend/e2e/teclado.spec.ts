@@ -1,5 +1,56 @@
-import { expect, test } from '@playwright/test';
-import { cpf, email, SENHA } from './apoio';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+import { cpf, criarContaPelaApi, email, entrar, SENHA } from './apoio';
+
+/** Avança com Tab até o elemento receber o foco (no máximo `limite` paradas). */
+async function tabAte(page: Page, alvo: Locator, limite = 25): Promise<void> {
+  for (let i = 0; i < limite && !(await alvo.evaluate((el) => el === document.activeElement)); i++) {
+    await page.keyboard.press('Tab');
+  }
+  await expect(alvo).toBeFocused();
+  const contorno = await alvo.evaluate((el) => getComputedStyle(el).outlineStyle);
+  expect(contorno, 'foco visível').not.toBe('none');
+}
+
+// Spec 007 US6 / FR-028 — transferência e extrato só com teclado.
+test.describe('Teclado — transferências e extrato', () => {
+  test.skip(({ isMobile }) => isMobile, 'navegação por teclado verificada no desktop');
+
+  test('transferência completa e filtros/páginas do extrato só pelo teclado', async ({ page }) => {
+    const pf = await criarContaPelaApi(page, 'PessoaFisica', 'Lucas Teclado');
+    const pj = await criarContaPelaApi(page, 'PessoaJuridica', 'Padaria Teclado Ltda');
+    await entrar(page, pf);
+    await page.goto('/transferir');
+
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toBeFocused();
+    const documento = page.getByLabel('CPF ou CNPJ de quem vai receber');
+    await tabAte(page, documento);
+    await page.keyboard.type(pj.documento);
+    await expect(page.getByRole('group', { name: 'Destinatário' })).toContainText('Padaria Teclado Ltda');
+
+    await page.keyboard.press('Tab');
+    await expect(page.getByLabel('Valor')).toBeFocused();
+    await page.keyboard.type('1,25');
+    await tabAte(page, page.getByRole('button', { name: 'Continuar' }));
+    await page.keyboard.press('Enter');
+
+    await expect(page.getByRole('heading', { name: 'Confira antes de enviar' })).toBeVisible();
+    await expect(page.locator('[aria-current="step"]')).toContainText('Confirmar');
+    await tabAte(page, page.getByRole('button', { name: /^Transferir R\$/ }));
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Transferência concluída' })).toBeVisible();
+    await tabAte(page, page.getByRole('link', { name: 'Voltar ao início' }));
+
+    await page.goto('/extrato');
+    await expect(page.getByText('Padaria Teclado Ltda')).toBeVisible();
+    await tabAte(page, page.getByRole('button', { name: 'Saídas' }));
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/extrato\?direcao=saidas$/);
+    await expect(page.getByText('Saldo inicial', { exact: true })).toHaveCount(0);
+    await page.keyboard.press('Space');
+    await expect(page.getByRole('button', { name: 'Saídas' })).toHaveAttribute('aria-pressed', 'true');
+  });
+});
 
 // US5 / FR-001a — cadastro, login e saída só com teclado; foco visível; erros anunciados.
 test.describe('Teclado', () => {
