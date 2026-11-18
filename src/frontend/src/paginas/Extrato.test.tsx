@@ -181,7 +181,8 @@ describe('Extrato — mobile (US4)', () => {
     await usuario.click(screen.getByRole('button', { name: 'Carregar mais' }));
     await waitFor(() => expect(screen.getAllByText(/^Contraparte \d+$/)).toHaveLength(25));
     expect(screen.queryByRole('button', { name: 'Carregar mais' })).not.toBeInTheDocument();
-    expect(screen.getByTestId('rota-atual')).toHaveTextContent('/extrato?pagina=2');
+    // A URL é atualizada depois de os itens chegarem: espera em vez de conferir na hora.
+    await waitFor(() => expect(screen.getByTestId('rota-atual')).toHaveTextContent('/extrato?pagina=2'));
     expect(consultas.at(-1)).toContain('pagina=2');
   });
 
