@@ -26,6 +26,8 @@ public class TransferenciasTests(BankApiFactory factory) : IClassFixture<BankApi
         Assert.Equal(chave, json.GetProperty("chaveIdempotencia").GetGuid());
         Assert.Equal(pf.UsuarioId, json.GetProperty("pagador").GetProperty("usuarioId").GetGuid());
         Assert.Equal("Lucas Silva", json.GetProperty("pagador").GetProperty("nome").GetString());
+        // Spec 008, FR-002a: documento do pagador mascarado.
+        Assert.Equal($"•••.{pf.Documento[3..6]}.{pf.Documento[6..9]}-••", json.GetProperty("pagador").GetProperty("documento").GetString());
         var recebedor = json.GetProperty("recebedor");
         Assert.Equal((pj.UsuarioId, "Empresa Exemplo Ltda", pj.Documento, "PessoaJuridica"),
             (recebedor.GetProperty("usuarioId").GetGuid(), recebedor.GetProperty("nome").GetString(), recebedor.GetProperty("documento").GetString(), recebedor.GetProperty("tipoConta").GetString()));

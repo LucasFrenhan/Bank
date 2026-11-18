@@ -71,6 +71,14 @@ public sealed partial class RealizarTransferencia(
             return Recusar([ErrosTransferencia.Autotransferencia]);
         }
 
+        // Documento do pagador para o comprovante (spec 008, FR-002a), lido antes da transação para
+        // não alongar o bloqueio das carteiras.
+        var titular = await usuarios.ObterTitularAsync(comando.PagadorUsuarioId, cancellationToken);
+        if (titular is null)
+        {
+            return Recusar([ErrosUsuario.NaoEncontrado]);
+        }
+
         await unidade.IniciarAsync(cancellationToken);
         try
         {
@@ -117,7 +125,7 @@ public sealed partial class RealizarTransferencia(
                 new Comprovante(
                     transferencia.Id,
                     chave,
-                    new PagadorComprovante(comando.PagadorUsuarioId, pagador.NomeTitular),
+                    new PagadorComprovante(comando.PagadorUsuarioId, pagador.NomeTitular, Documento.Ocultar(titular.Documento)),
                     new RecebedorComprovante(destino.UsuarioId, destino.Nome, destino.Documento, destino.TipoConta),
                     transferencia.Valor,
                     transferencia.Descricao,
@@ -138,7 +146,8 @@ public sealed partial class RealizarTransferencia(
         if (existente.Recebedor.Documento == documento.Valor && existente.Valor == valor.Valor)
         {
             metricas.RegistrarReplay();
-            return Resultado.Ok(new TransferenciaRealizada(existente, Replay: true));
+            var comPagadorMascarado = existente with { Pagador = existente.Pagador with { Documento = Documento.Ocultar(existente.Pagador.Documento) } };
+            return Resultado.Ok(new TransferenciaRealizada(comPagadorMascarado, Replay: true));
         }
 
         return Recusar([ErrosTransferencia.IdempotenciaDivergente]);

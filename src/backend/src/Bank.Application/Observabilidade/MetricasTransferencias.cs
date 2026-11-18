@@ -16,6 +16,7 @@ public sealed class MetricasTransferencias
     private readonly Counter<long> _replays;
     private readonly Histogram<double> _valor;
     private readonly Counter<long> _consultasDestinatario;
+    private readonly Counter<long> _consultas;
 
     public MetricasTransferencias(IMeterFactory meterFactory)
     {
@@ -27,6 +28,7 @@ public sealed class MetricasTransferencias
         _replays = meter.CreateCounter<long>("bank.transferencias.replays", "{requisicao}", "Reenvios idempotentes respondidos com o comprovante original.");
         _valor = meter.CreateHistogram<double>("bank.transferencias.valor", "BRL", "Valor das transferências concluídas.");
         _consultasDestinatario = meter.CreateCounter<long>("bank.transferencias.destinatario.consultas", "{consulta}", "Consultas de destinatário, por resultado.");
+        _consultas = meter.CreateCounter<long>("bank.transferencias.consultas", "{consulta}", "Consultas de transferência por identificador, por resultado.");
     }
 
     public void RegistrarConcluida(TipoConta tipoDestino, decimal valor)
@@ -43,4 +45,11 @@ public sealed class MetricasTransferencias
 
     public void RegistrarConsultaDestinatario(string resultado) =>
         _consultasDestinatario.Add(1, new KeyValuePair<string, object?>("resultado", resultado));
+
+    /// <summary>
+    /// Consulta por identificador (spec 008, FR-007): <c>encontrada</c>, <c>nao-encontrada</c> ou
+    /// <c>invalida</c>. Nunca o identificador como rótulo.
+    /// </summary>
+    public void RegistrarConsulta(string resultado) =>
+        _consultas.Add(1, new KeyValuePair<string, object?>("resultado", resultado));
 }

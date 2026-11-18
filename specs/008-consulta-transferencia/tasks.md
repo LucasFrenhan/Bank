@@ -45,41 +45,41 @@ identificador
 
 ### Testes da fundação (escrever primeiro)
 
-- [ ] T001 [P] Em `back/tests/Bank.UnitTests/Application/RealizarTransferenciaTests.cs`, acrescentar
+- [X] T001 [P] Em `back/tests/Bank.UnitTests/Application/RealizarTransferenciaTests.cs`, acrescentar
   asserções de que o comprovante de uma transferência nova e o de um reenvio trazem
   `Pagador.Documento` = CPF do pagador mascarado `•••.XXX.XXX-••` (FR-002a) e
   `ChaveIdempotencia` preenchida
-- [ ] T002 [P] Em `back/tests/Bank.IntegrationTests/TransferenciasTests.cs`, conferir no corpo do
+- [X] T002 [P] Em `back/tests/Bank.IntegrationTests/TransferenciasTests.cs`, conferir no corpo do
   `POST /api/v1/transferencias` (201 e 200) o campo `pagador.documento` mascarado e
   `chaveIdempotencia` igual à enviada
 
 ### Implementação da fundação
 
-- [ ] T003 [P] Acrescentar `TransferenciaNaoEncontrada` em
+- [X] T003 [P] Acrescentar `TransferenciaNaoEncontrada` em
   `back/src/Bank.Domain/Transferencias/ErrosTransferencia.cs`: código
   `transferencia-nao-encontrada`, mensagem "Transferência não encontrada.",
   `TipoErro.NaoEncontrado` (data-model "Erro novo")
-- [ ] T004 Em `back/src/Bank.Application/Abstracoes/ITransferencias.cs`: `Comprovante.ChaveIdempotencia`
+- [X] T004 Em `back/src/Bank.Application/Abstracoes/ITransferencias.cs`: `Comprovante.ChaveIdempotencia`
   passa a `Guid?`; `PagadorComprovante(Guid UsuarioId, string Nome, string Documento)`;
   `ITransferenciaRepositorio.ObterComprovantePorIdAsync(Guid transferenciaId, CancellationToken)`
   com XML doc "documento do pagador e do recebedor sem máscara; a Application mascara"
-- [ ] T005 [P] Em `back/src/Bank.Application/Observabilidade/MetricasTransferencias.cs`, criar o
+- [X] T005 [P] Em `back/src/Bank.Application/Observabilidade/MetricasTransferencias.cs`, criar o
   contador `bank.transferencias.consultas` (`{consulta}`, "Consultas de transferência por
   identificador, por resultado.") e `RegistrarConsulta(string resultado)` com o rótulo
   `resultado` (`encontrada` · `nao-encontrada` · `invalida`)
-- [ ] T006 Em `back/src/Bank.Infrastructure/Persistencia/TransferenciaRepositorio.cs`, extrair a
+- [X] T006 Em `back/src/Bank.Infrastructure/Persistencia/TransferenciaRepositorio.cs`, extrair a
   projeção do comprovante para uma consulta base (transferência + carteiras + usuários, incluindo
   `pagador.Documento`) usada por `ObterComprovantePorChaveAsync` e pelo novo
   `ObterComprovantePorIdAsync` (filtro por `t.Id`, `AsNoTracking`)
-- [ ] T007 Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`, preencher
+- [X] T007 Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`, preencher
   `Pagador.Documento` com `Documento.Ocultar` do documento do titular
   (`IUsuarioConsultas.ObterTitularAsync`, lido **antes** de iniciar a transação, junto com a carteira
   do pagador, para não alongar o bloqueio) na transferência nova e mascarar o documento vindo do
   repositório no reenvio (R4)
-- [ ] T008 Em `back/src/Bank.Api/Endpoints/TransferenciasEndpoints.cs`:
+- [X] T008 Em `back/src/Bank.Api/Endpoints/TransferenciasEndpoints.cs`:
   `PagadorResposta(Guid UsuarioId, string Nome, string Documento)`, `ComprovanteResposta.ChaveIdempotencia`
   como `Guid?` e `ComprovanteResposta.De` mapeando o documento
-- [ ] T009 Atualizar `back/tests/Bank.UnitTests/Application/DublesTransferencia.cs` para o novo
+- [X] T009 Atualizar `back/tests/Bank.UnitTests/Application/DublesTransferencia.cs` para o novo
   método do repositório (comprovantes guardados por id) e para o `PagadorComprovante` com
   documento; `dotnet build` e `dotnet test` verdes (T001–T002 passando)
 

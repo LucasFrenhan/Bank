@@ -177,13 +177,18 @@ public static class TransferenciasEndpoints
     /// <summary>Campos opcionais: ausências e valores inválidos viram erros por campo.</summary>
     public sealed record TransferenciaRequisicao(string? DocumentoDestino, decimal? Valor, string? Descricao);
 
-    public sealed record PagadorResposta(Guid UsuarioId, string Nome);
+    /// <summary>Documento do pagador mascarado (contrato v1.1.0, spec 008).</summary>
+    public sealed record PagadorResposta(Guid UsuarioId, string Nome, string Documento);
 
     public sealed record RecebedorResposta(Guid UsuarioId, string Nome, string Documento, string TipoConta);
 
+    /// <summary>
+    /// Comprovante do envio e da consulta (contrato v1.1.0): <c>chaveIdempotencia</c> é nula só na
+    /// consulta feita pelo recebedor.
+    /// </summary>
     public sealed record ComprovanteResposta(
         Guid TransferenciaId,
-        Guid ChaveIdempotencia,
+        Guid? ChaveIdempotencia,
         PagadorResposta Pagador,
         RecebedorResposta Recebedor,
         decimal Valor,
@@ -198,7 +203,7 @@ public static class TransferenciasEndpoints
             return new ComprovanteResposta(
                 comprovante.TransferenciaId,
                 comprovante.ChaveIdempotencia,
-                new PagadorResposta(comprovante.Pagador.UsuarioId, comprovante.Pagador.Nome),
+                new PagadorResposta(comprovante.Pagador.UsuarioId, comprovante.Pagador.Nome, comprovante.Pagador.Documento),
                 new RecebedorResposta(comprovante.Recebedor.UsuarioId, comprovante.Recebedor.Nome, comprovante.Recebedor.Documento, comprovante.Recebedor.TipoConta.ToString()),
                 comprovante.Valor,
                 comprovante.Descricao,

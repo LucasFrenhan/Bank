@@ -38,7 +38,11 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
         return Task.FromResult(u is null ? null : new DadosCarteira(u.Carteira.Id, u.Id, u.NomeCompleto, u.TipoConta, u.Carteira.Saldo, u.Carteira.Moeda, u.Carteira.AtualizadoEm));
     }
 
-    public Task<DadosTitular?> ObterTitularAsync(Guid usuarioId, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task<DadosTitular?> ObterTitularAsync(Guid usuarioId, CancellationToken cancellationToken)
+    {
+        var u = Usuarios.Find(x => x.Id == usuarioId);
+        return Task.FromResult(u is null ? null : new DadosTitular(u.Id, u.NomeCompleto, u.Email, u.Documento, u.TipoConta, Agora));
+    }
 
     public Task<Destinatario?> ObterDestinatarioAsync(string documento, CancellationToken cancellationToken)
     {
@@ -46,9 +50,21 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
         return Task.FromResult(u is null ? null : new Destinatario(u.Id, u.Carteira.Id, u.NomeCompleto, u.Documento, u.TipoConta));
     }
 
-    public Task<Comprovante?> ObterComprovantePorChaveAsync(Guid carteiraOrigemId, Guid chaveIdempotencia, CancellationToken cancellationToken)
+    public Task<Comprovante?> ObterComprovantePorChaveAsync(Guid carteiraOrigemId, Guid chaveIdempotencia, CancellationToken cancellationToken) =>
+        Comprovante(Gravadas.Find(x => x.Transferencia.CarteiraOrigemId == carteiraOrigemId && x.Transferencia.ChaveIdempotencia == chaveIdempotencia));
+
+    /// <summary>Quantas vezes a leitura por identificador foi chamada (spec 008).</summary>
+    public int LeiturasPorId { get; private set; }
+
+    public Task<Comprovante?> ObterComprovantePorIdAsync(Guid transferenciaId, CancellationToken cancellationToken)
     {
-        var e = Gravadas.Find(x => x.Transferencia.CarteiraOrigemId == carteiraOrigemId && x.Transferencia.ChaveIdempotencia == chaveIdempotencia);
+        LeiturasPorId++;
+        return Comprovante(Gravadas.Find(x => x.Transferencia.Id == transferenciaId));
+    }
+
+    /// <summary>Como o repositório real: documentos sem máscara.</summary>
+    private Task<Comprovante?> Comprovante(ExecucaoTransferencia? e)
+    {
         if (e is null)
         {
             return Task.FromResult<Comprovante?>(null);
@@ -57,8 +73,8 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
         var pagador = Usuarios.Single(u => u.Carteira.Id == e.Transferencia.CarteiraOrigemId);
         var recebedor = Usuarios.Single(u => u.Carteira.Id == e.Transferencia.CarteiraDestinoId);
         return Task.FromResult<Comprovante?>(new Comprovante(
-            e.Transferencia.Id, chaveIdempotencia,
-            new PagadorComprovante(pagador.Id, pagador.NomeCompleto),
+            e.Transferencia.Id, e.Transferencia.ChaveIdempotencia,
+            new PagadorComprovante(pagador.Id, pagador.NomeCompleto, pagador.Documento),
             new RecebedorComprovante(recebedor.Id, recebedor.NomeCompleto, recebedor.Documento, recebedor.TipoConta),
             e.Transferencia.Valor, e.Transferencia.Descricao, e.Transferencia.Status, e.Transferencia.CriadoEm));
     }

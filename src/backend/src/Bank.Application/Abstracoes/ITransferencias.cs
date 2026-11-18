@@ -4,14 +4,18 @@ using Bank.Domain.Usuarios;
 
 namespace Bank.Application.Abstracoes;
 
-public sealed record PagadorComprovante(Guid UsuarioId, string Nome);
+/// <summary>Pagador; o documento sai mascarado nas respostas (specs/008, FR-002a).</summary>
+public sealed record PagadorComprovante(Guid UsuarioId, string Nome, string Documento);
 
 public sealed record RecebedorComprovante(Guid UsuarioId, string Nome, string Documento, TipoConta TipoConta);
 
-/// <summary>Comprovante de uma transferência concluída (FR-009; contracts/transferencias-api.md).</summary>
+/// <summary>
+/// Comprovante de uma transferência concluída (spec 006, FR-009; contrato v1.1.0 da spec 008).
+/// A chave é sempre preenchida no envio e nula na consulta feita pelo recebedor (spec 008, FR-003).
+/// </summary>
 public sealed record Comprovante(
     Guid TransferenciaId,
-    Guid ChaveIdempotencia,
+    Guid? ChaveIdempotencia,
     PagadorComprovante Pagador,
     RecebedorComprovante Recebedor,
     decimal Valor,
@@ -19,11 +23,17 @@ public sealed record Comprovante(
     StatusTransferencia Status,
     DateTimeOffset CriadoEm);
 
-/// <summary>Leitura de transferências já gravadas (idempotência).</summary>
+/// <summary>
+/// Leitura de transferências já gravadas (idempotência e consulta). Os documentos do pagador e do
+/// recebedor vêm sem máscara; a Application aplica a máscara de exibição.
+/// </summary>
 public interface ITransferenciaRepositorio
 {
-    /// <summary>Transferência do pagador com a chave informada, se existir (FR-011).</summary>
+    /// <summary>Transferência do pagador com a chave informada, se existir (spec 006, FR-011).</summary>
     Task<Comprovante?> ObterComprovantePorChaveAsync(Guid carteiraOrigemId, Guid chaveIdempotencia, CancellationToken cancellationToken);
+
+    /// <summary>Transferência pelo identificador, se existir (specs/008-consulta-transferencia).</summary>
+    Task<Comprovante?> ObterComprovantePorIdAsync(Guid transferenciaId, CancellationToken cancellationToken);
 }
 
 public enum ResultadoConfirmacao
