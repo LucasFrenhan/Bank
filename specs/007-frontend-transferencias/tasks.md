@@ -277,7 +277,7 @@ agrupada (mobile)
 
 ### Tests for User Story 4
 
-- [ ] T037 [P] [US4] Criar `front/src/paginas/Extrato.test.tsx`: título, saldo atual e itens na
+- [X] T037 [P] [US4] Criar `front/src/paginas/Extrato.test.tsx`: título, saldo atual e itens na
   ordem da API; "Saldo inicial" com "Saldo inicial de demonstração" e sem link; "Sem descrição";
   status "Concluída"; filtros alteram `?direcao=entradas|saidas`, voltam à página 1 e chamam a
   API com `Entrada`/`Saida`; desktop: "Página X de Y · 20 por página", "Anterior"/"Próxima"
@@ -285,14 +285,14 @@ agrupada (mobile)
   `Hoje`/`Ontem`/`15 de novembro`, "Carregar mais" acrescenta sem duplicar (`lancamentoId`) e
   some no fim, `pagina=N` inicial pede `tamanhoPagina = 20·N` (até 100); vazio, carregando e erro
   com "Tentar de novo"; parâmetros inválidos na URL → padrão
-- [ ] T038 [P] [US4] Criar `front/e2e/extrato.spec.ts` e acrescentar a `apoio.ts`
+- [X] T038 [P] [US4] Criar `front/e2e/extrato.spec.ts` e acrescentar a `apoio.ts`
   `criarLancamentos(page, conta, n)` (transferências de R$ 0,01 pela API): PF recém-criada com
   "Saldo inicial"; filtros; 21+ lançamentos com paginação no desktop e "Carregar mais" no
   mobile; recarregar mantém filtro e página; primeira página visível em até 2 s (SC-004)
 
 ### Implementation for User Story 4
 
-- [ ] T039 [US4] Criar `front/src/paginas/Extrato.tsx`: lê/escreve `direcao` e `pagina` na URL
+- [X] T039 [US4] Criar `front/src/paginas/Extrato.tsx`: lê/escreve `direcao` e `pagina` na URL
   (data-model "Filtro do extrato"); saldo de `useCarteira`; filtros como grupo de botões
   alternáveis (`aria-pressed`); desktop em tabela com cabeçalhos Data, Contraparte, Descrição,
   Status, Valor (layout `desktop-05`); mobile em `ListaLancamentos` agrupada por `rotuloDia` com
@@ -300,7 +300,7 @@ agrupada (mobile)
   `/transferencias/{transferenciaId}` **somente quando o comprovante está no cache da aba**
   (`lerComprovante`) — a Fase 10 libera o link para todos; estilos em
   `front/src/paginas/Extrato.module.css`
-- [ ] T040 [US4] Registrar a rota protegida `/extrato` em `front/src/App.tsx`
+- [X] T040 [US4] Registrar a rota protegida `/extrato` em `front/src/App.tsx`
 
 **Checkpoint**: extrato completo nos dois layouts
 
@@ -315,24 +315,24 @@ recebimentos; navegação ativa
 
 ### Tests for User Story 5
 
-- [ ] T041 [P] [US5] Atualizar `front/src/paginas/Inicio.test.tsx`: PF com "Transferir" e "Ver
+- [X] T041 [P] [US5] Atualizar `front/src/paginas/Inicio.test.tsx`: PF com "Transferir" e "Ver
   extrato" como links (sem "Em breve"); "Últimas movimentações" com 5 itens
   (`tamanhoPagina=5`), "Transferência recebida/enviada · Hoje, 14:32" e "Ver tudo" → `/extrato`;
   PJ com "Últimos recebimentos" (`direcao=Entrada`), "{descrição ou Sem descrição} · data" e "Ver
   tudo" → `/extrato?direcao=entradas`; vazio "Nenhuma movimentação ainda"; sem "Entradas no
   mês"/"Saídas no mês"
-- [ ] T042 [P] [US5] Atualizar `front/e2e/inicio.spec.ts` (remover expectativas de "Em breve"
+- [X] T042 [P] [US5] Atualizar `front/e2e/inicio.spec.ts` (remover expectativas de "Em breve"
   para Transferir/Extrato) e acrescentar: navegação PF (desktop: Início, Transferir, Extrato,
   Perfil; mobile: Início, Extrato, Perfil) e PJ (Recebimentos → extrato filtrado; Cobranças "Em
   breve"); listas reais após transferências
 
 ### Implementation for User Story 5
 
-- [ ] T043 [US5] Alterar `front/src/design/componentes/Layout.tsx`: `ITENS_NAVEGACAO` com
+- [X] T043 [US5] Alterar `front/src/design/componentes/Layout.tsx`: `ITENS_NAVEGACAO` com
   `para` em Transferir (`/transferir`), Extrato (`/extrato`) e Recebimentos
   (`/extrato?direcao=entradas`); item opcional `somenteDesktop` para esconder "Transferir" da
   barra inferior da PF; ativo correto para `/transferir/confirmar`
-- [ ] T044 [US5] Alterar `front/src/paginas/Inicio.tsx`: substituir `AcaoEmBreve` por links
+- [X] T044 [US5] Alterar `front/src/paginas/Inicio.tsx`: substituir `AcaoEmBreve` por links
   "Transferir" e "Ver extrato" no cartão de saldo; "Últimas movimentações" (PF) e "Últimos
   recebimentos" (PJ) com `useExtrato` + `ListaLancamentos` + "Ver tudo"; remover `AcaoEmBreve`
   de `front/src/design/componentes/Botao.tsx` se ficar sem uso

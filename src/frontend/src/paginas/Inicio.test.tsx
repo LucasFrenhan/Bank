@@ -1,26 +1,23 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { carteira, problema, titular, TRACE_ID } from '../testes/handlers';
+import { carteira, extratoDe, itemExtrato, problema, titular, TRACE_ID } from '../testes/handlers';
 import { renderizarApp } from '../testes/renderizar';
 import { servidor } from '../testes/setup';
 
 describe('Início (US3; FR-014 a FR-016)', () => {
-  it('PF: saudação, saldo, atualização e ações "Em breve"', async () => {
+  it('PF: saudação, saldo, atualização e ações ativas (specs/007, FR-022)', async () => {
     renderizarApp('/', { sessao: 'PessoaFisica' });
 
     expect(await screen.findByRole('heading', { name: 'Olá, Lucas' })).toBeInTheDocument();
     expect(screen.getAllByText('Pessoa Física').length).toBeGreaterThan(0);
-    expect(screen.getByText(/R\$\s10,00/)).toBeInTheDocument();
+    const saldo = screen.getByRole('region', { name: 'Saldo disponível' });
+    expect(within(saldo).getByText(/R\$\s10,00/)).toBeInTheDocument();
     expect(screen.getByText('Atualizado em 17 nov 2026, 14:32.')).toBeInTheDocument();
 
-    const saldo = screen.getByRole('region', { name: 'Saldo disponível' });
-    for (const acao of [/Transferir/, /Ver extrato/]) {
-      const botao = within(saldo).getByRole('button', { name: acao });
-      expect(botao).toHaveAttribute('aria-disabled', 'true');
-      expect(botao).toHaveTextContent('Em breve');
-    }
-
-    expect(screen.getByText('Suas movimentações aparecerão aqui')).toBeInTheDocument();
+    expect(within(saldo).getByRole('link', { name: /Transferir/ })).toHaveAttribute('href', '/transferir');
+    expect(within(saldo).getByRole('link', { name: /Ver extrato/ })).toHaveAttribute('href', '/extrato');
+    expect(within(saldo).queryByText('Em breve')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Entradas no mês|Saídas no mês/)).not.toBeInTheDocument();
   });
 
   it('PJ: razão social, saldo zero e nenhuma ação de transferir (RN-06)', async () => {
@@ -109,12 +106,78 @@ describe('Início (US3; FR-014 a FR-016)', () => {
     let saldo = 10;
     servidor.use(http.get('*/api/v1/carteiras/minha', () => HttpResponse.json({ ...carteira(), saldo })));
     const primeira = renderizarApp('/', { sessao: 'PessoaFisica' });
-    expect(await screen.findByText(/R\$\s10,00/)).toBeInTheDocument();
+    const regiao = await screen.findByRole('region', { name: 'Saldo disponível' });
+    expect(within(regiao).getByText(/R\$\s10,00/)).toBeInTheDocument();
     primeira.unmount();
 
     saldo = 123.45;
     renderizarApp('/', { sessao: 'PessoaFisica' });
 
     expect(await screen.findByText(/R\$\s123,45/)).toBeInTheDocument();
+  });
+});
+
+describe('Início — movimentações reais (specs/007: US5; FR-022 a FR-024)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-17T15:00:00Z'));
+  });
+
+  it('PF: "Últimas movimentações" com os 5 mais recentes e "Ver tudo"', async () => {
+    const consultas: string[] = [];
+    servidor.events.on('request:start', ({ request }) => {
+      if (request.url.includes('/extrato')) consultas.push(new URL(request.url).search);
+    });
+    servidor.use(extratoDe([itemExtrato(1), itemExtrato(2), itemExtrato(30), itemExtrato(50), itemExtrato(51), itemExtrato(52)]));
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const secao = await screen.findByRole('region', { name: 'Últimas movimentações' });
+    await waitFor(() => expect(within(secao).getAllByRole('listitem')).toHaveLength(5));
+    expect(within(secao).getByText('Transferência enviada · Hoje, 08:00')).toBeInTheDocument();
+    expect(within(secao).getByText('Transferência recebida · Hoje, 07:00')).toBeInTheDocument();
+    expect(within(secao).getByText('Transferência recebida · 15 nov, 07:00')).toBeInTheDocument();
+    expect(within(secao).getByRole('link', { name: 'Ver tudo' })).toHaveAttribute('href', '/extrato');
+    expect(consultas[0]).toContain('tamanhoPagina=5');
+    servidor.events.removeAllListeners();
+  });
+
+  it('PF sem movimentações → "Nenhuma movimentação ainda"', async () => {
+    servidor.use(extratoDe([]));
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    expect(await screen.findByText('Nenhuma movimentação ainda')).toBeInTheDocument();
+  });
+
+  it('PJ: "Últimos recebimentos" só com entradas e "Ver tudo" no extrato filtrado', async () => {
+    servidor.use(
+      http.get('*/api/v1/carteiras/minha', () => HttpResponse.json(carteira('PessoaJuridica'))),
+      extratoDe([itemExtrato(1), itemExtrato(2, { descricao: null }), itemExtrato(4)]),
+    );
+    renderizarApp('/', { sessao: 'PessoaJuridica' });
+
+    const secao = await screen.findByRole('region', { name: 'Últimos recebimentos' });
+    await waitFor(() => expect(within(secao).getAllByRole('listitem')).toHaveLength(2));
+    expect(within(secao).getByText('Sem descrição · Hoje, 07:00')).toBeInTheDocument();
+    expect(within(secao).getByText('Descrição 4 · Hoje, 05:00')).toBeInTheDocument();
+    expect(within(secao).queryByText(/Contraparte 1$/)).not.toBeInTheDocument();
+    expect(within(secao).getByRole('link', { name: 'Ver tudo' })).toHaveAttribute('href', '/extrato?direcao=entradas');
+  });
+
+  it('navegação PF: Transferir e Extrato ativos; PJ: Recebimentos leva ao extrato filtrado e Cobranças continua "Em breve"', async () => {
+    const pf = renderizarApp('/', { sessao: 'PessoaFisica' });
+    const menuPf = await screen.findByRole('navigation', { name: 'Menu principal' });
+    expect(within(menuPf).getByRole('link', { name: 'Transferir' })).toHaveAttribute('href', '/transferir');
+    expect(within(menuPf).getByRole('link', { name: 'Extrato' })).toHaveAttribute('href', '/extrato');
+    const barraPf = screen.getByRole('navigation', { name: 'Menu principal (celular)' });
+    expect(within(barraPf).queryByText('Transferir')).not.toBeInTheDocument();
+    expect(within(barraPf).getByRole('link', { name: 'Extrato' })).toBeInTheDocument();
+    pf.unmount();
+    sessionStorage.clear();
+
+    servidor.use(http.get('*/api/v1/carteiras/minha', () => HttpResponse.json(carteira('PessoaJuridica'))));
+    renderizarApp('/', { sessao: 'PessoaJuridica' });
+    const menuPj = await screen.findByRole('navigation', { name: 'Menu principal' });
+    expect(within(menuPj).getByRole('link', { name: 'Recebimentos' })).toHaveAttribute('href', '/extrato?direcao=entradas');
+    expect(within(menuPj).getByText('Cobranças').closest('[aria-disabled]')).toHaveAttribute('aria-disabled', 'true');
   });
 });
