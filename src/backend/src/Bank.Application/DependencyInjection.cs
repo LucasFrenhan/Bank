@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<RealizarTransferencia>();
         services.AddScoped<ConsultarDestinatario>();
         services.AddScoped<ObterExtrato>();
+        services.AddScoped<ConsultarTransferencia>();
 
         return services;
     }

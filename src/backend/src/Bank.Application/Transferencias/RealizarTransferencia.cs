@@ -35,6 +35,8 @@ public sealed partial class RealizarTransferencia(
     public const string CampoChave = "Idempotency-Key";
     public const string CampoDocumento = "documentoDestino";
 
+    private const long TicksPorMicrossegundo = TimeSpan.TicksPerMillisecond / 1000;
+
     public async Task<Resultado<TransferenciaRealizada>> ExecutarAsync(RealizarTransferenciaComando comando, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(comando);
@@ -99,7 +101,10 @@ public sealed partial class RealizarTransferencia(
                 return ResolverExistente(existente, documento, valor);
             }
 
-            var agora = relogio.GetUtcNow();
+            // Precisão de microssegundos, a mesma do timestamptz: o comprovante do envio sai igual ao
+            // lido depois no reenvio e na consulta (spec 008, SC-001).
+            var relogioAgora = relogio.GetUtcNow();
+            var agora = relogioAgora.AddTicks(-(relogioAgora.Ticks % TicksPorMicrossegundo));
             var execucao = Transferencia.Executar(origem, carteiraDestino, valor, descricao, chave, agora);
             if (!execucao.Sucesso)
             {

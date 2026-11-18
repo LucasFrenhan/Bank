@@ -10,8 +10,8 @@ using Microsoft.OpenApi;
 namespace Bank.Api.Endpoints;
 
 /// <summary>
-/// Transferências, consulta de destinatário e extrato (specs/006-transferencias;
-/// contracts/transferencias-api.md). Só transporte: claims e cabeçalho viram comando para o caso
+/// Transferências, consulta de destinatário, extrato (specs/006-transferencias) e consulta por
+/// identificador (specs/008-consulta-transferencia; contrato v1.1.0). Só transporte: claims e cabeçalho viram comando para o caso
 /// de uso; o resultado vira HTTP.
 /// </summary>
 public static class TransferenciasEndpoints
@@ -60,7 +60,37 @@ public static class TransferenciasEndpoints
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
+        // Sem restrição de tipo: identificador inválido vira 400 com erro no campo (spec 008, R2).
+        // A rota literal /extrato tem precedência sobre o parâmetro.
+        grupo.MapGet("/{transferenciaId}", ConsultarTransferenciaAsync)
+            .RequireAuthorization(AutenticacaoExtensions.PoliticaUsuarioAutenticado)
+            .WithName("ConsultarTransferencia")
+            .WithSummary("Reabre o comprovante de uma transferência (pagador ou recebedor).")
+            .WithDescription("Para o recebedor, chaveIdempotencia vem nula. Transferência inexistente ou de que o usuário não participa recebe o mesmo 404.")
+            .Produces<ComprovanteResposta>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         return app;
+    }
+
+    private static async Task<IResult> ConsultarTransferenciaAsync(
+        string transferenciaId,
+        ClaimsPrincipal usuario,
+        ConsultarTransferencia casoDeUso,
+        CancellationToken cancellationToken)
+    {
+        if (!usuario.TentarObterUsuarioId(out var usuarioId))
+        {
+            return TypedResults.Forbid();
+        }
+
+        var resultado = await casoDeUso.ExecutarAsync(new ConsultarTransferenciaConsulta(usuarioId, transferenciaId), cancellationToken);
+        return resultado.Sucesso
+            ? TypedResults.Ok(ComprovanteResposta.De(resultado.Valor))
+            : resultado.ParaProblema();
     }
 
     private static async Task<IResult> ObterExtratoAsync(

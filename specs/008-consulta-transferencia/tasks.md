@@ -96,10 +96,10 @@ envio (quickstart, cenário 2, linha A)
 
 ### Tests for User Story 1
 
-- [ ] T010 [P] [US1] Criar `back/tests/Bank.UnitTests/Application/ConsultarTransferenciaTests.cs`:
+- [X] T010 [P] [US1] Criar `back/tests/Bank.UnitTests/Application/ConsultarTransferenciaTests.cs`:
   pagador → `Resultado.Ok` com chave preenchida, `Pagador.Documento` mascarado, `Recebedor.Documento`
   completo e métrica `encontrada` registrada uma vez
-- [ ] T011 [P] [US1] Criar `back/tests/Bank.IntegrationTests/ConsultaTransferenciaTests.cs`: PF
+- [X] T011 [P] [US1] Criar `back/tests/Bank.IntegrationTests/ConsultaTransferenciaTests.cs`: PF
   transfere para PJ; o pagador, com um **novo login**, faz
   `GET /api/v1/transferencias/{id}` → 200 com corpo igual ao do `POST` (todos os campos); duas
   consultas seguidas devolvem o mesmo corpo; saldos, total de lançamentos das duas carteiras e
@@ -108,13 +108,13 @@ envio (quickstart, cenário 2, linha A)
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Criar `back/src/Bank.Application/Transferencias/ConsultarTransferencia.cs`:
+- [X] T012 [US1] Criar `back/src/Bank.Application/Transferencias/ConsultarTransferencia.cs`:
   `ConsultarTransferenciaConsulta(Guid UsuarioId, string? TransferenciaId)`;
   `ExecutarAsync` → valida o UUID (R2), lê `ObterComprovantePorIdAsync`, aplica a regra de acesso
   do data-model e mascara o documento do pagador; registra a métrica por resultado
-- [ ] T013 [US1] Registrar `ConsultarTransferencia` em
+- [X] T013 [US1] Registrar `ConsultarTransferencia` em
   `back/src/Bank.Application/DependencyInjection.cs` (`AddScoped`)
-- [ ] T014 [US1] Em `back/src/Bank.Api/Endpoints/TransferenciasEndpoints.cs`, mapear
+- [X] T014 [US1] Em `back/src/Bank.Api/Endpoints/TransferenciasEndpoints.cs`, mapear
   `GET /{transferenciaId}` (texto, sem restrição de tipo) com a política `UsuarioAutenticado`,
   nome `ConsultarTransferencia`, resumo "Reabre o comprovante de uma transferência (pagador ou
   recebedor).", `Produces<ComprovanteResposta>(200)`, `ProducesValidationProblem()` e problemas
@@ -132,15 +132,15 @@ envio (quickstart, cenário 2, linha A)
 
 ### Tests for User Story 2
 
-- [ ] T015 [P] [US2] Acrescentar a `ConsultarTransferenciaTests.cs`: recebedor →
+- [X] T015 [P] [US2] Acrescentar a `ConsultarTransferenciaTests.cs`: recebedor →
   `ChaveIdempotencia` nula, demais campos iguais aos do pagador, documento do pagador mascarado
-- [ ] T016 [P] [US2] Acrescentar a `ConsultaTransferenciaTests.cs`: PJ recebedora e PF recebedora
+- [X] T016 [P] [US2] Acrescentar a `ConsultaTransferenciaTests.cs`: PJ recebedora e PF recebedora
   → 200 com `chaveIdempotencia: null`, `pagador.documento` mascarado e `recebedor.documento`
   completo (o próprio); o JSON não contém a chave enviada pelo pagador (SC-003)
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Garantir que T015–T016 passam com a regra de acesso de T012 (`ChaveIdempotencia =
+- [X] T017 [US2] Garantir que T015–T016 passam com a regra de acesso de T012 (`ChaveIdempotencia =
   null` para o recebedor em `ConsultarTransferencia.cs`); ajustar o caso de uso só se falharem
 
 **Checkpoint**: pagador e recebedor consultam
@@ -155,11 +155,11 @@ envio (quickstart, cenário 2, linha A)
 
 ### Tests for User Story 3
 
-- [ ] T018 [P] [US3] Acrescentar a `ConsultarTransferenciaTests.cs`: terceiro e inexistente →
+- [X] T018 [P] [US3] Acrescentar a `ConsultarTransferenciaTests.cs`: terceiro e inexistente →
   mesmo `Erro` (`transferencia-nao-encontrada`) e métrica `nao-encontrada`; `"abc"`, vazio e
   nulo → erro de validação no campo `transferenciaId` e métrica `invalida`; UUID em maiúsculas
   e sem hífens aceito; o repositório não é chamado com id inválido
-- [ ] T019 [P] [US3] Acrescentar a `ConsultaTransferenciaTests.cs`: terceiro (PF e PJ) → 404
+- [X] T019 [P] [US3] Acrescentar a `ConsultaTransferenciaTests.cs`: terceiro (PF e PJ) → 404
   `urn:bank:problema:transferencia-nao-encontrada`; UUID aleatório → 404 com `status`, `type`,
   `title` e `detail` **idênticos** aos do terceiro (só o `traceId` muda); `abc` → 400 com
   `errors.transferenciaId`; sem token e token inválido → 401; token sem claims
@@ -168,7 +168,7 @@ envio (quickstart, cenário 2, linha A)
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Em `ConsultarTransferencia.cs`, garantir um único caminho de recusa para
+- [X] T020 [US3] Em `ConsultarTransferencia.cs`, garantir um único caminho de recusa para
   inexistente e terceiro (mesma leitura, mesmo `Erro`), e a mensagem de validação "Informe um
   identificador de transferência válido." em `transferenciaId` (R3)
 
