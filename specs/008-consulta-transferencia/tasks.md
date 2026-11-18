@@ -178,19 +178,20 @@ envio (quickstart, cenário 2, linha A)
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T021 [P] Em `back/tests/Bank.IntegrationTests/OpenApiTests.cs`, conferir a operação
+- [X] T021 [P] Em `back/tests/Bank.IntegrationTests/OpenApiTests.cs`, conferir a operação
   `ConsultarTransferencia` em `/api/v1/transferencias/{transferenciaId}` com `Bearer` e respostas
   200/400/401/403/404, e `ComprovanteResposta` com `pagador.documento` e `chaveIdempotencia`
   anulável (FR-008)
-- [ ] T022 [P] Em `back/tests/Bank.IntegrationTests/TelemetryTests.cs`, conferir
-  `bank.transferencias.consultas` com os rótulos `encontrada`, `nao-encontrada` e `invalida`, sem
-  outros rótulos; em `DadosSensiveisTelemetriaTests.cs`, incluir consultas (pagador, recebedor,
-  terceiro) e conferir que documento, nome e e-mail não aparecem (SC-005)
-- [ ] T023 [P] Atualizar `docs/desenvolvimento.md` (seção "Transferências e extrato") com a
+- [X] T022 [P] Em `back/tests/Bank.IntegrationTests/DadosSensiveisTelemetriaTests.cs` (onde já
+  ficam as métricas de transferência), incluir consultas (pagador, recebedor, terceiro e id
+  inválido), conferir que documento, nome e e-mail não aparecem e que
+  `bank.transferencias.consultas` tem os rótulos `encontrada`, `nao-encontrada` e `invalida`, sem
+  outros rótulos (SC-005)
+- [X] T023 [P] Atualizar `docs/desenvolvimento.md` (seção "Transferências e extrato") com a
   consulta por identificador, a regra de acesso e o documento mascarado do pagador; e acrescentar
   em `specs/006-transferencias/contracts/transferencias-api.md` uma nota "Versão atual: v1.1.0 em
   specs/008" no Histórico
-- [ ] T024 Executar `dotnet build`, `dotnet test` (unitários, integração e arquitetura) e o
+- [X] T024 Executar `dotnet build`, `dotnet test` (unitários, integração e arquitetura) e o
   [quickstart.md](quickstart.md) cenários 2 e 3 contra o Compose; registrar desvios na spec, no
   plano ou no contrato no mesmo PR (Princípio I)
 

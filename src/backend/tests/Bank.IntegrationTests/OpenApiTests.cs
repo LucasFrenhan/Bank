@@ -92,7 +92,17 @@ public class OpenApiTests(BankApiFactory factory) : IClassFixture<BankApiFactory
         var parametros = extrato.GetProperty("parameters").EnumerateArray().Select(p => p.GetProperty("name").GetString()).ToList();
         Assert.Equal(["direcao", "pagina", "tamanhoPagina"], parametros.Order(StringComparer.Ordinal));
 
-        foreach (var operacao in new[] { transferir, destinatario, extrato })
+        // Spec 008: consulta por identificador e comprovante v1.1.0.
+        var consultar = caminhos.GetProperty("/api/v1/transferencias/{transferenciaId}").GetProperty("get");
+        Assert.Equal("ConsultarTransferencia", consultar.GetProperty("operationId").GetString());
+        AssertRespostas(consultar, "200", "400", "401", "403", "404");
+
+        var esquemas = documento.RootElement.GetProperty("components").GetProperty("schemas");
+        Assert.True(esquemas.GetProperty("PagadorResposta").GetProperty("properties").TryGetProperty("documento", out _));
+        var chaveComprovante = esquemas.GetProperty("ComprovanteResposta").GetProperty("properties").GetProperty("chaveIdempotencia");
+        Assert.Contains("null", chaveComprovante.GetRawText(), StringComparison.Ordinal);
+
+        foreach (var operacao in new[] { transferir, destinatario, extrato, consultar })
         {
             Assert.True(operacao.GetProperty("security")[0].TryGetProperty("Bearer", out _));
         }
