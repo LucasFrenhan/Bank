@@ -16,6 +16,7 @@ import { AvisoTransferencia, focarPrimeiroErro, IndisponivelPj } from './avisosT
 import { useTitulo } from './comum';
 import estilos from './Transferencia.module.css';
 import { useCarteira } from './useCarteira';
+import { maximoAgora, useLimites } from './useLimites';
 
 export const LIMITE_DESCRICAO = 200;
 
@@ -53,6 +54,15 @@ export function descreverDocumento(documento: string): string {
   return `${tipoDocumento(documento) === 'cpf' ? 'CPF' : 'CNPJ'} ${ocultarDocumento(documento)}`;
 }
 
+/** Dica do campo valor (spec 007; limite agora da spec 009, contracts/frontend.md). */
+export function dicaDoValor(saldoCentavos: number | null, maximoCentavos: number | null): string {
+  const partes = [
+    ...(saldoCentavos !== null ? [`Disponível: ${formatarCentavos(saldoCentavos)}`] : []),
+    ...(maximoCentavos !== null ? [`Limite agora: ${formatarCentavos(maximoCentavos)}`] : []),
+  ];
+  return partes.length > 0 ? `${partes.join(' · ')} · mínimo R$ 0,01` : 'Mínimo R$ 0,01';
+}
+
 export function nomeTipoConta(tipoConta: string): string {
   return NOME_TIPO_CONTA[tipoConta as TipoConta] ?? tipoConta;
 }
@@ -64,10 +74,13 @@ function FormularioTransferir() {
   const formulario = useRef<HTMLFormElement>(null);
   const { dados, errosCampo, aviso, buscando, confirmado } = transferencia;
   const saldoCentavos = carteira.estado === 'pronta' ? saldoEmCentavos(carteira.carteira.saldo) : null;
+  const limites = useLimites();
+  const maximo = maximoAgora(limites);
+  const avisoDoValor = aviso?.codigo === 'saldo-insuficiente' || aviso?.codigo === 'limite-excedido';
 
   async function enviar(evento: FormEvent) {
     evento.preventDefault();
-    if (await transferencia.continuar(saldoCentavos)) {
+    if (await transferencia.continuar(saldoCentavos, limites)) {
       void navegar('/transferir/confirmar');
     } else {
       focarPrimeiroErro(formulario.current);
@@ -114,7 +127,7 @@ function FormularioTransferir() {
           </div>
         ) : null}
 
-        {aviso && aviso.codigo !== 'saldo-insuficiente' ? <AvisoTransferencia erro={aviso} saldoCentavos={saldoCentavos} /> : null}
+        {aviso && !avisoDoValor ? <AvisoTransferencia erro={aviso} saldoCentavos={saldoCentavos} /> : null}
       </Cartao>
 
       <Cartao className={estilos.cartao}>
@@ -122,10 +135,10 @@ function FormularioTransferir() {
           valor={dados.valorTexto}
           aoAlterar={transferencia.alterarValor}
           erros={errosCampo.valor}
-          dica={saldoCentavos !== null ? `Disponível: ${formatarCentavos(saldoCentavos)} · mínimo R$ 0,01` : 'Mínimo R$ 0,01'}
+          dica={dicaDoValor(saldoCentavos, maximo?.centavos ?? null)}
         />
 
-        {aviso?.codigo === 'saldo-insuficiente' ? <AvisoTransferencia erro={aviso} saldoCentavos={saldoCentavos} /> : null}
+        {aviso && avisoDoValor ? <AvisoTransferencia erro={aviso} saldoCentavos={saldoCentavos} /> : null}
 
         <CampoTexto
           rotulo="Descrição (opcional)"

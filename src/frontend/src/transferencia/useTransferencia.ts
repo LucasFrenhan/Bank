@@ -11,6 +11,7 @@ import {
   TRANSFERENCIA_VAZIA,
   type TransferenciaEmAndamento,
 } from './armazenamento';
+import type { ResumoLimites } from '../paginas/useLimites';
 import { assinatura, prepararConfirmacao } from './chave';
 
 /**
@@ -78,6 +79,36 @@ function semCampo(erros: ErrosCampo, campo: CampoTransferencia): ErrosCampo {
   const copia = { ...erros };
   delete copia[campo];
   return copia;
+}
+
+/**
+ * Recusa local equivalente ao 422 `limite-excedido` da API (specs/009, contracts/frontend.md):
+ * por operação antes do diário; valor igual ao limite é permitido.
+ */
+export function verificarLimites(centavos: number, limites: ResumoLimites | null): MensagemErro | null {
+  if (!limites) {
+    return null;
+  }
+
+  const { porOperacaoCentavos, diarioCentavos, disponivelHojeCentavos } = limites;
+  if (porOperacaoCentavos !== null && centavos > porOperacaoCentavos) {
+    return erroDeLimite('PorOperacao', porOperacaoCentavos, porOperacaoCentavos);
+  }
+
+  if (diarioCentavos !== null && disponivelHojeCentavos !== null && centavos > disponivelHojeCentavos) {
+    return erroDeLimite('Diario', diarioCentavos, disponivelHojeCentavos);
+  }
+
+  return null;
+}
+
+function erroDeLimite(tipoLimite: string, limiteCentavos: number, disponivelCentavos: number): MensagemErro {
+  return traduzirErro(422, {
+    type: 'urn:bank:problema:limite-excedido',
+    tipoLimite,
+    limite: centavosParaNumero(limiteCentavos),
+    valorDisponivel: centavosParaNumero(disponivelCentavos),
+  });
 }
 
 export function useTransferencia(opcoes: { reiniciarSeConcluida?: boolean } = {}) {
@@ -216,7 +247,7 @@ export function useTransferencia(opcoes: { reiniciarSeConcluida?: boolean } = {}
     (texto: string) => {
       atualizar((d) => ({ ...d, valorTexto: texto }));
       definirErrosCampo((atuais) => semCampo(atuais, 'valor'));
-      definirAviso((atual) => (atual?.codigo === 'saldo-insuficiente' ? null : atual));
+      definirAviso((atual) => (atual?.codigo === 'saldo-insuficiente' || atual?.codigo === 'limite-excedido' ? null : atual));
     },
     [atualizar],
   );
@@ -234,7 +265,7 @@ export function useTransferencia(opcoes: { reiniciarSeConcluida?: boolean } = {}
    * mudou (research R2). Devolve `true` quando a confirmação pode ser aberta.
    */
   const continuar = useCallback(
-    async (saldoCentavos: number | null): Promise<boolean> => {
+    async (saldoCentavos: number | null, limites: ResumoLimites | null = null): Promise<boolean> => {
       let atual = dadosRef.current;
       const erros: ErrosCampo = {};
 
@@ -257,6 +288,13 @@ export function useTransferencia(opcoes: { reiniciarSeConcluida?: boolean } = {}
 
       if (!valor.ok || !destinatarioConfirmado(atual)) {
         return false; // a recusa da consulta já está na tela.
+      }
+
+      // Limites antes do saldo, na mesma ordem da API (spec 009, FR-008).
+      const recusaPorLimite = verificarLimites(valor.centavos, limites);
+      if (recusaPorLimite) {
+        definirAviso(recusaPorLimite);
+        return false;
       }
 
       if (saldoCentavos !== null && valor.centavos > saldoCentavos) {

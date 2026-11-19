@@ -291,49 +291,54 @@ avisos de limite (desktop e mobile)
 
 ### Testes da US4 — frontend (escrever primeiro)
 
-- [ ] T032 [P] [US4] Em `front/src/api/erros.test.ts`, acrescentar: `limite-excedido` com
+- [X] T032 [P] [US4] Em `front/src/api/erros.test.ts`, acrescentar: `limite-excedido` com
   extensões vira `MensagemErro` com `codigo: 'limite-excedido'`, variante `atencao`, título
   "Limite excedido" e `limite: { tipo, limite, disponivel }` em centavos; extensões ausentes ou
   `tipoLimite` desconhecido → mesmo título com "Ajuste o valor para continuar."
-- [ ] T033 [P] [US4] Criar `front/src/paginas/useLimites.test.ts`: máximo agora =
-  `min(porOperacao, disponivelHoje)` ignorando `null`; ambos `null` → sem máximo; falha de rede,
-  403 ou 5xx → sem máximo (sem aviso de erro); 401 segue o tratamento de sessão da spec 004
-- [ ] T034 [P] [US4] Em `front/src/paginas/Transferir.test.tsx`, acrescentar: dica "Disponível:
+- [X] T033 [P] [US4] Criar `front/src/paginas/useLimites.test.ts` (funções puras `resumirLimites` e
+  `maximoAgora`): máximo agora = `min(porOperacao, disponivelHoje)` ignorando `null`, por operação
+  no empate; ambos `null` → sem máximo; a falha da consulta (rede) → dica sem limite fica coberta
+  em T034; 401 segue o tratamento de sessão da spec 004
+- [X] T034 [P] [US4] Em `front/src/paginas/Transferir.test.tsx`, acrescentar: dica "Disponível:
   R$ {saldo} · Limite agora: R$ {máximo} · mínimo R$ 0,01" e, sem máximo, a dica da v1.1.1; valor
   acima do máximo não avança e mostra o aviso por tipo (`PorOperacao` antes de `Diario`); valor
   igual ao máximo avança; diário esgotado mostra "Você já usou todo o limite diário de R$
   {limite}. Ele renova à meia-noite (horário de Brasília)."
-- [ ] T035 [P] [US4] Em `front/src/paginas/ConfirmarTransferencia.test.tsx`, acrescentar: 422
+- [X] T035 [P] [US4] Em `front/src/paginas/ConfirmarTransferencia.test.tsx`, acrescentar: 422
   `limite-excedido` da API mostra "Limite excedido" com o texto por tipo (contracts/frontend.md,
   "Tradução de erros") e oferece voltar para a etapa Dados
 
 ### Implementação da US4 — frontend
 
-- [ ] T036 [US4] Com a API da US4 rodando, executar `npm run api:tipos` para regenerar
+- [X] T036 [US4] Com a API da US4 rodando, executar `npm run api:tipos` para regenerar
   `front/src/api/schema.d.ts` (operação `ConsultarLimites`, esquema `LimitesResposta`)
-- [ ] T037 [US4] Em `front/src/api/erros.ts`, acrescentar `MENSAGENS.limiteExcedido` ("Limite
+- [X] T037 [US4] Em `front/src/api/erros.ts`, acrescentar `MENSAGENS.limiteExcedido` ("Limite
   excedido") e os detalhes por tipo de contracts/frontend.md; em `traduzirErro`, ler `tipoLimite`,
   `limite` e `valorDisponivel` do problema e preencher o novo campo opcional
   `limite?: { tipo: string; limiteCentavos: number; disponivelCentavos: number }` de
   `MensagemErro`; T032 passa
-- [ ] T038 [US4] Criar `front/src/paginas/useLimites.ts` (no estilo de `useCarteira.ts`):
+- [X] T038 [US4] Criar `front/src/paginas/useLimites.ts` (no estilo de `useCarteira.ts`):
   `GET /api/v1/transferencias/limites`, estado `carregando | pronto | indisponivel`, e
   `maximoCentavos` + `tipoDoMaximo` calculados como em contracts/frontend.md; T033 passa
-- [ ] T039 [US4] Em `front/src/paginas/avisosTransferencia.tsx`, renderizar `limite-excedido`
+- [X] T039 [US4] Em `front/src/paginas/avisosTransferencia.tsx`, renderizar `limite-excedido`
   com `Aviso variante="atencao"`, título "Limite excedido" e o texto por tipo/disponível
-  (contracts/frontend.md, "Tradução de erros")
-- [ ] T040 [US4] Em `front/src/transferencia/useTransferencia.ts`, estender
+  (contracts/frontend.md, "Tradução de erros") — o `traduzirErro` (T037) já monta título,
+  detalhe e variante `atencao`, e o `AvisoErro` usado por `AvisoTransferencia` os renderiza; sem
+  caso especial no componente
+- [X] T040 [US4] Em `front/src/transferencia/useTransferencia.ts`, estender
   `continuar(saldoCentavos)` para receber também os limites (`porOperacao`, `disponivelHoje` em
   centavos) e recusar localmente com uma `MensagemErro` `limite-excedido` equivalente à da API
   quando o valor passar do máximo (por operação antes do diário)
-- [ ] T041 [US4] Em `front/src/paginas/Transferir.tsx`, usar `useLimites`, montar a dica do campo
+- [X] T041 [US4] Em `front/src/paginas/Transferir.tsx`, usar `useLimites`, montar a dica do campo
   valor da tabela de contracts/frontend.md e mostrar o aviso `limite-excedido` no mesmo lugar do
   aviso de saldo insuficiente (abaixo do campo valor); recarregar os limites ao voltar da
   confirmação; T034 passa
-- [ ] T042 [US4] Em `front/src/paginas/ConfirmarTransferencia.tsx`, tratar o resultado recusado com
-  `codigo === 'limite-excedido'` como o de `saldo-insuficiente` (aviso + voltar para Dados);
+- [X] T042 [US4] Em `front/src/paginas/ConfirmarTransferencia.tsx`, tratar o resultado recusado com
+  `codigo === 'limite-excedido'` como o de `saldo-insuficiente` (aviso + voltar para Dados); o
+  aviso sai pelo caminho genérico de `AvisoTransferencia` e o botão "Voltar" já existe — sem
+  mudança de código;
   T035 passa
-- [ ] T043 [US4] Em `front/e2e/transferencia.spec.ts`, acrescentar um teste que abre Transferir
+- [X] T043 [US4] Em `front/e2e/transferencia.spec.ts`, acrescentar um teste que abre Transferir
   com uma PF nova e confere a dica "Limite agora: R$ 1.000,00" (o saldo de demonstração não
   alcança o limite padrão; a recusa fica nos testes de componente), em desktop e na largura
   mobile já usada pelos demais testes

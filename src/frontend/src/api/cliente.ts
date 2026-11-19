@@ -22,6 +22,7 @@ export type Destinatario = Esquemas['DestinatarioResposta'];
 export type Comprovante = Esquemas['ComprovanteResposta'];
 export type ExtratoPagina = Esquemas['ExtratoResposta'];
 export type ItemExtrato = Esquemas['ItemExtratoResposta'];
+export type Limites = Esquemas['LimitesResposta'];
 export type DirecaoExtrato = 'Entrada' | 'Saida';
 
 export interface NovaTransferencia {
@@ -116,6 +117,9 @@ export const api = {
     chamar<TokenAcesso>(() => cliente.POST('/api/v1/autenticacao/login', { body: { email, senha } })),
 
   obterMinhaCarteira: () => chamar<MinhaCarteira>(() => cliente.GET('/api/v1/carteiras/minha')),
+
+  /** Limites de transferência da PF e uso no dia de Brasília (spec 009, US4). */
+  obterLimites: () => chamar<Limites>(() => cliente.GET('/api/v1/transferencias/limites'), { contexto: 'transferencia' }),
 
   /** Dados do titular (specs/005-usuarios-me): documento completo e data de cadastro. */
   obterTitular: () => chamar<Titular>(() => cliente.GET('/api/v1/usuarios/me')),

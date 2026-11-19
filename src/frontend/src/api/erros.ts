@@ -4,6 +4,8 @@
  * Decide pelo `type`, nunca pelo `detail`.
  */
 
+import { formatarCentavos, saldoEmCentavos } from '../formatacao/valor';
+
 export const PREFIXO_TIPO = 'urn:bank:problema:';
 
 export type AcaoErro = 'ir-para-login' | 'tentar-de-novo' | 'ir-para-inicio';
@@ -13,6 +15,13 @@ export type VarianteErro = 'erro' | 'erro-campo' | 'atencao' | 'info' | 'neutro'
 
 /** Contexto da chamada: muda a mensagem de `acesso-negado` (specs/007, research R9). */
 export type ContextoErro = 'transferencia';
+
+/** Extensões do 422 `limite-excedido` (specs/009, contracts/transferencias-api.md v1.2.0). */
+export interface LimiteExcedido {
+  tipo: string;
+  limiteCentavos: number;
+  disponivelCentavos: number;
+}
 
 export interface MensagemErro {
   /** Código do problema (sufixo do `type`), `rede` ou `inesperado`. */
@@ -26,6 +35,8 @@ export interface MensagemErro {
   campos?: Record<string, string[]>;
   traceId?: string;
   acao?: AcaoErro;
+  /** Limite que recusou (`limite-excedido`, spec 009), em centavos. */
+  limite?: LimiteExcedido;
   /** A sessão deve ser encerrada (401 em rota protegida, conta inexistente). */
   encerrarSessao?: boolean;
   status?: number;
@@ -55,6 +66,9 @@ export const MENSAGENS = {
   comprovanteNaoEncontradoDetalhe: 'Confira o endereço ou procure a transferência no extrato.',
   transferenciaRepetida: 'Essa transferência já foi feita',
   transferenciaRepetidaDetalhe: 'Nada foi cobrado de novo.',
+  // Limites (specs/009-limite-transferencia, contracts/frontend.md "Tradução de erros").
+  limiteExcedido: 'Limite excedido',
+  limiteExcedidoDetalhe: 'Ajuste o valor para continuar.',
 } as const;
 
 interface ProblemDetailsBruto {
@@ -62,6 +76,9 @@ interface ProblemDetailsBruto {
   status?: unknown;
   errors?: unknown;
   traceId?: unknown;
+  tipoLimite?: unknown;
+  limite?: unknown;
+  valorDisponivel?: unknown;
 }
 
 /**
@@ -107,6 +124,8 @@ export function traduzirErro(status: number | null, corpo: unknown, contexto?: C
       return { ...base, mensagem: MENSAGENS.autotransferencia, detalhe: MENSAGENS.autotransferenciaDetalhe, variante: 'atencao' };
     case 'saldo-insuficiente':
       return { ...base, mensagem: MENSAGENS.saldoInsuficiente, detalhe: MENSAGENS.saldoInsuficienteDetalhe, variante: 'atencao' };
+    case 'limite-excedido':
+      return traduzirLimite(base, problema);
     case 'idempotencia-divergente':
       return {
         ...base,
@@ -127,6 +146,45 @@ export function traduzirErro(status: number | null, corpo: unknown, contexto?: C
     default:
       return { ...base, codigo: 'inesperado', mensagem: MENSAGENS.inesperado, acao: 'tentar-de-novo' };
   }
+}
+
+/** Texto por tipo de limite; extensões ausentes ou tipo desconhecido → texto genérico. */
+function traduzirLimite(base: Pick<MensagemErro, 'codigo' | 'status' | 'traceId'>, problema: ProblemDetailsBruto): MensagemErro {
+  const limite = lerLimite(problema);
+  const mensagem = { ...base, mensagem: MENSAGENS.limiteExcedido, variante: 'atencao' as const };
+  if (!limite) {
+    return { ...mensagem, detalhe: MENSAGENS.limiteExcedidoDetalhe };
+  }
+
+  return { ...mensagem, detalhe: detalheLimite(limite), limite };
+}
+
+function detalheLimite(limite: LimiteExcedido): string {
+  if (limite.tipo === 'PorOperacao') {
+    return `O limite por transferência é ${formatarCentavos(limite.limiteCentavos)}. ${MENSAGENS.limiteExcedidoDetalhe}`;
+  }
+
+  if (limite.tipo === 'Diario') {
+    return limite.disponivelCentavos > 0
+      ? `Você ainda pode transferir ${formatarCentavos(limite.disponivelCentavos)} hoje. ${MENSAGENS.limiteExcedidoDetalhe}`
+      : `Você já usou todo o limite diário de ${formatarCentavos(limite.limiteCentavos)}. Ele renova à meia-noite (horário de Brasília).`;
+  }
+
+  return MENSAGENS.limiteExcedidoDetalhe;
+}
+
+function lerLimite(problema: ProblemDetailsBruto): LimiteExcedido | undefined {
+  const { tipoLimite, limite, valorDisponivel } = problema;
+  if (tipoLimite !== 'PorOperacao' && tipoLimite !== 'Diario') {
+    return undefined;
+  }
+
+  const valido = (v: unknown): v is number | string => typeof v === 'number' || (typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v.trim()));
+  if (!valido(limite) || !valido(valorDisponivel)) {
+    return undefined;
+  }
+
+  return { tipo: tipoLimite, limiteCentavos: saldoEmCentavos(limite), disponivelCentavos: saldoEmCentavos(valorDisponivel) };
 }
 
 function codigoPorStatus(status: number): string {

@@ -97,3 +97,38 @@ describe('traduzirErro — transferências (specs/007, data-model "Tradução de
     expect(traduzirErro(403, problema('acesso-negado', 403)).mensagem).toBe(MENSAGENS.acessoNegado);
   });
 });
+
+describe('traduzirErro — limite-excedido (specs/009, contracts/frontend.md)', () => {
+  const extensoes = (tipoLimite: string, limite: number, valorDisponivel: number) => ({ tipoLimite, limite, valorDisponivel });
+
+  it.each([
+    ['PorOperacao', 1000, 1000, /^O limite por transferência é R\$\s1\.000,00\. Ajuste o valor para continuar\.$/],
+    ['Diario', 5000, 500, /^Você ainda pode transferir R\$\s500,00 hoje\. Ajuste o valor para continuar\.$/],
+    ['Diario', 5000, 0, /^Você já usou todo o limite diário de R\$\s5\.000,00\. Ele renova à meia-noite \(horário de Brasília\)\.$/],
+  ])('%s (limite %d, disponível %d) → texto por tipo', (tipo, limite, disponivel, detalhe) => {
+    const erro = traduzirErro(422, problema('limite-excedido', 422, extensoes(tipo, limite, disponivel)));
+
+    expect(erro.codigo).toBe('limite-excedido');
+    expect(erro.mensagem).toBe('Limite excedido');
+    expect(erro.variante).toBe('atencao');
+    expect(erro.detalhe).toMatch(detalhe);
+    expect(erro.limite).toEqual({ tipo, limiteCentavos: limite * 100, disponivelCentavos: disponivel * 100 });
+  });
+
+  it('valores em texto (decimal serializado como string) também são lidos', () => {
+    const erro = traduzirErro(422, problema('limite-excedido', 422, extensoes('Diario', '2000.00' as unknown as number, '12.34' as unknown as number)));
+
+    expect(erro.limite).toEqual({ tipo: 'Diario', limiteCentavos: 200000, disponivelCentavos: 1234 });
+  });
+
+  it.each([
+    ['sem extensões', {}],
+    ['tipo desconhecido', extensoes('Noturno', 100, 50)],
+  ])('%s → título com "Ajuste o valor para continuar."', (_, extra) => {
+    const erro = traduzirErro(422, problema('limite-excedido', 422, extra));
+
+    expect(erro.mensagem).toBe('Limite excedido');
+    expect(erro.detalhe).toBe('Ajuste o valor para continuar.');
+    expect(erro.variante).toBe('atencao');
+  });
+});

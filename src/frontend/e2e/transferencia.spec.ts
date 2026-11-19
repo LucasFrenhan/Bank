@@ -148,3 +148,15 @@ test.describe('Reenvio sem cobrar duas vezes (US3)', () => {
     expect(saidas.itens.map((i) => i.valor)).toEqual([3, 2]);
   });
 });
+
+test.describe('Limites (specs/009-limite-transferencia, US4)', () => {
+  test('a dica do valor mostra o limite agora (padrão R$ 1.000,00 por transferência)', async ({ page }) => {
+    const pagador = await criarContaPelaApi(page, 'PessoaFisica', 'Lucas Limite');
+    await entrar(page, pagador);
+
+    await page.goto('/transferir');
+
+    // O saldo de demonstração (R$ 10,00) não alcança o limite padrão; a recusa fica nos testes de componente.
+    await expect(page.getByText(/Disponível: R\$\s10,00 · Limite agora: R\$\s1\.000,00 · mínimo R\$\s0,01/)).toBeVisible();
+  });
+});
