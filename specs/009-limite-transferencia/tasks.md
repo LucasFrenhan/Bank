@@ -226,24 +226,24 @@ concluídas e 2 `limite-excedido`; replay de uma concluída com o limite esgotad
 
 ### Testes da US3 (escrever primeiro)
 
-- [ ] T024 [P] [US3] Criar `back/tests/Bank.IntegrationTests/ConcorrenciaLimiteTests.cs` com
+- [X] T024 [P] [US3] Criar `back/tests/Bank.IntegrationTests/ConcorrenciaLimiteTests.cs` com
   fábrica própria (saldo inicial PF `5000.00`, `Diario=1000.00`, `PorOperacao=""`): 5
   transferências simultâneas de R$ 300,00 de uma PF nova → exatamente 3 × 201 e 2 × 422
   `limite-excedido`, total enviado R$ 900,00 e saldo R$ 4.100,00, repetido 5 rodadas (SC-001);
   20 reenvios paralelos da mesma `Idempotency-Key` → 1 débito e o disponível cai uma única vez
   (SC-004)
-- [ ] T025 [P] [US3] Em `back/tests/Bank.IntegrationTests/LimiteTransferenciaTests.cs`,
+- [X] T025 [P] [US3] Em `back/tests/Bank.IntegrationTests/LimiteTransferenciaTests.cs`,
   acrescentar: com o diário esgotado, reenviar uma transferência concluída com a mesma chave e
   os mesmos dados → 200 com o mesmo `transferenciaId`; depois de reduzir o limite (fábrica com
   `WithWebHostBuilder` e `PorOperacao` menor que o valor original) o replay continua 200
-- [ ] T026 [P] [US3] Em `back/tests/Bank.UnitTests/Application/RealizarTransferenciaTests.cs`,
+- [X] T026 [P] [US3] Em `back/tests/Bank.UnitTests/Application/RealizarTransferenciaTests.cs`,
   acrescentar: replay (primeira e segunda verificação de idempotência) não chama
   `SomarEnviadasAsync` nem registra recusa por limite, mesmo com valor acima do limite por
   operação configurado
 
 ### Implementação da US3
 
-- [ ] T027 [US3] Confirmar em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`
+- [X] T027 [US3] Confirmar em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`
   que a verificação por operação fica depois da primeira verificação de idempotência (replay sai
   antes) e a diária depois da segunda (dentro do bloqueio), com T024–T026 verdes; corrigir a
   ordem se algum falhar (FR-008)

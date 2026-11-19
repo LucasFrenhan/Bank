@@ -66,6 +66,42 @@ public class LimiteTransferenciaTests(LimitesApiFactory factory) : IClassFixture
     }
 
     [Fact]
+    public async Task Replay_ComLimiteDiarioEsgotado_200ComOOriginal()
+    {
+        using var client = factory.CreateClient();
+        var (pf, pj) = (await CriarPfAsync(client), await CriarPjAsync(client));
+        var chave = Guid.NewGuid();
+
+        using var original = await TransferirAsync(client, pf, pj.Documento, 1000.00m, chave);
+        using var esgota = await TransferirAsync(client, pf, pj.Documento, 1000.00m);
+        using var replay = await TransferirAsync(client, pf, pj.Documento, 1000.00m, chave);
+
+        Assert.Equal((HttpStatusCode.Created, HttpStatusCode.Created, HttpStatusCode.OK), (original.StatusCode, esgota.StatusCode, replay.StatusCode));
+        Assert.Equal(
+            (await ApiBank.LerJsonAsync(original)).GetProperty("transferenciaId").GetGuid(),
+            (await ApiBank.LerJsonAsync(replay)).GetProperty("transferenciaId").GetGuid());
+        Assert.Equal(3000.00m, await SaldoAsync(client, pf));
+    }
+
+    [Fact]
+    public async Task Replay_DepoisDeReduzirOLimite_ContinuaComOOriginal()
+    {
+        using var client = factory.CreateClient();
+        var (pf, pj) = (await CriarPfAsync(client), await CriarPjAsync(client));
+        var chave = Guid.NewGuid();
+        using var original = await TransferirAsync(client, pf, pj.Documento, 1000.00m, chave);
+
+        await using var reduzida = factory.WithWebHostBuilder(b => b.ConfigureAppConfiguration((_, c) => c.AddInMemoryCollection(
+            new Dictionary<string, string?> { ["Transferencias:Limites:PessoaFisica:PorOperacao"] = "500.00" })));
+        using var clientReduzido = reduzida.CreateClient();
+        using var replay = await TransferirAsync(clientReduzido, pf, pj.Documento, 1000.00m, chave);
+        using var nova = await TransferirAsync(clientReduzido, pf, pj.Documento, 1000.00m);
+
+        Assert.Equal(HttpStatusCode.OK, replay.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, nova.StatusCode);
+    }
+
+    [Fact]
     public async Task Recusa_NaoGravaAChave_MesmaChaveDepoisCom500_201()
     {
         using var client = factory.CreateClient();

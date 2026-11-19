@@ -252,6 +252,39 @@ public sealed class RealizarTransferenciaTests : IDisposable
         Assert.Equal(ErrosTransferencia.SaldoInsuficiente, Assert.Single(resultado.Erros));
     }
 
+    // ---------- Replay e limites (specs/009-limite-transferencia, US3) ----------
+
+    [Fact]
+    public async Task Replay_AntesDoBloqueio_NaoVerificaLimites()
+    {
+        var chave = Guid.NewGuid();
+        await Transferir("12ABC34501DE35", 4m, chave: chave);
+        _limites.PessoaFisica.PorOperacao = 1m;
+        _limites.PessoaFisica.Diario = 1m;
+        _banco.Chamadas.Clear();
+
+        var replay = await Transferir("12ABC34501DE35", 4m, chave: chave);
+
+        Assert.True(replay.Valor.Replay);
+        Assert.Empty(_banco.Chamadas);
+        Assert.DoesNotContain(_metricas.Medicoes, m => m.Nome == "bank.transferencias.recusadas");
+    }
+
+    [Fact]
+    public async Task Replay_DentroDoBloqueio_NaoSomaODia()
+    {
+        var chave = Guid.NewGuid();
+        var outra = Transferencia.Executar(_pf.Carteira, _pj.Carteira, ValorTransferencia.Criar(2m).Valor, null, chave, Relogio.GetUtcNow()).Valor;
+        _limites.PessoaFisica.Diario = 1m;
+        _banco.AntesDeBloquear = () => _banco.Gravadas.Add(outra);
+
+        var resultado = await Transferir("12ABC34501DE35", 2m, chave: chave);
+
+        Assert.True(resultado.Valor.Replay);
+        Assert.Equal(["Bloquear"], _banco.Chamadas);
+        Assert.DoesNotContain(_metricas.Medicoes, m => m.Nome == "bank.transferencias.recusadas");
+    }
+
     private Task<Resultado<TransferenciaRealizada>> Transferir(string documento, decimal valor, string? descricao = null, Guid? chave = null) =>
         _casoDeUso.ExecutarAsync(new RealizarTransferenciaComando(_pf.Id, (chave ?? Guid.NewGuid()).ToString(), documento, valor, descricao), CancellationToken.None);
 

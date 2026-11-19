@@ -18,6 +18,9 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
 
     private ExecucaoTransferencia? _pendente;
 
+    /// <summary>Simula outra requisição gravando a mesma chave enquanto esta espera o bloqueio.</summary>
+    public Action? AntesDeBloquear { get; set; }
+
     /// <summary>Simula outra requisição gravando a mesma chave durante a confirmação.</summary>
     public Action? AntesDeConfirmar { get; set; }
 
@@ -111,6 +114,7 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
     public Task<IReadOnlyList<Carteira>> BloquearCarteirasAsync(Guid carteiraA, Guid carteiraB, CancellationToken cancellationToken)
     {
         Chamadas.Add("Bloquear");
+        AntesDeBloquear?.Invoke();
         return Task.FromResult<IReadOnlyList<Carteira>>(OmitirCarteirasNoBloqueio
             ? []
             : [.. Usuarios.Select(u => u.Carteira).Where(c => c.Id == carteiraA || c.Id == carteiraB).OrderBy(c => c.Id)]);
