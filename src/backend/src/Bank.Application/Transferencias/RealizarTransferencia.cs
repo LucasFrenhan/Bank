@@ -30,6 +30,7 @@ public sealed partial class RealizarTransferencia(
     ITransferenciaRepositorio transferencias,
     IUnidadeDeTransferencia unidade,
     IOptionsMonitor<LimitesTransferenciaOptions> limites,
+    CalendarioBrasilia calendario,
     TimeProvider relogio,
     MetricasTransferencias metricas,
     ILogger<RealizarTransferencia> logger)
@@ -115,6 +116,21 @@ public sealed partial class RealizarTransferencia(
             // lido depois no reenvio e na consulta (spec 008, SC-001).
             var relogioAgora = relogio.GetUtcNow();
             var agora = relogioAgora.AddTicks(-(relogioAgora.Ticks % TicksPorMicrossegundo));
+
+            // Limite diário sob o bloqueio da origem: em ReadCommitted, a soma (novo comando) já vê
+            // as transferências confirmadas por quem segurava o bloqueio antes (spec 009, R3, FR-009).
+            if (limitesPf.Diario is not null)
+            {
+                var dia = calendario.Hoje(agora);
+                var transferidoHoje = await transferencias.SomarEnviadasAsync(pagador.CarteiraId, dia.InicioUtc, dia.FimUtc, cancellationToken);
+                var diario = limitesPf.VerificarDiario(valor.Valor, transferidoHoje);
+                if (!diario.Sucesso)
+                {
+                    await unidade.DesfazerAsync(cancellationToken);
+                    return RecusarPorLimite(diario.Erros, pagador.CarteiraId, valor.Valor);
+                }
+            }
+
             var execucao = Transferencia.Executar(origem, carteiraDestino, valor, descricao, chave, agora);
             if (!execucao.Sucesso)
             {

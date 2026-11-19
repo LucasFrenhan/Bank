@@ -6,7 +6,7 @@ namespace Bank.Infrastructure.Persistencia;
 
 /// <summary>
 /// Leitura de transferências gravadas: idempotência (specs/006-transferencias, R4) e consulta por
-/// identificador (specs/008-consulta-transferencia, R1). Uma única projeção garante o mesmo
+/// identificador (specs/008-consulta-transferencia, R1) e soma do dia (specs/009, R3). Uma única projeção garante o mesmo
 /// comprovante nos dois casos; os documentos saem sem máscara.
 /// </summary>
 internal sealed class TransferenciaRepositorio(BankDbContext contexto) : ITransferenciaRepositorio
@@ -16,6 +16,11 @@ internal sealed class TransferenciaRepositorio(BankDbContext contexto) : ITransf
 
     public Task<Comprovante?> ObterComprovantePorIdAsync(Guid transferenciaId, CancellationToken cancellationToken) =>
         ObterAsync(contexto.Transferencias.Where(t => t.Id == transferenciaId), cancellationToken);
+
+    public async Task<decimal> SomarEnviadasAsync(Guid carteiraOrigemId, DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken cancellationToken) =>
+        await contexto.Transferencias
+            .Where(t => t.CarteiraOrigemId == carteiraOrigemId && t.CriadoEm >= inicioUtc && t.CriadoEm < fimUtc)
+            .SumAsync(t => (decimal?)t.Valor, cancellationToken) ?? 0m;
 
     private async Task<Comprovante?> ObterAsync(IQueryable<Transferencia> transferencias, CancellationToken cancellationToken)
     {

@@ -161,18 +161,18 @@ virada às 00h00 de Brasília (03h00 UTC) libera o limite
 
 ### Testes da US2 (escrever primeiro)
 
-- [ ] T016 [P] [US2] Criar `back/tests/Bank.UnitTests/Application/CalendarioBrasiliaTests.cs`:
+- [X] T016 [P] [US2] Criar `back/tests/Bank.UnitTests/Application/CalendarioBrasiliaTests.cs`:
   `2026-11-18T02:59:59Z` → dia 2026-11-17 (23h59 de Brasília); `2026-11-18T03:00:00Z` → dia
   2026-11-18 com `InicioUtc = 2026-11-18T03:00:00Z` e `FimUtc = 2026-11-19T03:00:00Z`; `FimUtc`
   exclusivo
-- [ ] T017 [P] [US2] Em `back/tests/Bank.UnitTests/Application/RealizarTransferenciaTests.cs`,
+- [X] T017 [P] [US2] Em `back/tests/Bank.UnitTests/Application/RealizarTransferenciaTests.cs`,
   acrescentar: soma do dia + valor acima do diário → `limite-excedido`/`Diario` com
   `valorDisponivel` correto, transação desfeita (`DesfazerAsync`) e nada adicionado à unidade;
   a soma é pedida ao repositório depois de `BloquearCarteirasAsync` (ordem das chamadas no dublê)
   e com o intervalo do `CalendarioBrasilia`; valor que cabe no limite mas não no saldo →
   `saldo-insuficiente` (dublês em `back/tests/Bank.UnitTests/Application/DublesTransferencia.cs`
   ganham `SomarEnviadasAsync` configurável)
-- [ ] T018 [P] [US2] Criar `back/tests/Bank.IntegrationTests/LimiteDiarioTests.cs` com a fábrica
+- [X] T018 [P] [US2] Criar `back/tests/Bank.IntegrationTests/LimiteDiarioTests.cs` com a fábrica
   `LimiteDiarioApiFactory : BankApiFactory` (saldo inicial PF `5000.00`, `Diario=2000.00` e
   `PorOperacao=""` — vazio, sem limite por operação, para que só o diário recuse) e os testes:
   R$ 1.500,00 (201) → R$ 600,00 (422, `tipoLimite=Diario`, `limite=2000.00`,
@@ -185,30 +185,30 @@ virada às 00h00 de Brasília (03h00 UTC) libera o limite
 
 ### Implementação da US2
 
-- [ ] T019 [P] [US2] Criar `back/src/Bank.Application/Transferencias/CalendarioBrasilia.cs`:
+- [X] T019 [P] [US2] Criar `back/src/Bank.Application/Transferencias/CalendarioBrasilia.cs`:
   `DiaBrasilia(DateOnly Data, DateTimeOffset InicioUtc, DateTimeOffset FimUtc)` e
   `Hoje(DateTimeOffset agoraUtc)`; fuso resolvido uma vez por `America/Sao_Paulo`, depois
   `E. South America Standard Time`, senão `InvalidOperationException` com mensagem clara (R4),
   no construtor; registrar como singleton em `back/src/Bank.Application/DependencyInjection.cs`
   e pedi-lo em `back/src/Bank.Api/Program.cs` logo depois do `Build()`, para a API falhar na
   inicialização; T016 passa
-- [ ] T020 [US2] Em `back/src/Bank.Application/Abstracoes/ITransferencias.cs`, acrescentar a
+- [X] T020 [US2] Em `back/src/Bank.Application/Abstracoes/ITransferencias.cs`, acrescentar a
   `ITransferenciaRepositorio` o método `Task<decimal> SomarEnviadasAsync(Guid carteiraOrigemId,
   DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken)` (intervalo `[inicio,
   fim)`, 0 sem transferências) e implementá-lo por LINQ em
   `back/src/Bank.Infrastructure/Persistencia/TransferenciaRepositorio.cs`, usando o mesmo
   `BankDbContext` da unidade de transferência (mesma transação)
-- [ ] T021 [US2] Em `back/src/Bank.Infrastructure/Persistencia/Configuracoes/TransferenciaConfiguracao.cs`,
+- [X] T021 [US2] Em `back/src/Bank.Infrastructure/Persistencia/Configuracoes/TransferenciaConfiguracao.cs`,
   acrescentar o índice `ix_transferencias_origem_criado_em (carteira_origem_id, criado_em)` e
   gerar a migration `AdicionarIndiceTransferenciasOrigemCriadoEm` em
   `back/src/Bank.Infrastructure/Persistencia/Migrations/` (`dotnet ef migrations add`, sem SQL
   puro)
-- [ ] T022 [US2] Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`, injetar
+- [X] T022 [US2] Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`, injetar
   `CalendarioBrasilia`; dentro da transação, depois do bloqueio e da segunda verificação de
   idempotência e antes de `Transferencia.Executar`, calcular o dia a partir do mesmo `agora`,
   somar com `SomarEnviadasAsync`, chamar `VerificarDiario` e, se recusar, `DesfazerAsync`, log de
   auditoria e `Recusar` (FR-008, FR-009, FR-010); T017 e T018 passam
-- [ ] T023 [P] [US2] Em `src/backend/Dockerfile`, no estágio `final`, acrescentar
+- [X] T023 [P] [US2] Em `src/backend/Dockerfile`, no estágio `final`, acrescentar
   `RUN apk add --no-cache tzdata` antes de `USER app`, com comentário citando a spec 009 (R4);
   validar com `docker compose up -d --build --wait` que a API sobe saudável
 

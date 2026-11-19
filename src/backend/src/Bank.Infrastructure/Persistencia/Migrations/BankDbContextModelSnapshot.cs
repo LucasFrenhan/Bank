@@ -181,6 +181,9 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_transferencias_origem_chave");
 
+                    b.HasIndex("CarteiraOrigemId", "CriadoEm")
+                        .HasDatabaseName("ix_transferencias_origem_criado_em");
+
                     b.ToTable("transferencias", null, t =>
                         {
                             t.HasCheckConstraint("ck_transferencias_origem_diferente_destino", "carteira_origem_id <> carteira_destino_id");

@@ -5,6 +5,7 @@ using Bank.Api.OpenApi;
 using Bank.Api.Seguranca;
 using Bank.Api.Testing;
 using Bank.Application;
+using Bank.Application.Transferencias;
 using Bank.Infrastructure;
 
 // Raiz de composição: único ponto da API que conhece a camada de infraestrutura.
@@ -21,6 +22,9 @@ builder.Services
     .AddHealthEndpoints();
 
 var app = builder.Build();
+
+// Falha na inicialização se o fuso de Brasília não existir (specs/009-limite-transferencia, R4).
+_ = app.Services.GetRequiredService<CalendarioBrasilia>();
 
 app.UseTratamentoDeErros();
 app.UseAuthentication();

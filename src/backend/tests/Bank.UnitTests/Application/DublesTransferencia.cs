@@ -81,6 +81,24 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
             e.Transferencia.Valor, e.Transferencia.Descricao, e.Transferencia.Status, e.Transferencia.CriadoEm));
     }
 
+    /// <summary>Ordem das chamadas relevantes (bloqueio e soma do dia — spec 009, FR-009).</summary>
+    public List<string> Chamadas { get; } = [];
+
+    /// <summary>Já transferido hoje fora das gravadas (soma do dia — spec 009).</summary>
+    public decimal TransferidoAntes { get; set; }
+
+    /// <summary>Intervalo da última soma do dia pedida.</summary>
+    public (DateTimeOffset Inicio, DateTimeOffset Fim)? UltimoIntervalo { get; private set; }
+
+    public Task<decimal> SomarEnviadasAsync(Guid carteiraOrigemId, DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken cancellationToken)
+    {
+        Chamadas.Add("Somar");
+        UltimoIntervalo = (inicioUtc, fimUtc);
+        return Task.FromResult(TransferidoAntes + Gravadas
+            .Where(g => g.Transferencia.CarteiraOrigemId == carteiraOrigemId && g.Transferencia.CriadoEm >= inicioUtc && g.Transferencia.CriadoEm < fimUtc)
+            .Sum(g => g.Transferencia.Valor));
+    }
+
     /// <summary>Transações iniciadas (o limite por operação recusa antes do bloqueio — spec 009).</summary>
     public int TransacoesIniciadas { get; private set; }
 
@@ -90,10 +108,13 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyList<Carteira>> BloquearCarteirasAsync(Guid carteiraA, Guid carteiraB, CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<Carteira>>(OmitirCarteirasNoBloqueio
+    public Task<IReadOnlyList<Carteira>> BloquearCarteirasAsync(Guid carteiraA, Guid carteiraB, CancellationToken cancellationToken)
+    {
+        Chamadas.Add("Bloquear");
+        return Task.FromResult<IReadOnlyList<Carteira>>(OmitirCarteirasNoBloqueio
             ? []
             : [.. Usuarios.Select(u => u.Carteira).Where(c => c.Id == carteiraA || c.Id == carteiraB).OrderBy(c => c.Id)]);
+    }
 
     public void Adicionar(ExecucaoTransferencia execucao) => _pendente = execucao;
 

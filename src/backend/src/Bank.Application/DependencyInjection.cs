@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddSingleton<IValidateOptions<LimitesTransferenciaOptions>, ValidadorLimitesTransferenciaOptions>();
 
         services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<CalendarioBrasilia>();
         services.AddSingleton<MetricasUsuarios>();
         services.AddSingleton<HashSenhaFicticio>();
 
