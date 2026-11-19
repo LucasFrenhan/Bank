@@ -2,6 +2,8 @@ using Bank.Application.Abstracoes;
 using Bank.Domain.Carteiras;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Bank.UnitTests.Application;
 
@@ -79,7 +81,14 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
             e.Transferencia.Valor, e.Transferencia.Descricao, e.Transferencia.Status, e.Transferencia.CriadoEm));
     }
 
-    public Task IniciarAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    /// <summary>Transações iniciadas (o limite por operação recusa antes do bloqueio — spec 009).</summary>
+    public int TransacoesIniciadas { get; private set; }
+
+    public Task IniciarAsync(CancellationToken cancellationToken)
+    {
+        TransacoesIniciadas++;
+        return Task.CompletedTask;
+    }
 
     public Task<IReadOnlyList<Carteira>> BloquearCarteirasAsync(Guid carteiraA, Guid carteiraB, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<Carteira>>(OmitirCarteirasNoBloqueio
@@ -107,5 +116,35 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
         Desfeitas++;
         _pendente = null;
         return Task.CompletedTask;
+    }
+}
+
+/// <summary><see cref="IOptionsMonitor{TOptions}"/> fixo; o teste pode alterar a instância.</summary>
+internal sealed class MonitorDeOpcoes<T>(T valor) : IOptionsMonitor<T>
+{
+    public T CurrentValue => valor;
+
+    public T Get(string? name) => valor;
+
+    public IDisposable? OnChange(Action<T, string?> listener) => null;
+}
+
+/// <summary>Logger que guarda nível, mensagem e propriedades (auditoria da spec 009, FR-016).</summary>
+internal sealed class LoggerCapturado<T> : ILogger<T>
+{
+    public List<(LogLevel Nivel, string Mensagem, IReadOnlyDictionary<string, object?> Propriedades)> Registros { get; } = [];
+
+    public IDisposable? BeginScope<TState>(TState state)
+        where TState : notnull => null;
+
+    public bool IsEnabled(LogLevel logLevel) => true;
+
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    {
+        ArgumentNullException.ThrowIfNull(formatter);
+        var propriedades = state is IEnumerable<KeyValuePair<string, object?>> pares
+            ? pares.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal)
+            : new Dictionary<string, object?>(StringComparer.Ordinal);
+        Registros.Add((logLevel, formatter(state, exception), propriedades));
     }
 }

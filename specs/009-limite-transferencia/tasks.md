@@ -122,13 +122,13 @@ valor acima do limite e do saldo → `limite-excedido`
 
 ### Testes da US1 (escrever primeiro)
 
-- [ ] T013 [P] [US1] Em `back/tests/Bank.UnitTests/Application/RealizarTransferenciaTests.cs`,
+- [X] T013 [P] [US1] Em `back/tests/Bank.UnitTests/Application/RealizarTransferenciaTests.cs`,
   acrescentar (com opções de limite injetadas por `Options.Create`/monitor de teste): valor acima
   do limite por operação → falha `limite-excedido` sem iniciar a transação nem bloquear carteiras
   (dublê de `IUnidadeDeTransferencia` sem chamadas); valor acima do limite e do saldo →
   `limite-excedido`; métrica de recusa com `motivo=limite-excedido` e `tipo_limite=PorOperacao`;
   log `Warning` de auditoria com o identificador da carteira, sem documento nem nome
-- [ ] T014 [P] [US1] Criar `back/tests/Bank.IntegrationTests/LimiteTransferenciaTests.cs` com uma
+- [X] T014 [P] [US1] Criar `back/tests/Bank.IntegrationTests/LimiteTransferenciaTests.cs` com uma
   fábrica `LimitesApiFactory : BankApiFactory` (saldo inicial PF `5000.00`, limites
   `PorOperacao=1000.00` e `Diario=2000.00` via `AddInMemoryCollection`, como `SaldoMilApiFactory`)
   e os testes: R$ 1.000,00 → 201; R$ 1.000,01 → 422 `application/problem+json` com `type`,
@@ -138,7 +138,7 @@ valor acima do limite e do saldo → `limite-excedido`
 
 ### Implementação da US1
 
-- [ ] T015 [US1] Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`, injetar
+- [X] T015 [US1] Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`, injetar
   `IOptionsMonitor<LimitesTransferenciaOptions>`; depois da verificação de autotransferência e
   antes de `ObterTitularAsync`/`unidade.IniciarAsync`, chamar `VerificarOperacao(valor.Valor)` e
   recusar com o erro (FR-008); trocar `Recusar` para usar `metricas.RegistrarRecusa(erros[0])`;

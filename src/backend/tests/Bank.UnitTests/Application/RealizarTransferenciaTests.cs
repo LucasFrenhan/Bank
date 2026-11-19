@@ -3,6 +3,7 @@ using Bank.Application.Transferencias;
 using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bank.UnitTests.Application;
@@ -16,9 +17,13 @@ public sealed class RealizarTransferenciaTests : IDisposable
     private readonly Usuario _pf;
     private readonly Usuario _pj;
 
+    /// <summary>Sem limites por padrão; os testes da spec 009 configuram os valores.</summary>
+    private readonly LimitesTransferenciaOptions _limites = new();
+    private readonly LoggerCapturado<RealizarTransferencia> _logger = new();
+
     public RealizarTransferenciaTests()
     {
-        _casoDeUso = new RealizarTransferencia(_banco, _banco, _banco, _banco, TimeProvider.System, _metricas.Metricas, NullLogger<RealizarTransferencia>.Instance);
+        _casoDeUso = new RealizarTransferencia(_banco, _banco, _banco, _banco, new MonitorDeOpcoes<LimitesTransferenciaOptions>(_limites), TimeProvider.System, _metricas.Metricas, _logger);
         _pf = _banco.Criar("Lucas Silva", "52998224725", TipoConta.PessoaFisica, 10m);
         _pj = _banco.Criar("Cafeteria Ltda", "12ABC34501DE35", TipoConta.PessoaJuridica, 0m);
     }
@@ -135,6 +140,62 @@ public sealed class RealizarTransferenciaTests : IDisposable
 
         Assert.True(resultado.Valor.Replay);
         Assert.Equal(outra.Transferencia.Id, resultado.Valor.Comprovante.TransferenciaId);
+    }
+
+    // ---------- Limite por operação (specs/009-limite-transferencia, US1) ----------
+
+    [Fact]
+    public async Task LimitePorOperacao_ValorIgual_Conclui()
+    {
+        _limites.PessoaFisica.PorOperacao = 4m;
+
+        Assert.True((await Transferir("12ABC34501DE35", 4m)).Sucesso);
+    }
+
+    [Fact]
+    public async Task LimitePorOperacao_Acima_RecusaAntesDoBloqueio()
+    {
+        _limites.PessoaFisica.PorOperacao = 4m;
+
+        var resultado = await Transferir("12ABC34501DE35", 4.01m);
+
+        var erro = Assert.Single(resultado.Erros);
+        Assert.Equal("limite-excedido", erro.Codigo);
+        Assert.Equal("PorOperacao", erro.Detalhes!["tipoLimite"]);
+        Assert.Equal(4m, erro.Detalhes["valorDisponivel"]);
+        Assert.Equal(0, _banco.TransacoesIniciadas);
+        Assert.Empty(_banco.Gravadas);
+        Assert.Equal(10m, _pf.Carteira.Saldo);
+        Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.recusadas"
+            && m.Tags["motivo"] == "limite-excedido" && m.Tags["tipo_limite"] == "PorOperacao");
+    }
+
+    [Fact]
+    public async Task LimitePorOperacao_AcimaDoLimiteEDoSaldo_RecusaPorLimite()
+    {
+        _limites.PessoaFisica.PorOperacao = 4m;
+
+        var resultado = await Transferir("12ABC34501DE35", 50m);
+
+        Assert.Equal("limite-excedido", Assert.Single(resultado.Erros).Codigo);
+    }
+
+    [Fact]
+    public async Task LimitePorOperacao_Recusa_GeraLogDeAuditoriaSemDadosPessoais()
+    {
+        _limites.PessoaFisica.PorOperacao = 4m;
+
+        await Transferir("12ABC34501DE35", 5m);
+
+        var registro = Assert.Single(_logger.Registros, r => r.Nivel == LogLevel.Warning);
+        Assert.Equal(("PorOperacao", _pf.Carteira.Id, 5m, 4m, 4m), (
+            registro.Propriedades["TipoLimite"]?.ToString(),
+            (Guid)registro.Propriedades["CarteiraOrigemId"]!,
+            (decimal)registro.Propriedades["Valor"]!,
+            (decimal)registro.Propriedades["Limite"]!,
+            (decimal)registro.Propriedades["ValorDisponivel"]!));
+        Assert.DoesNotContain("52998224725", registro.Mensagem, StringComparison.Ordinal);
+        Assert.DoesNotContain("Lucas", registro.Mensagem, StringComparison.Ordinal);
     }
 
     private Task<Resultado<TransferenciaRealizada>> Transferir(string documento, decimal valor, string? descricao = null, Guid? chave = null) =>
