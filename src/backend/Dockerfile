@@ -18,6 +18,9 @@ RUN dotnet publish src/Bank.Api/Bank.Api.csproj -c Release -o /app --no-restore
 # Alpine: inclui o wget do BusyBox, usado pelo healthcheck do Compose
 FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-alpine3.24 AS final
 WORKDIR /app
+# Fuso de Brasília para o limite diário: a imagem Alpine não traz /usr/share/zoneinfo
+# (specs/009-limite-transferencia, research R4)
+RUN apk add --no-cache tzdata
 COPY --from=build /app .
 USER app
 ENV ASPNETCORE_HTTP_PORTS=8080

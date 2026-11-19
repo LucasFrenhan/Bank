@@ -3,6 +3,7 @@ using Bank.Application.Transferencias;
 using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bank.UnitTests.Application;
@@ -16,9 +17,16 @@ public sealed class RealizarTransferenciaTests : IDisposable
     private readonly Usuario _pf;
     private readonly Usuario _pj;
 
+    /// <summary>Sem limites por padrão; os testes da spec 009 configuram os valores.</summary>
+    private readonly LimitesTransferenciaOptions _limites = new();
+    private readonly LoggerCapturado<RealizarTransferencia> _logger = new();
+
+    /// <summary>23h30 de 17/11 em Brasília (02h30 UTC de 18/11): o dia do limite é 17/11.</summary>
+    private static readonly RelogioFixo Relogio = new(new DateTimeOffset(2026, 11, 18, 2, 30, 0, TimeSpan.Zero));
+
     public RealizarTransferenciaTests()
     {
-        _casoDeUso = new RealizarTransferencia(_banco, _banco, _banco, _banco, TimeProvider.System, _metricas.Metricas, NullLogger<RealizarTransferencia>.Instance);
+        _casoDeUso = new RealizarTransferencia(_banco, _banco, _banco, _banco, new MonitorDeOpcoes<LimitesTransferenciaOptions>(_limites), new CalendarioBrasilia(), Relogio, _metricas.Metricas, _logger);
         _pf = _banco.Criar("Lucas Silva", "52998224725", TipoConta.PessoaFisica, 10m);
         _pj = _banco.Criar("Cafeteria Ltda", "12ABC34501DE35", TipoConta.PessoaJuridica, 0m);
     }
@@ -135,6 +143,146 @@ public sealed class RealizarTransferenciaTests : IDisposable
 
         Assert.True(resultado.Valor.Replay);
         Assert.Equal(outra.Transferencia.Id, resultado.Valor.Comprovante.TransferenciaId);
+    }
+
+    // ---------- Limite por operação (specs/009-limite-transferencia, US1) ----------
+
+    [Fact]
+    public async Task LimitePorOperacao_ValorIgual_Conclui()
+    {
+        _limites.PessoaFisica.PorOperacao = 4m;
+
+        Assert.True((await Transferir("12ABC34501DE35", 4m)).Sucesso);
+    }
+
+    [Fact]
+    public async Task LimitePorOperacao_Acima_RecusaAntesDoBloqueio()
+    {
+        _limites.PessoaFisica.PorOperacao = 4m;
+
+        var resultado = await Transferir("12ABC34501DE35", 4.01m);
+
+        var erro = Assert.Single(resultado.Erros);
+        Assert.Equal("limite-excedido", erro.Codigo);
+        Assert.Equal("PorOperacao", erro.Detalhes!["tipoLimite"]);
+        Assert.Equal(4m, erro.Detalhes["valorDisponivel"]);
+        Assert.Equal(0, _banco.TransacoesIniciadas);
+        Assert.Empty(_banco.Gravadas);
+        Assert.Equal(10m, _pf.Carteira.Saldo);
+        Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.recusadas"
+            && m.Tags["motivo"] == "limite-excedido" && m.Tags["tipo_limite"] == "PorOperacao");
+    }
+
+    [Fact]
+    public async Task LimitePorOperacao_AcimaDoLimiteEDoSaldo_RecusaPorLimite()
+    {
+        _limites.PessoaFisica.PorOperacao = 4m;
+
+        var resultado = await Transferir("12ABC34501DE35", 50m);
+
+        Assert.Equal("limite-excedido", Assert.Single(resultado.Erros).Codigo);
+    }
+
+    [Fact]
+    public async Task LimitePorOperacao_Recusa_GeraLogDeAuditoriaSemDadosPessoais()
+    {
+        _limites.PessoaFisica.PorOperacao = 4m;
+
+        await Transferir("12ABC34501DE35", 5m);
+
+        var registro = Assert.Single(_logger.Registros, r => r.Nivel == LogLevel.Warning);
+        Assert.Equal(("PorOperacao", _pf.Carteira.Id, 5m, 4m, 4m), (
+            registro.Propriedades["TipoLimite"]?.ToString(),
+            (Guid)registro.Propriedades["CarteiraOrigemId"]!,
+            (decimal)registro.Propriedades["Valor"]!,
+            (decimal)registro.Propriedades["Limite"]!,
+            (decimal)registro.Propriedades["ValorDisponivel"]!));
+        Assert.DoesNotContain("52998224725", registro.Mensagem, StringComparison.Ordinal);
+        Assert.DoesNotContain("Lucas", registro.Mensagem, StringComparison.Ordinal);
+    }
+
+    // ---------- Limite diário (specs/009-limite-transferencia, US2) ----------
+
+    [Fact]
+    public async Task LimiteDiario_SomaAcima_RecusaDentroDoBloqueioEDesfaz()
+    {
+        _limites.PessoaFisica.Diario = 8m;
+        _banco.TransferidoAntes = 5m;
+
+        var resultado = await Transferir("12ABC34501DE35", 3.01m);
+
+        var erro = Assert.Single(resultado.Erros);
+        Assert.Equal(("limite-excedido", "Diario", 8m, 3m), (erro.Codigo, erro.Detalhes!["tipoLimite"], erro.Detalhes["limite"], erro.Detalhes["valorDisponivel"]));
+        Assert.Equal(["Bloquear", "Somar"], _banco.Chamadas);
+        Assert.Equal(1, _banco.Desfeitas);
+        Assert.Empty(_banco.Gravadas);
+        Assert.Equal(10m, _pf.Carteira.Saldo);
+        Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.recusadas" && m.Tags["tipo_limite"] == "Diario");
+        Assert.Single(_logger.Registros, r => r.Nivel == LogLevel.Warning);
+    }
+
+    [Fact]
+    public async Task LimiteDiario_SomaIgual_Conclui()
+    {
+        _limites.PessoaFisica.Diario = 8m;
+        _banco.TransferidoAntes = 5m;
+
+        Assert.True((await Transferir("12ABC34501DE35", 3m)).Sucesso);
+    }
+
+    [Fact]
+    public async Task LimiteDiario_SomaUsaODiaDeBrasilia()
+    {
+        _limites.PessoaFisica.Diario = 8m;
+
+        await Transferir("12ABC34501DE35", 1m);
+
+        Assert.Equal(
+            (new DateTimeOffset(2026, 11, 17, 3, 0, 0, TimeSpan.Zero), new DateTimeOffset(2026, 11, 18, 3, 0, 0, TimeSpan.Zero)),
+            _banco.UltimoIntervalo);
+    }
+
+    [Fact]
+    public async Task LimiteDiario_CabeNoLimiteMasNaoNoSaldo_SaldoInsuficiente()
+    {
+        _limites.PessoaFisica.Diario = 100m;
+
+        var resultado = await Transferir("12ABC34501DE35", 10.01m);
+
+        Assert.Equal(ErrosTransferencia.SaldoInsuficiente, Assert.Single(resultado.Erros));
+    }
+
+    // ---------- Replay e limites (specs/009-limite-transferencia, US3) ----------
+
+    [Fact]
+    public async Task Replay_AntesDoBloqueio_NaoVerificaLimites()
+    {
+        var chave = Guid.NewGuid();
+        await Transferir("12ABC34501DE35", 4m, chave: chave);
+        _limites.PessoaFisica.PorOperacao = 1m;
+        _limites.PessoaFisica.Diario = 1m;
+        _banco.Chamadas.Clear();
+
+        var replay = await Transferir("12ABC34501DE35", 4m, chave: chave);
+
+        Assert.True(replay.Valor.Replay);
+        Assert.Empty(_banco.Chamadas);
+        Assert.DoesNotContain(_metricas.Medicoes, m => m.Nome == "bank.transferencias.recusadas");
+    }
+
+    [Fact]
+    public async Task Replay_DentroDoBloqueio_NaoSomaODia()
+    {
+        var chave = Guid.NewGuid();
+        var outra = Transferencia.Executar(_pf.Carteira, _pj.Carteira, ValorTransferencia.Criar(2m).Valor, null, chave, Relogio.GetUtcNow()).Valor;
+        _limites.PessoaFisica.Diario = 1m;
+        _banco.AntesDeBloquear = () => _banco.Gravadas.Add(outra);
+
+        var resultado = await Transferir("12ABC34501DE35", 2m, chave: chave);
+
+        Assert.True(resultado.Valor.Replay);
+        Assert.Equal(["Bloquear"], _banco.Chamadas);
+        Assert.DoesNotContain(_metricas.Medicoes, m => m.Nome == "bank.transferencias.recusadas");
     }
 
     private Task<Resultado<TransferenciaRealizada>> Transferir(string documento, decimal valor, string? descricao = null, Guid? chave = null) =>

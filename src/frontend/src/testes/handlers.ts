@@ -116,6 +116,13 @@ export function extratoDe(itens: object[]) {
   });
 }
 
+/** Limites da PF (spec 009, GET /limites). Rota literal antes de /:transferenciaId. */
+export function limitesDe(extra: { porOperacao?: number | null; diario?: number | null; transferidoHoje?: number; disponivelHoje?: number | null } = {}) {
+  return http.get('*/api/v1/transferencias/limites', () =>
+    HttpResponse.json({ porOperacao: 1000, diario: 5000, transferidoHoje: 0, disponivelHoje: 5000, dia: '2026-11-18', ...extra }),
+  );
+}
+
 /** Sobrescreve uma rota da spec 006 com um problema (ou falha de rede). */
 export function falhaEm(metodo: 'get' | 'post', caminho: string, codigo: string, status = 400, extra: object = {}) {
   return http[metodo](`*${caminho}`, () => (codigo === 'rede' ? HttpResponse.error() : problema(codigo, status, extra)));
@@ -144,6 +151,8 @@ export const handlersPadrao = [
   http.get('*/api/v1/usuarios/me', () => HttpResponse.json(titular())),
   http.post('*/api/v1/transferencias/destinatarios/consultar', () => HttpResponse.json(destinatario())),
   http.post('*/api/v1/transferencias', () => HttpResponse.json(comprovante(), { status: 201 })),
+  // Sem limites por padrão (a dica fica como na spec 007); os testes da spec 009 usam limitesDe.
+  limitesDe({ porOperacao: null, diario: null, transferidoHoje: 0, disponivelHoje: null }),
   extratoDe([ITEM_ABERTURA]),
   // Depois do extrato: a rota literal /extrato tem precedência, como na API (spec 008).
   consultaDe({ [ID_TRANSFERENCIA]: comprovante() }),

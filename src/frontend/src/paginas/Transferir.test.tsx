@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { CHAVE_TRANSFERENCIA, TRANSFERENCIA_VAZIA } from '../transferencia/armazenamento';
-import { carteira, destinatario, falhaEm, problema, TRACE_ID } from '../testes/handlers';
+import { carteira, destinatario, falhaEm, limitesDe, problema, TRACE_ID } from '../testes/handlers';
 import { renderizarApp } from '../testes/renderizar';
 import { servidor } from '../testes/setup';
 
@@ -249,5 +249,66 @@ describe('Transferir — recusas na etapa Dados (US2)', () => {
     expect(await screen.findByText('Algo deu errado')).toBeInTheDocument();
     expect(screen.getByText(TRACE_ID)).toBeInTheDocument();
     expect(campoDocumento()).toHaveValue('12.ABC.345/01DE-35');
+  });
+});
+
+describe('Transferir — limites (specs/009, US4; contracts/frontend.md)', () => {
+  async function digitarCnpj() {
+    const resultado = renderizarApp('/transferir', { sessao: 'PessoaFisica' });
+    await resultado.usuario.type(await screen.findByLabelText('CPF ou CNPJ de quem vai receber'), '12ABC34501DE35');
+    await screen.findByText('Padaria Boa Massa Ltda');
+    return resultado;
+  }
+
+  it('dica mostra o limite agora (menor entre por operação e disponível hoje)', async () => {
+    servidor.use(limitesDe({ porOperacao: 4, diario: 6, transferidoHoje: 3, disponivelHoje: 3 }));
+    renderizarApp('/transferir', { sessao: 'PessoaFisica' });
+
+    expect(await screen.findByText(/Disponível: R\$\s10,00 · Limite agora: R\$\s3,00 · mínimo R\$\s0,01/)).toBeInTheDocument();
+  });
+
+  it('consulta de limites indisponível → dica como antes', async () => {
+    servidor.use(falhaEm('get', '/api/v1/transferencias/limites', 'rede'));
+    renderizarApp('/transferir', { sessao: 'PessoaFisica' });
+
+    expect(await screen.findByText(/Disponível: R\$\s10,00 · mínimo R\$\s0,01/)).toBeInTheDocument();
+    expect(screen.queryByText(/Limite agora/)).not.toBeInTheDocument();
+  });
+
+  it('acima do limite por operação (e do saldo) → aviso de limite, sem avançar', async () => {
+    servidor.use(limitesDe({ porOperacao: 4, diario: 6, transferidoHoje: 0, disponivelHoje: 6 }));
+    const { usuario } = await digitarCnpj();
+    await screen.findByText(/Limite agora: R\$\s4,00/);
+
+    await usuario.type(campoValor(), '50');
+    await usuario.click(screen.getByRole('button', { name: 'Continuar' }));
+
+    const aviso = await screen.findByRole('alert');
+    expect(aviso).toHaveTextContent('Limite excedido');
+    expect(aviso).toHaveTextContent(/O limite por transferência é R\$\s4,00\. Ajuste o valor para continuar\./);
+    expect(screen.getByTestId('rota-atual')).toHaveTextContent(/^\/transferir$/);
+  });
+
+  it('valor igual ao limite avança para a confirmação', async () => {
+    servidor.use(limitesDe({ porOperacao: 4, diario: 6, transferidoHoje: 0, disponivelHoje: 6 }));
+    const { usuario } = await digitarCnpj();
+    await screen.findByText(/Limite agora: R\$\s4,00/);
+
+    await usuario.type(campoValor(), '4,00');
+    await usuario.click(screen.getByRole('button', { name: 'Continuar' }));
+
+    await waitFor(() => expect(screen.getByTestId('rota-atual')).toHaveTextContent('/transferir/confirmar'));
+  });
+
+  it('limite diário esgotado → "Você já usou todo o limite diário…"', async () => {
+    servidor.use(limitesDe({ porOperacao: 4, diario: 6, transferidoHoje: 6, disponivelHoje: 0 }));
+    const { usuario } = await digitarCnpj();
+    await screen.findByText(/Limite agora: R\$\s0,00/);
+
+    await usuario.type(campoValor(), '0,01');
+    await usuario.click(screen.getByRole('button', { name: 'Continuar' }));
+
+    const aviso = await screen.findByRole('alert');
+    expect(aviso).toHaveTextContent(/Você já usou todo o limite diário de R\$\s6,00\. Ele renova à meia-noite \(horário de Brasília\)\./);
   });
 });

@@ -4,6 +4,7 @@ using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Bank.Application.Transferencias;
 
@@ -20,7 +21,7 @@ public sealed record TransferenciaRealizada(Comprovante Comprovante, bool Replay
 
 /// <summary>
 /// Caso de uso de transferência (specs/006-transferencias US1–US3): validação, idempotência por
-/// pagador (R4), bloqueio ordenado das carteiras e gravação atômica (R3). As regras de saldo e
+/// pagador (R4), limites (spec 009), bloqueio ordenado das carteiras e gravação atômica (R3). As regras de saldo e
 /// autotransferência ficam no domínio.
 /// </summary>
 public sealed partial class RealizarTransferencia(
@@ -28,6 +29,8 @@ public sealed partial class RealizarTransferencia(
     IUsuarioConsultas usuarios,
     ITransferenciaRepositorio transferencias,
     IUnidadeDeTransferencia unidade,
+    IOptionsMonitor<LimitesTransferenciaOptions> limites,
+    CalendarioBrasilia calendario,
     TimeProvider relogio,
     MetricasTransferencias metricas,
     ILogger<RealizarTransferencia> logger)
@@ -73,6 +76,14 @@ public sealed partial class RealizarTransferencia(
             return Recusar([ErrosTransferencia.Autotransferencia]);
         }
 
+        // Limite por operação antes do bloqueio: não depende do histórico (spec 009, FR-008).
+        var limitesPf = limites.CurrentValue.ParaPessoaFisica();
+        var porOperacao = limitesPf.VerificarOperacao(valor.Valor);
+        if (!porOperacao.Sucesso)
+        {
+            return RecusarPorLimite(porOperacao.Erros, pagador.CarteiraId, valor.Valor);
+        }
+
         // Documento do pagador para o comprovante (spec 008, FR-002a), lido antes da transação para
         // não alongar o bloqueio das carteiras.
         var titular = await usuarios.ObterTitularAsync(comando.PagadorUsuarioId, cancellationToken);
@@ -105,6 +116,21 @@ public sealed partial class RealizarTransferencia(
             // lido depois no reenvio e na consulta (spec 008, SC-001).
             var relogioAgora = relogio.GetUtcNow();
             var agora = relogioAgora.AddTicks(-(relogioAgora.Ticks % TicksPorMicrossegundo));
+
+            // Limite diário sob o bloqueio da origem: em ReadCommitted, a soma (novo comando) já vê
+            // as transferências confirmadas por quem segurava o bloqueio antes (spec 009, R3, FR-009).
+            if (limitesPf.Diario is not null)
+            {
+                var dia = calendario.Hoje(agora);
+                var transferidoHoje = await transferencias.SomarEnviadasAsync(pagador.CarteiraId, dia.InicioUtc, dia.FimUtc, cancellationToken);
+                var diario = limitesPf.VerificarDiario(valor.Valor, transferidoHoje);
+                if (!diario.Sucesso)
+                {
+                    await unidade.DesfazerAsync(cancellationToken);
+                    return RecusarPorLimite(diario.Erros, pagador.CarteiraId, valor.Valor);
+                }
+            }
+
             var execucao = Transferencia.Executar(origem, carteiraDestino, valor, descricao, chave, agora);
             if (!execucao.Sucesso)
             {
@@ -160,7 +186,7 @@ public sealed partial class RealizarTransferencia(
 
     private Resultado<TransferenciaRealizada> Recusar(IReadOnlyList<Erro> erros)
     {
-        metricas.RegistrarRecusa(erros[0].Codigo);
+        metricas.RegistrarRecusa(erros[0]);
         return Resultado.Falha<TransferenciaRealizada>(erros);
     }
 
@@ -187,6 +213,17 @@ public sealed partial class RealizarTransferencia(
             ? Resultado.Falha<(Guid, Documento, ValorTransferencia, string?)>(erros)
             : Resultado.Ok((chave, documento.Valor, valor.Valor, descricao.Valor));
     }
+
+    /// <summary>Recusa por limite com log de auditoria (spec 009, FR-016): só identificadores e valores.</summary>
+    private Resultado<TransferenciaRealizada> RecusarPorLimite(IReadOnlyList<Erro> erros, Guid carteiraOrigemId, decimal valor)
+    {
+        var detalhes = erros[0].Detalhes!;
+        LogRecusaPorLimite(logger, (string)detalhes["tipoLimite"]!, carteiraOrigemId, valor, (decimal)detalhes["limite"]!, (decimal)detalhes["valorDisponivel"]!);
+        return Recusar(erros);
+    }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Transferência recusada por limite {TipoLimite} na carteira {CarteiraOrigemId}: valor {Valor}, limite {Limite}, disponível {ValorDisponivel}")]
+    private static partial void LogRecusaPorLimite(ILogger logger, string tipoLimite, Guid carteiraOrigemId, decimal valor, decimal limite, decimal valorDisponivel);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Transferência {TransferenciaId} concluída da carteira {CarteiraOrigemId} para {CarteiraDestinoId}")]
     private static partial void LogConcluida(ILogger logger, Guid transferenciaId, Guid carteiraOrigemId, Guid carteiraDestinoId);

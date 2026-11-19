@@ -34,6 +34,13 @@ public interface ITransferenciaRepositorio
 
     /// <summary>Transferência pelo identificador, se existir (specs/008-consulta-transferencia).</summary>
     Task<Comprovante?> ObterComprovantePorIdAsync(Guid transferenciaId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Soma das transferências concluídas enviadas pela carteira com <c>criado_em</c> em
+    /// <c>[inicioUtc, fimUtc)</c>; 0 se não houver (specs/009-limite-transferencia, R3). No envio, é
+    /// chamada dentro da transação, depois do bloqueio da carteira de origem.
+    /// </summary>
+    Task<decimal> SomarEnviadasAsync(Guid carteiraOrigemId, DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken cancellationToken);
 }
 
 public enum ResultadoConfirmacao

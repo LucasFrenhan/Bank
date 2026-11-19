@@ -33,6 +33,9 @@ internal sealed class TransferenciaConfiguracao : IEntityTypeConfiguration<Trans
         builder.HasIndex(t => new { t.CarteiraOrigemId, t.ChaveIdempotencia }).IsUnique().HasDatabaseName(IndiceChave);
         builder.HasIndex(t => t.CarteiraDestinoId).HasDatabaseName("ix_transferencias_carteira_destino_id");
 
+        // Soma do dia por pagador sob bloqueio (specs/009-limite-transferencia, R3).
+        builder.HasIndex(t => new { t.CarteiraOrigemId, t.CriadoEm }).HasDatabaseName("ix_transferencias_origem_criado_em");
+
         builder.HasOne<Carteira>().WithMany().HasForeignKey(t => t.CarteiraOrigemId)
             .HasConstraintName("fk_transferencias_carteira_origem").OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Carteira>().WithMany().HasForeignKey(t => t.CarteiraDestinoId)

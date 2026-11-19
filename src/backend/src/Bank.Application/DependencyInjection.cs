@@ -24,7 +24,13 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<IValidateOptions<SaldoInicialOptions>>(new ValidadorSaldoInicialOptions(ambienteDeProducao));
 
+        services.AddOptions<LimitesTransferenciaOptions>()
+            .BindConfiguration(LimitesTransferenciaOptions.Secao)
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<LimitesTransferenciaOptions>, ValidadorLimitesTransferenciaOptions>();
+
         services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<CalendarioBrasilia>();
         services.AddSingleton<MetricasUsuarios>();
         services.AddSingleton<HashSenhaFicticio>();
 
@@ -37,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<ConsultarDestinatario>();
         services.AddScoped<ObterExtrato>();
         services.AddScoped<ConsultarTransferencia>();
+        services.AddScoped<ConsultarLimites>();
 
         return services;
     }

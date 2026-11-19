@@ -11,7 +11,7 @@ namespace Bank.Api.Endpoints;
 
 /// <summary>
 /// Transferências, consulta de destinatário, extrato (specs/006-transferencias) e consulta por
-/// identificador (specs/008-consulta-transferencia; contrato v1.1.0). Só transporte: claims e cabeçalho viram comando para o caso
+/// identificador (specs/008-consulta-transferencia) e limites (specs/009; contrato v1.2.0). Só transporte: claims e cabeçalho viram comando para o caso
 /// de uso; o resultado vira HTTP.
 /// </summary>
 public static class TransferenciasEndpoints
@@ -28,7 +28,7 @@ public static class TransferenciasEndpoints
             .RequireAuthorization(politicasPagador)
             .WithName("Transferir")
             .WithSummary("Transfere da carteira do usuário (PF) para uma conta PF ou PJ, com idempotência.")
-            .WithDescription("Reenvios com o mesmo cabeçalho Idempotency-Key devolvem 200 com o comprovante original, sem novo débito.")
+            .WithDescription("Reenvios com o mesmo cabeçalho Idempotency-Key devolvem 200 com o comprovante original, sem novo débito. Valor acima do limite por operação ou do limite diário (dia de Brasília) recebe 422 limite-excedido, com tipoLimite, limite e valorDisponivel.")
             .AddOpenApiOperationTransformer(MarcarCabecalhoObrigatorio)
             .Produces<ComprovanteResposta>(StatusCodes.Status201Created)
             .Produces<ComprovanteResposta>(StatusCodes.Status200OK)
@@ -57,6 +57,17 @@ public static class TransferenciasEndpoints
             .WithSummary("Lista os lançamentos da carteira do usuário (PF e PJ), do mais recente para o mais antigo.")
             .Produces<ExtratoResposta>(StatusCodes.Status200OK)
             .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden);
+
+        // Limites da PF (specs/009-limite-transferencia, FR-012). Rota literal: tem precedência
+        // sobre /{transferenciaId}, como /extrato.
+        grupo.MapGet("/limites", ConsultarLimitesAsync)
+            .RequireAuthorization(politicasPagador)
+            .WithName("ConsultarLimites")
+            .WithSummary("Limites de transferência da PF e quanto ainda pode ser enviado hoje (dia de Brasília).")
+            .WithDescription("Informativo: o envio verifica os limites de novo. Limites e disponível nulos = sem limite.")
+            .Produces<LimitesResposta>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden);
 
@@ -92,6 +103,29 @@ public static class TransferenciasEndpoints
             ? TypedResults.Ok(ComprovanteResposta.De(resultado.Valor))
             : resultado.ParaProblema();
     }
+
+    private static async Task<IResult> ConsultarLimitesAsync(
+        ClaimsPrincipal usuario,
+        ConsultarLimites casoDeUso,
+        CancellationToken cancellationToken)
+    {
+        if (!usuario.TentarObterUsuarioId(out var usuarioId))
+        {
+            return TypedResults.Forbid();
+        }
+
+        var resultado = await casoDeUso.ExecutarAsync(usuarioId, cancellationToken);
+        if (!resultado.Sucesso)
+        {
+            return resultado.ParaProblema();
+        }
+
+        var resumo = resultado.Valor;
+        return TypedResults.Ok(new LimitesResposta(resumo.PorOperacao, resumo.Diario, resumo.TransferidoHoje, resumo.DisponivelHoje, resumo.Dia));
+    }
+
+    /// <summary>Contrato v1.2.0 (specs/009-limite-transferencia): nulos = sem limite.</summary>
+    public sealed record LimitesResposta(decimal? PorOperacao, decimal? Diario, decimal TransferidoHoje, decimal? DisponivelHoje, DateOnly Dia);
 
     private static async Task<IResult> ObterExtratoAsync(
         [FromQuery] string? pagina,

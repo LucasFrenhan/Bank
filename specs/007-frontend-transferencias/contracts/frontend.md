@@ -49,6 +49,7 @@ telemetria continuam valendo.
 
 ## Histórico
 
+- **1.2.0** (2026-11-18): versão atual em [specs/009 — frontend.md](../../009-limite-transferencia/contracts/frontend.md) — limite na dica do valor e aviso de `limite-excedido` (issue #33).
 - **1.1.1** (2026-11-18): comprovante reaberto pela consulta da spec 008 (contrato de
   transferências v1.1.0); CPF do pagador vindo do comprovante, sem `GET /usuarios/me`; nota do
   identificador da transferência na telemetria (issue #32, fase 10).

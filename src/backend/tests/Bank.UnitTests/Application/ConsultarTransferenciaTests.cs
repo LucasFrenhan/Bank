@@ -30,7 +30,7 @@ public sealed class ConsultarTransferenciaTests : IDisposable
 
     private async Task TransferirAsync()
     {
-        var transferir = new RealizarTransferencia(_banco, _banco, _banco, _banco, TimeProvider.System, _metricas.Metricas, NullLogger<RealizarTransferencia>.Instance);
+        var transferir = new RealizarTransferencia(_banco, _banco, _banco, _banco, new MonitorDeOpcoes<LimitesTransferenciaOptions>(new()), new CalendarioBrasilia(), TimeProvider.System, _metricas.Metricas, NullLogger<RealizarTransferencia>.Instance);
         var resultado = await transferir.ExecutarAsync(
             new RealizarTransferenciaComando(_pagador.Id, _chave.ToString(), "12ABC34501DE35", 4.5m, "Café"),
             CancellationToken.None);

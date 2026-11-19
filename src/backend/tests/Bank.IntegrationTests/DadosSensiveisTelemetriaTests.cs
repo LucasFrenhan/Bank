@@ -168,6 +168,9 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
         }
 
         (await ApiTransferencias.TransferirAsync(client, pagador, cnpjRecebedor, 100m)).Dispose();
+        // Spec 009: recusa por limite (padrão R$ 1.000,00 por operação) e consulta de limites.
+        (await ApiTransferencias.TransferirAsync(client, pagador, cnpjRecebedor, 1000.01m)).Dispose();
+        (await ApiTransferencias.GetComTokenAsync(client, token, "/api/v1/transferencias/limites")).Dispose();
         (await ApiTransferencias.GetComTokenAsync(client, token, "/api/v1/transferencias/extrato")).Dispose();
 
         ForcarExportacao();
@@ -190,6 +193,12 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
         }
 
         Assert.All(factory.Medicoes.Where(m => m.Nome == "bank.transferencias.consultas"), m => Assert.Equal(["resultado"], m.Tags.Keys));
+
+        // Spec 009, FR-015 e R7: recusa por limite com tipo_limite; consulta de limites por resultado.
+        Assert.Contains(factory.Medicoes, m => m.Nome == "bank.transferencias.recusadas"
+            && m.Tags.GetValueOrDefault("motivo") == "limite-excedido" && m.Tags.GetValueOrDefault("tipo_limite") == "PorOperacao");
+        AssertMetrica("bank.transferencias.limites.consultas", "resultado", "consultada");
+        Assert.Contains(textos, t => t.Contains("Transferência recusada por limite", StringComparison.Ordinal));
     }
 
     private void ForcarExportacao()

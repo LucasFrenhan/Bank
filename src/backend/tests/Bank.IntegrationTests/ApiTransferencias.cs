@@ -76,6 +76,17 @@ public static class ApiTransferencias
         return saldo - razao;
     }
 
+    /// <summary><c>type</c> do erro de limite (specs/009-limite-transferencia).</summary>
+    public const string TipoLimiteExcedido = "urn:bank:problema:limite-excedido";
+
+    /// <summary>Extensões do 422 <c>limite-excedido</c> (contracts/transferencias-api.md v1.2.0).</summary>
+    public static void AssertLimite(JsonElement json, string tipo, decimal limite, decimal disponivel)
+    {
+        Assert.Equal(tipo, json.GetProperty("tipoLimite").GetString());
+        Assert.Equal(limite, json.GetProperty("limite").GetDecimal());
+        Assert.Equal(disponivel, json.GetProperty("valorDisponivel").GetDecimal());
+    }
+
     private static async Task<ContaTeste> ContaAsync(HttpClient client, string email, string documento, JsonElement cadastro) =>
         new(email,
             cadastro.GetProperty("documento").GetString() ?? documento,

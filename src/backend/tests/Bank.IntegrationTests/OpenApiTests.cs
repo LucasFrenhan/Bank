@@ -102,7 +102,19 @@ public class OpenApiTests(BankApiFactory factory) : IClassFixture<BankApiFactory
         var chaveComprovante = esquemas.GetProperty("ComprovanteResposta").GetProperty("properties").GetProperty("chaveIdempotencia");
         Assert.Contains("null", chaveComprovante.GetRawText(), StringComparison.Ordinal);
 
-        foreach (var operacao in new[] { transferir, destinatario, extrato, consultar })
+        // Spec 009: consulta de limites (contrato v1.2.0) e o 422 limite-excedido do envio.
+        var limites = caminhos.GetProperty("/api/v1/transferencias/limites").GetProperty("get");
+        Assert.Equal("ConsultarLimites", limites.GetProperty("operationId").GetString());
+        AssertRespostas(limites, "200", "401", "403");
+        var propriedadesLimites = esquemas.GetProperty("LimitesResposta").GetProperty("properties");
+        foreach (var campo in new[] { "porOperacao", "diario", "transferidoHoje", "disponivelHoje", "dia" })
+        {
+            Assert.True(propriedadesLimites.TryGetProperty(campo, out _), campo);
+        }
+
+        Assert.Contains("limite-excedido", transferir.GetProperty("description").GetString(), StringComparison.Ordinal);
+
+        foreach (var operacao in new[] { transferir, destinatario, extrato, consultar, limites })
         {
             Assert.True(operacao.GetProperty("security")[0].TryGetProperty("Bearer", out _));
         }

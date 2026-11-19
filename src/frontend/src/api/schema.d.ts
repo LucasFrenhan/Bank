@@ -96,7 +96,7 @@ export interface paths {
         put?: never;
         /**
          * Transfere da carteira do usuário (PF) para uma conta PF ou PJ, com idempotência.
-         * @description Reenvios com o mesmo cabeçalho Idempotency-Key devolvem 200 com o comprovante original, sem novo débito.
+         * @description Reenvios com o mesmo cabeçalho Idempotency-Key devolvem 200 com o comprovante original, sem novo débito. Valor acima do limite por operação ou do limite diário (dia de Brasília) recebe 422 limite-excedido, com tipoLimite, limite e valorDisponivel.
          */
         post: operations["Transferir"];
         delete?: never;
@@ -131,6 +131,26 @@ export interface paths {
         };
         /** Lista os lançamentos da carteira do usuário (PF e PJ), do mais recente para o mais antigo. */
         get: operations["ObterExtrato"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transferencias/limites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Limites de transferência da PF e quanto ainda pode ser enviado hoje (dia de Brasília).
+         * @description Informativo: o envio verifica os limites de novo. Limites e disponível nulos = sem limite.
+         */
+        get: operations["ConsultarLimites"];
         put?: never;
         post?: never;
         delete?: never;
@@ -222,6 +242,18 @@ export interface components {
             descricao: null | string;
             /** Format: date-time */
             criadoEm: string;
+        };
+        LimitesResposta: {
+            /** Format: double */
+            porOperacao: null | number | string;
+            /** Format: double */
+            diario: null | number | string;
+            /** Format: double */
+            transferidoHoje: number | string;
+            /** Format: double */
+            disponivelHoje: null | number | string;
+            /** Format: date */
+            dia: string;
         };
         LoginRequisicao: {
             email: null | string;
@@ -707,6 +739,44 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ConsultarLimites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LimitesResposta"];
                 };
             };
             /** @description Unauthorized */

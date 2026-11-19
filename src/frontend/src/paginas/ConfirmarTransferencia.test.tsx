@@ -267,3 +267,22 @@ describe('Confirmação — reenvio sem cobrar duas vezes (US3)', () => {
     expect((JSON.parse(sessionStorage.getItem(CHAVE_TRANSFERENCIA) ?? '{}') as { chave: string }).chave).not.toBe(CHAVE);
   });
 });
+
+describe('Confirmação — limite excedido (specs/009, US4)', () => {
+  it.each([
+    ['PorOperacao', 1000, 1000, /O limite por transferência é R\$\s1\.000,00\. Ajuste o valor para continuar\./],
+    ['Diario', 5000, 250, /Você ainda pode transferir R\$\s250,00 hoje\. Ajuste o valor para continuar\./],
+  ])('422 limite-excedido %s → aviso com o texto por tipo e volta para Dados', async (tipoLimite, limite, valorDisponivel, texto) => {
+    servidor.use(falhaEm('post', '/api/v1/transferencias', 'limite-excedido', 422, { tipoLimite, limite, valorDisponivel }));
+    const { usuario } = abrirConfirmacao();
+
+    await usuario.click(await screen.findByRole('button', { name: /^Transferir R\$/ }));
+
+    const aviso = await screen.findByRole('alert');
+    expect(aviso).toHaveTextContent('Limite excedido');
+    expect(aviso).toHaveTextContent(texto);
+
+    await usuario.click(screen.getByRole('button', { name: 'Voltar' }));
+    await waitFor(() => expect(screen.getByTestId('rota-atual')).toHaveTextContent(/^\/transferir$/));
+  });
+});
