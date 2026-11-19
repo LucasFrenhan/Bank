@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Ícone da marca (componente Marca / .marcaIcone): fundo da cor primária (#1d4ed8) e "B" branco em negrito.
+       O "B" é um contorno, não <text>: o favicon é renderizado isolado, sem as fontes da página. -->
+  <rect width="32" height="32" rx="9" fill="#1d4ed8"/>
+  <path fill="#fff" fill-rule="evenodd" d="M9.5 8H16.5C19.8 8 21.7 9.6 21.7 12.1C21.7 13.8 20.8 15 19.4 15.5C21.2 15.9 22.4 17.3 22.4 19.3C22.4 22.2 20.3 24 16.7 24H9.5ZM13.1 10.8V14.4H15.9C17.3 14.4 18.1 13.8 18.1 12.6C18.1 11.4 17.3 10.8 15.9 10.8ZM13.1 17V21.2H16.2C17.8 21.2 18.7 20.5 18.7 19.1C18.7 17.7 17.8 17 16.2 17Z"/>
+</svg>
