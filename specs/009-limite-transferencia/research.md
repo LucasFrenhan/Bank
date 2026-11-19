@@ -82,8 +82,9 @@ ganho, já que o bloqueio pessimista existe); somar os lançamentos de saída (e
 de Brasília, obtém a data local e devolve o intervalo `[00h00, 00h00 do dia seguinte)` em UTC.
 O fuso é resolvido por `America/Sao_Paulo` e, se não existir, por
 `E. South America Standard Time`; se nenhum existir, a aplicação não inicia (falha explícita): o
-fuso é resolvido no construtor do singleton, e um `IHostedService` da Application pede o
-singleton no `StartAsync`.
+fuso é resolvido no construtor do singleton, e o `Program.cs` pede o singleton logo depois do
+`Build()` (a Application não referencia `Hosting.Abstractions`, e um pacote novo só para isso não
+se justifica).
 O `Dockerfile` do backend passa a instalar `tzdata`.
 
 **Motivo** (verificado em 2026-11-18): a imagem `aspnet:10.0.15-alpine3.24` **não** tem

@@ -24,6 +24,11 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<IValidateOptions<SaldoInicialOptions>>(new ValidadorSaldoInicialOptions(ambienteDeProducao));
 
+        services.AddOptions<LimitesTransferenciaOptions>()
+            .BindConfiguration(LimitesTransferenciaOptions.Secao)
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<LimitesTransferenciaOptions>, ValidadorLimitesTransferenciaOptions>();
+
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<MetricasUsuarios>();
         services.AddSingleton<HashSenhaFicticio>();

@@ -37,10 +37,10 @@ rodam em `src/frontend/`. Arquivos de raiz usam o caminho completo.
 
 **Purpose**: configuração dos limites e variáveis do ambiente local
 
-- [ ] T001 Em `back/src/Bank.Api/appsettings.json`, acrescentar a seção
+- [X] T001 Em `back/src/Bank.Api/appsettings.json`, acrescentar a seção
   `"Transferencias": { "Limites": { "PessoaFisica": { "PorOperacao": 1000.00, "Diario": 5000.00 } } }`
   (FR-006, research R2)
-- [ ] T002 [P] Em `docker-compose.yml`, no `environment` do serviço `api`, acrescentar
+- [X] T002 [P] Em `docker-compose.yml`, no `environment` do serviço `api`, acrescentar
   `Transferencias__Limites__PessoaFisica__PorOperacao: ${LIMITE_PF_POR_OPERACAO-1000.00}` e
   `Transferencias__Limites__PessoaFisica__Diario: ${LIMITE_PF_DIARIO-5000.00}` (sem `:` — vazio
   desliga o limite; só a variável não definida usa o padrão, research R2); em `.env.example`, nova
@@ -58,51 +58,51 @@ rodam em `src/frontend/`. Arquivos de raiz usam o caminho completo.
 
 ### Testes da fundação (escrever primeiro)
 
-- [ ] T003 [P] Criar `back/tests/Bank.UnitTests/Domain/LimitesTransferenciaTests.cs`:
+- [X] T003 [P] Criar `back/tests/Bank.UnitTests/Domain/LimitesTransferenciaTests.cs`:
   `VerificarOperacao` aceita valor igual ao limite e recusa um centavo acima (tipo `PorOperacao`,
   `limite` = `valorDisponivel` = limite); `VerificarDiario` aceita `transferidoHoje + valor ==
   Diario`, recusa um centavo acima com `valorDisponivel = max(0, Diario − transferidoHoje)` e
   nunca negativo (transferido acima do limite → 0); limites `null` nunca recusam;
   `DisponivelHoje` devolve `null` sem limite diário
-- [ ] T004 [P] Criar `back/tests/Bank.UnitTests/Application/LimitesTransferenciaOptionsTests.cs`
+- [X] T004 [P] Criar `back/tests/Bank.UnitTests/Application/LimitesTransferenciaOptionsTests.cs`
   (no estilo de `SaldoInicialOptionsTests.cs`): aceita os padrões, aceita valores ausentes
   (`null` = sem limite); ligando uma `ConfigurationBuilder` com o padrão e uma sobrescrita de
   valor vazio (`""`), o limite resultante é `null` (research R2); recusa ≤ 0, mais de 2 casas decimais e `PorOperacao > Diario`, com a
   chave completa da configuração na mensagem (`Transferencias:Limites:PessoaFisica:...`)
-- [ ] T005 [P] Criar `back/tests/Bank.UnitTests/ErrorHandling/ResultadoHttpExtensionsTests.cs`:
+- [X] T005 [P] Criar `back/tests/Bank.UnitTests/ErrorHandling/ResultadoHttpExtensionsTests.cs`:
   um `Erro` com `Detalhes` vira `ProblemDetails` com essas chaves em `Extensions`, status 422 e
   `type` `urn:bank:problema:limite-excedido` com título "Limite de transferência excedido"; um erro
   sem detalhes continua sem extensões extras
 
 ### Implementação da fundação
 
-- [ ] T006 Em `back/src/Bank.Domain/Comum/Erro.cs`, acrescentar o parâmetro opcional
+- [X] T006 Em `back/src/Bank.Domain/Comum/Erro.cs`, acrescentar o parâmetro opcional
   `IReadOnlyDictionary<string, object?>? Detalhes = null` ao record `Erro` (depois de `Campo`),
   sem mudar os usos existentes (data-model, "Erro (alterado)")
-- [ ] T007 Criar `back/src/Bank.Domain/Transferencias/LimitesTransferencia.cs` com o enum
+- [X] T007 Criar `back/src/Bank.Domain/Transferencias/LimitesTransferencia.cs` com o enum
   `TipoLimite { PorOperacao, Diario }` e o record `LimitesTransferencia(decimal? PorOperacao,
   decimal? Diario)` com `VerificarOperacao(decimal valor)`, `VerificarDiario(decimal valor,
   decimal transferidoHoje)` (ambos `Resultado`) e `DisponivelHoje(decimal transferidoHoje)`
   (`decimal?`), regras exatamente como em data-model "LimitesTransferencia"; limites inclusivos
   (FR-004)
-- [ ] T008 Em `back/src/Bank.Domain/Transferencias/ErrosTransferencia.cs`, acrescentar
+- [X] T008 Em `back/src/Bank.Domain/Transferencias/ErrosTransferencia.cs`, acrescentar
   `LimiteExcedido(TipoLimite tipo, decimal limite, decimal valorDisponivel)`: código
   `limite-excedido`, `TipoErro.RegraDeNegocio`, mensagem "O valor passa do limite por
   transferência." (`PorOperacao`) ou "O valor passa do limite diário de transferências."
   (`Diario`), `Detalhes` = `{ tipoLimite: tipo.ToString(), limite, valorDisponivel }`
   (contracts/transferencias-api.md)
-- [ ] T009 Em `back/src/Bank.Api/ErrorHandling/ResultadoHttpExtensions.cs`, acrescentar o título
+- [X] T009 Em `back/src/Bank.Api/ErrorHandling/ResultadoHttpExtensions.cs`, acrescentar o título
   `["limite-excedido"] = "Limite de transferência excedido"` e copiar `erro.Detalhes` para as
   extensões do `ProblemDetails` em `ParaProblema` (R5); T005 passa
-- [ ] T010 Criar `back/src/Bank.Application/Transferencias/LimitesTransferenciaOptions.cs`:
+- [X] T010 Criar `back/src/Bank.Application/Transferencias/LimitesTransferenciaOptions.cs`:
   `Secao = "Transferencias:Limites"`, propriedade `PessoaFisica` do tipo `LimitesPerfilOptions {
   decimal? PorOperacao; decimal? Diario }`, método `ParaPessoaFisica()` →
   `LimitesTransferencia`, e `ValidadorLimitesTransferenciaOptions : IValidateOptions` com as
   regras de T004 (> 0, até 2 casas com `Dinheiro.TemAteDuasCasas`, `PorOperacao ≤ Diario`)
-- [ ] T011 Em `back/src/Bank.Application/DependencyInjection.cs`, registrar
+- [X] T011 Em `back/src/Bank.Application/DependencyInjection.cs`, registrar
   `AddOptions<LimitesTransferenciaOptions>().BindConfiguration(...).ValidateOnStart()` e o
   validador (como `SaldoInicialOptions`); T003 e T004 passam
-- [ ] T012 Em `back/src/Bank.Application/Observabilidade/MetricasTransferencias.cs`, sobrecarga
+- [X] T012 Em `back/src/Bank.Application/Observabilidade/MetricasTransferencias.cs`, sobrecarga
   `RegistrarRecusa(Erro erro)` que adiciona a tag `tipo_limite` (valor de
   `Detalhes["tipoLimite"]`) somente quando o código é `limite-excedido`; demais recusas com a tag
   `motivo` apenas, como hoje (R7)
@@ -190,8 +190,8 @@ virada às 00h00 de Brasília (03h00 UTC) libera o limite
   `Hoje(DateTimeOffset agoraUtc)`; fuso resolvido uma vez por `America/Sao_Paulo`, depois
   `E. South America Standard Time`, senão `InvalidOperationException` com mensagem clara (R4),
   no construtor; registrar como singleton em `back/src/Bank.Application/DependencyInjection.cs`
-  junto com um `IHostedService` interno (`VerificacaoFusoBrasilia`) que pede o singleton no
-  `StartAsync`, para a API falhar na inicialização; T016 passa
+  e pedi-lo em `back/src/Bank.Api/Program.cs` logo depois do `Build()`, para a API falhar na
+  inicialização; T016 passa
 - [ ] T020 [US2] Em `back/src/Bank.Application/Abstracoes/ITransferencias.cs`, acrescentar a
   `ITransferenciaRepositorio` o método `Task<decimal> SomarEnviadasAsync(Guid carteiraOrigemId,
   DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken)` (intervalo `[inicio,

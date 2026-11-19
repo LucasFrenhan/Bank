@@ -18,6 +18,24 @@ public static class ErrosTransferencia
         new("idempotencia-divergente", "Esta chave de idempotência já foi usada com outro destinatário ou valor.", TipoErro.Conflito);
 
     /// <summary>
+    /// Valor acima de um limite de transferência (specs/009-limite-transferencia, FR-011): um único
+    /// código, com o tipo, o limite e o valor disponível nos detalhes.
+    /// </summary>
+    public static Erro LimiteExcedido(TipoLimite tipo, decimal limite, decimal valorDisponivel) =>
+        new(
+            "limite-excedido",
+            tipo == TipoLimite.PorOperacao
+                ? "O valor passa do limite por transferência."
+                : "O valor passa do limite diário de transferências.",
+            TipoErro.RegraDeNegocio,
+            Detalhes: new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                ["tipoLimite"] = tipo.ToString(),
+                ["limite"] = limite,
+                ["valorDisponivel"] = valorDisponivel,
+            });
+
+    /// <summary>
     /// Transferência inexistente ou de que o usuário não participa — mesma resposta nos dois casos
     /// (specs/008-consulta-transferencia, FR-004).
     /// </summary>

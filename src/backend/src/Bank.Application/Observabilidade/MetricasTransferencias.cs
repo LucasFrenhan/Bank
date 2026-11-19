@@ -1,4 +1,5 @@
 using System.Diagnostics.Metrics;
+using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
 
 namespace Bank.Application.Observabilidade;
@@ -10,6 +11,8 @@ namespace Bank.Application.Observabilidade;
 public sealed class MetricasTransferencias
 {
     public const string NomeMeter = "Bank.Transferencias";
+
+    private const string CodigoLimiteExcedido = "limite-excedido";
 
     private readonly Counter<long> _concluidas;
     private readonly Counter<long> _recusadas;
@@ -40,6 +43,26 @@ public sealed class MetricasTransferencias
 
     public void RegistrarRecusa(string motivo) =>
         _recusadas.Add(1, new KeyValuePair<string, object?>("motivo", motivo));
+
+    /// <summary>
+    /// Recusa pelo erro: <c>limite-excedido</c> ganha a tag <c>tipo_limite</c>
+    /// (specs/009-limite-transferencia, FR-015; research R7); as demais só o motivo.
+    /// </summary>
+    public void RegistrarRecusa(Erro erro)
+    {
+        ArgumentNullException.ThrowIfNull(erro);
+
+        if (erro.Codigo == CodigoLimiteExcedido && erro.Detalhes?.GetValueOrDefault("tipoLimite") is string tipoLimite)
+        {
+            _recusadas.Add(
+                1,
+                new KeyValuePair<string, object?>("motivo", erro.Codigo),
+                new KeyValuePair<string, object?>("tipo_limite", tipoLimite));
+            return;
+        }
+
+        RegistrarRecusa(erro.Codigo);
+    }
 
     public void RegistrarReplay() => _replays.Add(1);
 

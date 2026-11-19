@@ -23,6 +23,7 @@ public static class ResultadoHttpExtensions
         ["autotransferencia"] = "Transferência para a própria conta",
         ["saldo-insuficiente"] = "Saldo insuficiente",
         ["idempotencia-divergente"] = "Chave de idempotência já usada com outros dados",
+        ["limite-excedido"] = "Limite de transferência excedido",
     };
 
     public static string Tipo(string codigo) => PrefixoTipo + codigo;
@@ -58,7 +59,8 @@ public static class ResultadoHttpExtensions
             detail: erro.Mensagem,
             statusCode: Status(erro.Tipo),
             title: Titulos.GetValueOrDefault(erro.Codigo, erro.Codigo),
-            type: Tipo(erro.Codigo));
+            type: Tipo(erro.Codigo),
+            extensions: erro.Detalhes is null ? null : new Dictionary<string, object?>(erro.Detalhes, StringComparer.Ordinal));
     }
 
     private static int Status(TipoErro tipo) => tipo switch
