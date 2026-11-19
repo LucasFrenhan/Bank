@@ -138,6 +138,19 @@ Definidos em [`specs/006-transferencias`](../specs/006-transferencias/spec.md) �
   `chaveIdempotencia` vem `null`. Identificador que não é UUID → `400`.
 - **Comprovante** (envio e consulta, contrato v1.1.0): traz `pagador.documento` com o CPF
   mascarado (`•••.982.247-••`) e `criadoEm` com precisão de microssegundos, igual ao gravado.
+- **Limites** ([spec 009](../specs/009-limite-transferencia/spec.md), contrato v1.2.0): PF tem
+  limite por transferência (padrão R$ 1.000,00) e diário (padrão R$ 5.000,00, soma das
+  transferências enviadas no dia civil de **Brasília**, que vira à meia-noite local). Acima de um
+  deles → `422 limite-excedido`, com `tipoLimite` (`PorOperacao`/`Diario`), `limite` e
+  `valorDisponivel`; o limite é verificado antes do saldo, e um reenvio idempotente não passa por
+  ele. `GET /api/v1/transferencias/limites` (só PF) devolve limites, transferido e disponível
+  hoje.
+  - Configuração `Transferencias:Limites:PessoaFisica:PorOperacao` e `...:Diario`; valor vazio
+    desliga o limite. No Compose, `LIMITE_PF_POR_OPERACAO` e `LIMITE_PF_DIARIO` do `.env` (vazia
+    desliga; não definida usa o padrão). Para ver a recusa com o saldo de demonstração:
+    `LIMITE_PF_POR_OPERACAO=4.00 LIMITE_PF_DIARIO=6.00 docker compose up -d --build --wait`.
+  - O dia de Brasília usa o fuso `America/Sao_Paulo` (imagem com `tzdata`) ou, no Windows,
+    `E. South America Standard Time`; sem nenhum dos dois, a API não sobe.
 - **Razão**: transferências e lançamentos são imutáveis (trigger no banco) e toda carteira tem
   saldo = soma dos lançamentos. O evento `transferencia.concluida` é gravado em `outbox_eventos`
   na mesma transação (a publicação no broker fica para a issue #9).
@@ -209,6 +222,9 @@ Definidos em [`specs/007-frontend-transferencias`](../specs/007-frontend-transfe
   (duplo clique, falha de rede, recarregar, voltar do navegador) usam a mesma chave; mudar
   destinatário, valor ou descrição gera outra. Os comprovantes recebidos na aba ficam em
   `bank.comprovantes`; tudo é apagado ao sair ou quando a sessão expira.
+- **Limites** (spec 009, frontend v1.2.0): a etapa Dados lê `GET /limites` e mostra
+  "Limite agora: R$ …" na dica do valor; acima dele, "Continuar" não avança e mostra o aviso
+  "Limite excedido" (o mesmo da recusa da API na confirmação).
 - **Dinheiro em centavos**: valores digitados e saldos são convertidos para centavos inteiros
   (`src/formatacao/valor.ts`); nenhuma conta de dinheiro usa ponto flutuante.
 - **Comprovante depois**: todo lançamento de transferência do extrato e do início leva ao

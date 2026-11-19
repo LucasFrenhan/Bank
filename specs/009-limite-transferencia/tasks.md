@@ -349,19 +349,19 @@ avisos de limite (desktop e mobile)
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T044 [P] Em `back/tests/Bank.IntegrationTests/OpenApiTests.cs`, conferir a operação
+- [X] T044 [P] Em `back/tests/Bank.IntegrationTests/OpenApiTests.cs`, conferir a operação
   `ConsultarLimites` com `Bearer` e respostas 200/401/403, o esquema `LimitesResposta` e o 422 de
   `Transferir` (FR-017)
-- [ ] T045 [P] Em `back/tests/Bank.IntegrationTests/DadosSensiveisTelemetriaTests.cs`, provocar uma
+- [X] T045 [P] Em `back/tests/Bank.IntegrationTests/DadosSensiveisTelemetriaTests.cs`, provocar uma
   recusa por limite e uma consulta de limites e conferir que nenhum documento, nome ou e-mail
   aparece em logs, spans ou métricas, e que a métrica de recusa tem `tipo_limite` (SC-008)
-- [ ] T046 [P] Acrescentar nota de versão apontando para a v1.2.0 em
+- [X] T046 [P] Acrescentar nota de versão apontando para a v1.2.0 em
   `specs/008-consulta-transferencia/contracts/transferencias-api.md` (Histórico) e para o frontend
   v1.2.0 em `specs/007-frontend-transferencias/contracts/frontend.md` (Histórico)
-- [ ] T047 [P] Em `docs/desenvolvimento.md`, documentar os limites de transferência: seção de
+- [X] T047 [P] Em `docs/desenvolvimento.md`, documentar os limites de transferência: seção de
   configuração `Transferencias:Limites`, variáveis `LIMITE_PF_POR_OPERACAO`/`LIMITE_PF_DIARIO`
   (valor vazio desliga o limite), dia de Brasília e o `tzdata` da imagem
-- [ ] T048 Rodar o quickstart completo (cenários 1–4), incluindo `dotnet test` em `src/backend/` e
+- [X] T048 Rodar o quickstart completo (cenários 1–4), incluindo `dotnet test` em `src/backend/` e
   `npm run lint && npm run typecheck && npm test && npm run e2e` em `src/frontend/`, e conferir a
   dica e os avisos em desktop e mobile; medir o SC-007 no Compose (50 transferências sequenciais
   de uma PF com histórico no dia, p95 < 1 s) e registrar o resultado no PR; atualizar a spec, o plano e os contratos se algo divergir

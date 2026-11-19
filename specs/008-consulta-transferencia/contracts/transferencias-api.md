@@ -67,6 +67,7 @@ anulável.
 
 ## Histórico
 
+- **1.2.0** (2026-11-18): versão atual em [specs/009 — transferencias-api.md](../../009-limite-transferencia/contracts/transferencias-api.md) — erro `limite-excedido` e `GET /limites` (issue #33).
 - **1.1.0** (2026-11-18): consulta por identificador; `pagador.documento` mascarado no
   comprovante; `chaveIdempotencia` anulável (só na consulta pelo recebedor) — issue #36.
 - **1.0.0** (2026-11-17): versão inicial (issues #8 e #13).
