@@ -262,12 +262,12 @@ avisos de limite (desktop e mobile)
 
 ### Testes da US4 — backend (escrever primeiro)
 
-- [ ] T028 [P] [US4] Criar `back/tests/Bank.UnitTests/Application/ConsultarLimitesTests.cs`:
+- [X] T028 [P] [US4] Criar `back/tests/Bank.UnitTests/Application/ConsultarLimitesTests.cs`:
   `ResumoLimites` com `PorOperacao`, `Diario`, `TransferidoHoje`, `DisponivelHoje = max(0, Diario
   − TransferidoHoje)` (`null` sem diário) e `Dia` de Brasília do relógio; usuário sem carteira →
   `usuario-nao-encontrado` (como os demais casos de uso); métrica
   `bank.transferencias.limites.consultas` com `resultado=consultada` ou `usuario-nao-encontrado`
-- [ ] T029 [P] [US4] Em `back/tests/Bank.IntegrationTests/LimiteTransferenciaTests.cs`,
+- [X] T029 [P] [US4] Em `back/tests/Bank.IntegrationTests/LimiteTransferenciaTests.cs`,
   acrescentar `GET /api/v1/transferencias/limites`: 200 com os campos do contrato antes e depois de
   uma transferência (`transferidoHoje`, `disponivelHoje`, `dia` no formato `yyyy-MM-dd`); 401 sem
   token e com token inválido; 403 `acesso-negado` para PJ; a rota não é capturada por
@@ -275,13 +275,13 @@ avisos de limite (desktop e mobile)
 
 ### Implementação da US4 — backend
 
-- [ ] T030 [US4] Criar `back/src/Bank.Application/Transferencias/ConsultarLimites.cs`
+- [X] T030 [US4] Criar `back/src/Bank.Application/Transferencias/ConsultarLimites.cs`
   (`ResumoLimites` + caso de uso `ExecutarAsync(Guid usuarioId, ...)` → `Resultado<ResumoLimites>`,
   sem transação nem bloqueio, R6) e registrá-lo em `back/src/Bank.Application/DependencyInjection.cs`;
   acrescentar `RegistrarConsultaLimites(string resultado)` (contador
   `bank.transferencias.limites.consultas`, R7) em
   `back/src/Bank.Application/Observabilidade/MetricasTransferencias.cs`; T028 passa
-- [ ] T031 [US4] Em `back/src/Bank.Api/Endpoints/TransferenciasEndpoints.cs`, mapear
+- [X] T031 [US4] Em `back/src/Bank.Api/Endpoints/TransferenciasEndpoints.cs`, mapear
   `grupo.MapGet("/limites", ConsultarLimitesAsync)` antes de `/{transferenciaId}`, com
   `RequireAuthorization(politicasPagador)`, `WithName("ConsultarLimites")`, resumo em português,
   `Produces<LimitesResposta>(200)`, `ProducesProblem(401)`, `ProducesProblem(403)`; record

@@ -20,6 +20,7 @@ public sealed class MetricasTransferencias
     private readonly Histogram<double> _valor;
     private readonly Counter<long> _consultasDestinatario;
     private readonly Counter<long> _consultas;
+    private readonly Counter<long> _consultasLimites;
 
     public MetricasTransferencias(IMeterFactory meterFactory)
     {
@@ -32,6 +33,7 @@ public sealed class MetricasTransferencias
         _valor = meter.CreateHistogram<double>("bank.transferencias.valor", "BRL", "Valor das transferências concluídas.");
         _consultasDestinatario = meter.CreateCounter<long>("bank.transferencias.destinatario.consultas", "{consulta}", "Consultas de destinatário, por resultado.");
         _consultas = meter.CreateCounter<long>("bank.transferencias.consultas", "{consulta}", "Consultas de transferência por identificador, por resultado.");
+        _consultasLimites = meter.CreateCounter<long>("bank.transferencias.limites.consultas", "{consulta}", "Consultas de limites de transferência, por resultado.");
     }
 
     public void RegistrarConcluida(TipoConta tipoDestino, decimal valor)
@@ -75,4 +77,11 @@ public sealed class MetricasTransferencias
     /// </summary>
     public void RegistrarConsulta(string resultado) =>
         _consultas.Add(1, new KeyValuePair<string, object?>("resultado", resultado));
+
+    /// <summary>
+    /// Consulta de limites (specs/009-limite-transferencia, R7): <c>consultada</c> ou
+    /// <c>usuario-nao-encontrado</c>.
+    /// </summary>
+    public void RegistrarConsultaLimites(string resultado) =>
+        _consultasLimites.Add(1, new KeyValuePair<string, object?>("resultado", resultado));
 }

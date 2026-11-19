@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<ConsultarDestinatario>();
         services.AddScoped<ObterExtrato>();
         services.AddScoped<ConsultarTransferencia>();
+        services.AddScoped<ConsultarLimites>();
 
         return services;
     }

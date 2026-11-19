@@ -114,4 +114,60 @@ public class LimiteTransferenciaTests(LimitesApiFactory factory) : IClassFixture
         Assert.Equal(HttpStatusCode.UnprocessableEntity, recusada.StatusCode);
         Assert.Equal(HttpStatusCode.Created, concluida.StatusCode);
     }
+
+    // ---------- GET /limites (US4; FR-012) ----------
+
+    private const string CaminhoLimites = "/api/v1/transferencias/limites";
+
+    [Fact]
+    public async Task Limites_PF_200AntesEDepoisDeTransferir()
+    {
+        using var client = factory.CreateClient();
+        var (pf, pj) = (await CriarPfAsync(client), await CriarPjAsync(client));
+
+        using var antes = await GetComTokenAsync(client, pf.Token, CaminhoLimites);
+        Assert.Equal(HttpStatusCode.OK, antes.StatusCode);
+        var json = await ApiBank.LerJsonAsync(antes);
+        Assert.Equal((1000.00m, 2000.00m, 0m, 2000.00m), (
+            json.GetProperty("porOperacao").GetDecimal(),
+            json.GetProperty("diario").GetDecimal(),
+            json.GetProperty("transferidoHoje").GetDecimal(),
+            json.GetProperty("disponivelHoje").GetDecimal()));
+        Assert.Matches(@"^\d{4}-\d{2}-\d{2}$", json.GetProperty("dia").GetString());
+
+        using (var transferencia = await TransferirAsync(client, pf, pj.Documento, 750.00m))
+        {
+            Assert.Equal(HttpStatusCode.Created, transferencia.StatusCode);
+        }
+
+        using var depois = await GetComTokenAsync(client, pf.Token, CaminhoLimites);
+        var jsonDepois = await ApiBank.LerJsonAsync(depois);
+        Assert.Equal((750.00m, 1250.00m), (jsonDepois.GetProperty("transferidoHoje").GetDecimal(), jsonDepois.GetProperty("disponivelHoje").GetDecimal()));
+    }
+
+    [Theory]
+    [InlineData("sem-token")]
+    [InlineData("adulterado")]
+    public async Task Limites_SemTokenOuTokenInvalido_401(string cenario)
+    {
+        using var client = factory.CreateClient();
+        var claims = TokensDeTeste.Claims(Guid.CreateVersion7().ToString(), Guid.CreateVersion7().ToString());
+
+        using var resposta = cenario == "sem-token"
+            ? await client.GetAsync(new Uri(CaminhoLimites, UriKind.Relative), TestContext.Current.CancellationToken)
+            : await GetComTokenAsync(client, TokensDeTeste.Criar(factory.ChaveJwt, claims)[..^4] + "AAAA", CaminhoLimites);
+
+        await ApiBank.AssertProblemaAsync(resposta, HttpStatusCode.Unauthorized, "urn:bank:problema:nao-autenticado");
+    }
+
+    [Fact]
+    public async Task Limites_PJ_403()
+    {
+        using var client = factory.CreateClient();
+        var pj = await CriarPjAsync(client);
+
+        using var resposta = await GetComTokenAsync(client, pj.Token, CaminhoLimites);
+
+        await ApiBank.AssertProblemaAsync(resposta, HttpStatusCode.Forbidden, "urn:bank:problema:acesso-negado");
+    }
 }
