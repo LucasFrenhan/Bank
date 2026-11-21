@@ -418,14 +418,14 @@ Consumer (quickstart, cenário 3, passo 3)
 
 ### Testes da US5 (escrever primeiro)
 
-- [ ] T052 [P] [US5] Acrescentar em `back/tests/Bank.UnitTests/Infrastructure/EventoOutboxTests.cs`
+- [X] T052 [P] [US5] Acrescentar em `back/tests/Bank.UnitTests/Infrastructure/EventoOutboxTests.cs`
   (arquivo existente, spec 006): com
   `Activity.Current` ativo, `EventoOutbox.De` grava `TraceParent` no formato W3C
   (`00-<32 hex>-<16 hex>-<2 hex>`) e `TraceState`; sem atividade, ambos nulos
-- [ ] T053 [P] [US5] Em `back/tests/Bank.UnitTests/Infrastructure/CabecalhosMensagemTests.cs`:
+- [X] T053 [P] [US5] Em `back/tests/Bank.UnitTests/Infrastructure/CabecalhosMensagemTests.cs`:
   injeção e extração com `Propagators.DefaultTextMapPropagator` (`traceparent`/`tracestate` como
   string UTF-8 nos headers; leitura aceita `byte[]`); headers ausentes → contexto vazio
-- [ ] T054 [US5] Em `back/tests/Bank.IntegrationTests/RastreamentoMensageriaTests.cs`: com
+- [X] T054 [US5] Em `back/tests/Bank.IntegrationTests/RastreamentoMensageriaTests.cs`: com
   exportadores em memória na API e no Worker, o `TraceId` do span HTTP do `POST` é o mesmo do span
   Producer `banco.eventos.topic publish` (atributos `messaging.*` do contrato) e do Consumer
   `notificacoes.transferencias.fila process`, cujo pai é o Producer; com publicação atrasada
@@ -434,16 +434,16 @@ Consumer (quickstart, cenário 3, passo 3)
 
 ### Implementação da US5
 
-- [ ] T055 [US5] Em `msg/EventoOutbox.cs`: `De` preenche `TraceParent`/`TraceState` a partir de
+- [X] T055 [US5] Em `msg/EventoOutbox.cs`: `De` preenche `TraceParent`/`TraceState` a partir de
   `Activity.Current` (`Id` no formato W3C e `TraceStateString`) — T052 passa
-- [ ] T056 [US5] Em `msg/CabecalhosMensagem.cs`: `Injetar(ActivityContext, headers)` e
+- [X] T056 [US5] Em `msg/CabecalhosMensagem.cs`: `Injetar(ActivityContext, headers)` e
   `Extrair(headers)` com `Propagators.DefaultTextMapPropagator` (`PropagationContext`) — T053 passa
-- [ ] T057 [US5] Em `msg/DespachanteOutbox.cs`: para cada evento, `ActivityContext.TryParse(TraceParent,
+- [X] T057 [US5] Em `msg/DespachanteOutbox.cs`: para cada evento, `ActivityContext.TryParse(TraceParent,
   TraceState)`, abrir `ActivityKind.Producer` `banco.eventos.topic publish` com esse pai (ou raiz),
   atributos `messaging.system=rabbitmq`, `messaging.operation.type=send`,
   `messaging.destination.name=banco.eventos.topic`, `messaging.rabbitmq.destination.routing_key`,
   `messaging.message.id`, e injetar o contexto do span nos headers; status de erro na falha
-- [ ] T058 [US5] Em `msg/ConsumidorEventos.cs`: extrair o contexto dos headers e abrir
+- [X] T058 [US5] Em `msg/ConsumidorEventos.cs`: extrair o contexto dos headers e abrir
   `ActivityKind.Consumer` `<fila> process` com ele como pai, atributos `messaging.system`,
   `messaging.operation.type=process`, `messaging.destination.name`, `messaging.message.id`,
   `bank.mensageria.tentativa` e `bank.mensageria.resultado`; os logs do processamento ficam
