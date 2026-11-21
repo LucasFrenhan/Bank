@@ -1,18 +1,19 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
+using Bank.Infrastructure.Mensageria.Contratos;
 
 namespace Bank.Infrastructure.Mensageria;
 
 /// <summary>
 /// Evento de integração gravado na mesma transação da operação (Transactional Outbox —
 /// constituição, Princípio IV; specs/006-transferencias, research R9). A publicação no RabbitMQ
-/// (TASK-09) preencherá <see cref="PublicadoEm"/>.
+/// é feita pelo despachante do Worker, que preenche <see cref="PublicadoEm"/> após a confirmação do
+/// broker (specs/010-mensageria-rabbitmq, research R4).
 /// </summary>
 public sealed class EventoOutbox
 {
-    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
-
     private EventoOutbox()
     {
     }
@@ -45,38 +46,26 @@ public sealed class EventoOutbox
         PublicadoEm ??= publicadoEm;
     }
 
+    /// <summary>
+    /// Registro do outbox com o payload v1 revisado (specs/010-mensageria-rabbitmq, FR-011) e o
+    /// contexto de trace ativo (FR-005): o <c>traceparent</c> só é guardado no formato W3C.
+    /// </summary>
     public static EventoOutbox De(TransferenciaConcluida evento)
     {
         ArgumentNullException.ThrowIfNull(evento);
+
+        var atividade = Activity.Current;
+        var w3c = atividade is { IdFormat: ActivityIdFormat.W3C };
 
         return new EventoOutbox
         {
             Id = evento.EventoId,
             Tipo = TransferenciaConcluida.Tipo,
             Versao = TransferenciaConcluida.Versao,
-            Payload = JsonSerializer.Serialize(PayloadTransferenciaConcluida.De(evento), Json),
+            Payload = JsonSerializer.Serialize(TransferenciaConcluidaV1.De(evento), TransferenciaConcluidaV1.Json),
             OcorridoEm = evento.OcorridoEm,
+            TraceParent = w3c ? atividade!.Id : null,
+            TraceState = w3c && !string.IsNullOrEmpty(atividade!.TraceStateString) ? atividade.TraceStateString : null,
         };
-    }
-
-    /// <summary>
-    /// Forma do payload v1 (contracts/evento-transferencia-concluida.md): identificadores como
-    /// <see cref="Guid"/>, independentes dos tipos do Domain (issue #43).
-    /// </summary>
-    private sealed record PayloadTransferenciaConcluida(
-        Guid EventoId,
-        Guid TransferenciaId,
-        Guid PagadorUsuarioId,
-        Guid RecebedorUsuarioId,
-        decimal Valor,
-        DateTimeOffset OcorridoEm)
-    {
-        public static PayloadTransferenciaConcluida De(TransferenciaConcluida evento) => new(
-            evento.EventoId.Valor,
-            evento.TransferenciaId.Valor,
-            evento.PagadorUsuarioId.Valor,
-            evento.RecebedorUsuarioId.Valor,
-            evento.Valor,
-            evento.OcorridoEm);
     }
 }

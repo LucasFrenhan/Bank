@@ -9,18 +9,30 @@ public enum StatusTransferencia
     Concluida = 1,
 }
 
-/// <summary>Fato publicado após cada transferência concluída (evento <c>transferencia.concluida</c> v1).</summary>
+/// <summary>
+/// Fato publicado após cada transferência concluída (evento <c>transferencia.concluida</c> v1;
+/// nomes e descrição acrescentados pela specs/010-mensageria-rabbitmq, FR-011).
+/// </summary>
 public sealed record TransferenciaConcluida(
     EventoId EventoId,
     TransferenciaId TransferenciaId,
     UsuarioId PagadorUsuarioId,
     UsuarioId RecebedorUsuarioId,
     decimal Valor,
-    DateTimeOffset OcorridoEm)
+    DateTimeOffset OcorridoEm,
+    string PagadorNome,
+    string RecebedorNome,
+    string? Descricao)
 {
     public const string Tipo = "transferencia.concluida";
     public const int Versao = 1;
 }
+
+/// <summary>
+/// Nomes do pagador e do recebedor no momento da transferência, para o evento
+/// (specs/010-mensageria-rabbitmq, FR-011). Não fazem parte da transferência gravada.
+/// </summary>
+public sealed record NomesTitulares(string Pagador, string Recebedor);
 
 /// <summary>Tudo o que uma transferência concluída grava, numa única transação (FR-006).</summary>
 public sealed record ExecucaoTransferencia(
@@ -62,11 +74,13 @@ public sealed class Transferencia
         ValorTransferencia valor,
         string? descricao,
         Guid chaveIdempotencia,
-        DateTimeOffset agora)
+        DateTimeOffset agora,
+        NomesTitulares titulares)
     {
         ArgumentNullException.ThrowIfNull(origem);
         ArgumentNullException.ThrowIfNull(destino);
         ArgumentNullException.ThrowIfNull(valor);
+        ArgumentNullException.ThrowIfNull(titulares);
 
         if (origem.Id == destino.Id)
         {
@@ -97,6 +111,8 @@ public sealed class Transferencia
             transferencia,
             Lancamento.DeTransferencia(origem.Id, DirecaoLancamento.Saida, valor.Valor, transferencia.Id, descricao, agora),
             Lancamento.DeTransferencia(destino.Id, DirecaoLancamento.Entrada, valor.Valor, transferencia.Id, descricao, agora),
-            new TransferenciaConcluida(EventoId.Novo(agora), transferencia.Id, origem.UsuarioId, destino.UsuarioId, valor.Valor, agora)));
+            new TransferenciaConcluida(
+                EventoId.Novo(agora), transferencia.Id, origem.UsuarioId, destino.UsuarioId, valor.Valor, agora,
+                titulares.Pagador, titulares.Recebedor, descricao)));
     }
 }

@@ -70,6 +70,8 @@ public static class DependencyInjection
         services.AddSingleton<ConexaoRabbitMq>();
         services.AddSingleton<EstadoMensageria>();
         services.AddHostedService<TopologiaNaInicializacao>();
+        services.AddHostedService<DespachanteOutbox>();
+        services.AddHostedService<ConsumidorNotificacoesTransferencia>();
 
         return services;
     }

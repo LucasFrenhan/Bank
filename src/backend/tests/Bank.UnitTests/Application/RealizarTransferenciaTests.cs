@@ -11,6 +11,8 @@ namespace Bank.UnitTests.Application;
 /// <summary>Caso de uso de transferência (spec 006: US1, US2; research R3, R4).</summary>
 public sealed class RealizarTransferenciaTests : IDisposable
 {
+    private static readonly NomesTitulares Nomes = new("Pagador", "Recebedor");
+
     private readonly BancoFalso _banco = new();
     private readonly MetricasCapturadasTransferencias _metricas = new();
     private readonly RealizarTransferencia _casoDeUso;
@@ -47,7 +49,9 @@ public sealed class RealizarTransferenciaTests : IDisposable
         // Spec 008, FR-002a: documento do pagador mascarado; chave sempre preenchida no envio.
         Assert.Equal("•••.982.247-••", comprovante.Pagador.Documento);
         Assert.NotNull(comprovante.ChaveIdempotencia);
-        Assert.Single(_banco.Gravadas);
+        var evento = Assert.Single(_banco.Gravadas).Evento;
+        // Spec 010, FR-011: o evento leva os nomes lidos pelo caso de uso e a descrição normalizada.
+        Assert.Equal(("Lucas Silva", "Cafeteria Ltda", "Almoço"), (evento.PagadorNome, evento.RecebedorNome, evento.Descricao));
         Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.concluidas" && m.Tags["tipo_destino"] == "PessoaJuridica");
         Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.valor");
     }
@@ -135,7 +139,7 @@ public sealed class RealizarTransferenciaTests : IDisposable
     public async Task ChaveGravadaPorOutraRequisicaoNaConfirmacao_DevolveReplay()
     {
         var chave = Guid.NewGuid();
-        var outra = Transferencia.Executar(_pf.Carteira, _pj.Carteira, ValorTransferencia.Criar(2m).Valor, null, chave, DateTimeOffset.UtcNow).Valor;
+        var outra = Transferencia.Executar(_pf.Carteira, _pj.Carteira, ValorTransferencia.Criar(2m).Valor, null, chave, DateTimeOffset.UtcNow, Nomes).Valor;
         _banco.ForcarChaveDuplicada = true;
         _banco.AntesDeConfirmar = () => _banco.Gravadas.Add(outra);
 
@@ -274,7 +278,7 @@ public sealed class RealizarTransferenciaTests : IDisposable
     public async Task Replay_DentroDoBloqueio_NaoSomaODia()
     {
         var chave = Guid.NewGuid();
-        var outra = Transferencia.Executar(_pf.Carteira, _pj.Carteira, ValorTransferencia.Criar(2m).Valor, null, chave, Relogio.GetUtcNow()).Valor;
+        var outra = Transferencia.Executar(_pf.Carteira, _pj.Carteira, ValorTransferencia.Criar(2m).Valor, null, chave, Relogio.GetUtcNow(), Nomes).Valor;
         _limites.PessoaFisica.Diario = 1m;
         _banco.AntesDeBloquear = () => _banco.Gravadas.Add(outra);
 

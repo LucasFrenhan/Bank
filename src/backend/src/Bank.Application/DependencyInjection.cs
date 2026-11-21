@@ -1,5 +1,7 @@
 using Bank.Application.Autenticacao;
 using Bank.Application.Carteiras;
+using Bank.Application.Abstracoes;
+using Bank.Application.Notificacoes;
 using Bank.Application.Observabilidade;
 using Bank.Application.Usuarios;
 using Bank.Application.Transferencias;
@@ -44,6 +46,10 @@ public static class DependencyInjection
         services.AddScoped<ObterExtrato>();
         services.AddScoped<ConsultarTransferencia>();
         services.AddScoped<ConsultarLimites>();
+
+        // Notificações (specs/010-mensageria-rabbitmq, research R8)
+        services.AddSingleton<MetricasNotificacoes>();
+        services.AddScoped<INotificadorTransferencia, NotificarTransferenciaConcluida>();
 
         return services;
     }

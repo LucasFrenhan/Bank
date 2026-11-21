@@ -132,7 +132,7 @@ public sealed partial class RealizarTransferencia(
                 }
             }
 
-            var execucao = Transferencia.Executar(origem, carteiraDestino, valor, descricao, chave, agora);
+            var execucao = Transferencia.Executar(origem, carteiraDestino, valor, descricao, chave, agora, new NomesTitulares(pagador.NomeTitular, destino.Nome));
             if (!execucao.Sucesso)
             {
                 await unidade.DesfazerAsync(cancellationToken);

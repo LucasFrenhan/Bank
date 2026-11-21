@@ -188,26 +188,26 @@ e o evento processado
 
 ### Testes da US1 (escrever primeiro)
 
-- [ ] T023 [P] [US1] Em `back/tests/Bank.UnitTests/Domain/TransferenciaTests.cs`: o evento de
+- [X] T023 [P] [US1] Em `back/tests/Bank.UnitTests/Domain/TransferenciaTests.cs`: o evento de
   `Transferencia.Executar` traz `PagadorNome`, `RecebedorNome` e `Descricao` (inclusive `null`)
-- [ ] T024 [P] [US1] Em `back/tests/Bank.UnitTests/Infrastructure/ContratoEventosTests.cs`
+- [X] T024 [P] [US1] Em `back/tests/Bank.UnitTests/Infrastructure/ContratoEventosTests.cs`
   (contrato, Princípio VII): `EventoOutbox.De` gera exatamente os campos e nomes camelCase de
   [contracts/evento-transferencia-concluida.md](contracts/evento-transferencia-concluida.md)
   (`tipoEvento = "TransferenciaConcluida"`, `versao = 1`, `descricao` `null` quando ausente,
   `valor` com 2 casas, identificadores como UUID); `tipo` e `versao` do registro
-- [ ] T025 [P] [US1] Em `back/tests/Bank.UnitTests/Infrastructure/LeitorTransferenciaConcluidaTests.cs`:
+- [X] T025 [P] [US1] Em `back/tests/Bank.UnitTests/Infrastructure/LeitorTransferenciaConcluidaTests.cs`:
   lê o payload completo; lê payload antigo (só os 6 campos originais) sem erro; ignora campo
   desconhecido; recusa (resultado `mensagem-invalida`) JSON inválido, campo obrigatório ausente
   (`eventoId`, `transferenciaId`, `pagadorUsuarioId`, `recebedorUsuarioId`, `valor`, `ocorridoEm`),
   `type` ≠ `transferencia.concluida` e `versao` ≠ 1 (header como fonte; corpo como alternativa)
-- [ ] T026 [P] [US1] Em `back/tests/Bank.UnitTests/Application/NotificarTransferenciaConcluidaTests.cs`:
+- [X] T026 [P] [US1] Em `back/tests/Bank.UnitTests/Application/NotificarTransferenciaConcluidaTests.cs`:
   registra 2 logs (papéis `pagador` e `recebedor`) com `eventoId`, `transferenciaId`, `usuarioId` e
   valor, e incrementa `bank.notificacoes.enviadas` por papel
-- [ ] T027 [P] [US1] Em `back/tests/Bank.UnitTests/Infrastructure/CabecalhosMensagemTests.cs`:
+- [X] T027 [P] [US1] Em `back/tests/Bank.UnitTests/Infrastructure/CabecalhosMensagemTests.cs`:
   propriedades da publicação conforme [contracts/topologia-e-mensagens.md](contracts/topologia-e-mensagens.md)
   (`ContentType`, `ContentEncoding`, `DeliveryMode` persistente, `MessageId = eventoId`,
   `Type`, `Timestamp` em segundos Unix, header `versao`)
-- [ ] T028 [US1] Em `back/tests/Bank.IntegrationTests/PublicacaoOutboxTests.cs`: com API + Worker
+- [X] T028 [US1] Em `back/tests/Bank.IntegrationTests/PublicacaoOutboxTests.cs`: com API + Worker
   (mesmo banco, vhost exclusivo), um `POST /api/v1/transferencias` resulta, em até 5 s, em
   `publicado_em` preenchido, 1 linha em `eventos_processados` (`nome_consumidor =
   notificacoes-transferencias`), os 2 logs de notificação e métrica `banco.eventos.processados`
@@ -216,18 +216,18 @@ e o evento processado
 
 ### Implementação da US1
 
-- [ ] T029 [P] [US1] Em `back/src/Bank.Domain/Transferencias/Transferencia.cs`:
+- [X] T029 [P] [US1] Em `back/src/Bank.Domain/Transferencias/Transferencia.cs`:
   `TransferenciaConcluida` ganha `string PagadorNome`, `string RecebedorNome`, `string? Descricao`;
   `Transferencia.Executar` recebe `pagadorNome` e `recebedorNome` e preenche o evento (descrição da
   própria transferência) — data-model
-- [ ] T030 [US1] Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`: passar
+- [X] T030 [US1] Em `back/src/Bank.Application/Transferencias/RealizarTransferencia.cs`: passar
   `pagador.NomeTitular` e `destino.Nome` para `Transferencia.Executar`; ajustar os demais chamadores
   e testes que constroem o evento
-- [ ] T031 [US1] Em `msg/EventoOutbox.cs`: `PayloadTransferenciaConcluida` com a ordem e os campos
+- [X] T031 [US1] Em `msg/EventoOutbox.cs`: `PayloadTransferenciaConcluida` com a ordem e os campos
   do contrato (`EventoId`, `TipoEvento`, `Versao`, `TransferenciaId`, `PagadorUsuarioId`,
   `PagadorNome`, `RecebedorUsuarioId`, `RecebedorNome`, `Valor`, `Descricao`, `OcorridoEm`);
   `descricao` serializada como `null` quando ausente (T024 passa)
-- [ ] T032 [P] [US1] Criar `back/src/Bank.Application/Observabilidade/MetricasNotificacoes.cs`
+- [X] T032 [P] [US1] Criar `back/src/Bank.Application/Observabilidade/MetricasNotificacoes.cs`
   (meter `Bank.Notificacoes`, contador `bank.notificacoes.enviadas`, `{notificacao}`, tag `papel`)
   e `back/src/Bank.Application/Notificacoes/NotificarTransferenciaConcluida.cs` com o comando
   `NotificacaoTransferencia(EventoId, TransferenciaId, PagadorUsuarioId, RecebedorUsuarioId, Valor,
@@ -236,20 +236,20 @@ e o evento processado
   (`Task NotificarAsync(NotificacaoTransferencia, CancellationToken)`), que é o que o consumidor
   resolve por DI (research R8); registrar métricas e caso de uso em
   `back/src/Bank.Application/DependencyInjection.cs` (T026 passa)
-- [ ] T033 [P] [US1] Criar `msg/CabecalhosMensagem.cs`: monta `BasicProperties` da publicação a
+- [X] T033 [P] [US1] Criar `msg/CabecalhosMensagem.cs`: monta `BasicProperties` da publicação a
   partir do `EventoOutbox` e lê de volta `MessageId`, `Type`, header `versao` (aceitando `byte[]`
   e inteiros, como o cliente entrega) — T027 passa
-- [ ] T034 [P] [US1] Criar `msg/LeitorTransferenciaConcluida.cs`: desserializa o contrato v1
+- [X] T034 [P] [US1] Criar `msg/LeitorTransferenciaConcluida.cs`: desserializa o contrato v1
   (`System.Text.Json`, `JsonSerializerDefaults.Web`) num DTO com `Guid`, valida os obrigatórios,
   o `type` e a `versao`, e converte para `NotificacaoTransferencia` com os tipos do Domain
   (`EventoId.De`, `TransferenciaId.De`, `UsuarioId.De`); resultado `Valida | Invalida(motivo)`
   — T025 passa
-- [ ] T035 [US1] Criar `back/src/Bank.Infrastructure/Persistencia/Sql/Consultas/ReservarEventosPendentes.sql`
+- [X] T035 [US1] Criar `back/src/Bank.Infrastructure/Persistencia/Sql/Consultas/ReservarEventosPendentes.sql`
   (cabeçalho com a spec de origem; `SELECT ... FROM outbox_eventos WHERE publicado_em IS NULL
   ORDER BY ocorrido_em, id LIMIT @lote FOR UPDATE SKIP LOCKED`) e `RegistrarEventoProcessado.sql`
   (`INSERT INTO eventos_processados (evento_id, nome_consumidor, processado_em) VALUES (...)
   ON CONFLICT DO NOTHING`)
-- [ ] T036 [US1] Criar `msg/DespachanteOutbox.cs` (`BackgroundService`, registrado por
+- [X] T036 [US1] Criar `msg/DespachanteOutbox.cs` (`BackgroundService`, registrado por
   `AddMensageria`): a cada `IntervaloDespachoMs`, em escopo novo e transação `ReadCommitted`, reserva
   até `TamanhoLoteDespacho` pendentes (T035), publica cada um em
   `banco.eventos.topic` com routing key = `tipo`, `mandatory: true` e as propriedades de T033 num
@@ -258,7 +258,7 @@ e o evento processado
   marca `MarcarPublicado(agora)` e faz commit; declara a topologia ao abrir o canal; métricas
   `banco.eventos.publicados` e gauge de pendentes; log 5001 `EventoPublicado` (Debug, `eventoId`,
   `tipo`) — research R4 (o tratamento de falhas e a reabertura entram na US2)
-- [ ] T037 [US1] Criar `msg/ConsumidorEventos.cs` (base abstrata `BackgroundService`): numa sessão,
+- [X] T037 [US1] Criar `msg/ConsumidorEventos.cs` (base abstrata `BackgroundService`): numa sessão,
   abre canal de consumo (`BasicQosAsync(prefetch)`, `ConsumerDispatchConcurrency = 1`,
   `autoAck: false`) e canal de publicação com confirms; declara a topologia; inscreve
   `AsyncEventingBasicConsumer` na fila principal; para cada entrega: lê (abstrato), abre transação,
@@ -268,11 +268,11 @@ e o evento processado
   inseridas) → commit e ACK sem processar; leitura inválida ou exceção no processamento →
   rollback e `BasicNackAsync(requeue: false)` (a mensagem chega à DLQ pela dead letter exchange
   da fila) com log de erro com o `eventoId`; a US3 e a US4 substituem esses ramos
-- [ ] T038 [US1] Criar `msg/ConsumidorNotificacoesTransferencia.cs` (nome
+- [X] T038 [US1] Criar `msg/ConsumidorNotificacoesTransferencia.cs` (nome
   `notificacoes-transferencias`, fila `notificacoes.transferencias.fila`): usa
   `LeitorTransferenciaConcluida` e chama `INotificadorTransferencia` num escopo de DI;
   registrar em `AddMensageria`
-- [ ] T039 [US1] Em `back/src/Bank.Worker/Saude/SaudeEndpoints.cs`: `/health/pronto` responde 200
+- [X] T039 [US1] Em `back/src/Bank.Worker/Saude/SaudeEndpoints.cs`: `/health/pronto` responde 200
   só com a conexão aberta e o consumidor inscrito (estado exposto pelo `ConsumidorEventos`) e 503
   caso contrário; T028 passa
 

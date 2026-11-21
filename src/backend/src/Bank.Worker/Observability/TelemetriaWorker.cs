@@ -16,8 +16,8 @@ public static class TelemetriaWorker
 {
     public const string NomeServico = "bank-worker";
 
-    /// <summary>Meter das notificações (Application), registrado pelo nome para não acoplar a composição.</summary>
-    public const string MeterNotificacoes = "Bank.Notificacoes";
+    /// <summary>Meter das notificações (Application).</summary>
+    public const string MeterNotificacoes = Bank.Application.Observabilidade.MetricasNotificacoes.NomeMeter;
 
     public static WebApplicationBuilder AddTelemetriaWorker(this WebApplicationBuilder builder)
     {
