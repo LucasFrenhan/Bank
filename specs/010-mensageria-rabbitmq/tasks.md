@@ -365,7 +365,7 @@ inválidas direto para a DLQ; reprocessamento recomeça a contagem
 
 ### Testes da US4 (escrever primeiro)
 
-- [ ] T046 [P] [US4] Em `back/tests/Bank.UnitTests/Infrastructure/PoliticaNovaTentativaTests.cs`:
+- [X] T046 [P] [US4] Em `back/tests/Bank.UnitTests/Infrastructure/PoliticaNovaTentativaTests.cs`:
   sem headers → execução 1; `x-tentativas = 2` → execução 3; com `x-falhou-em` → execução 1 e
   `x-reprocessamentos` + 1 (1 se ausente); falha na execução N ≤ 3 → destino espera do N-ésimo
   intervalo, headers da cópia com `x-tentativas = N`, sem `x-falhou-em`/`x-motivo`/`x-ultimo-erro`,
@@ -374,7 +374,7 @@ inválidas direto para a DLQ; reprocessamento recomeça a contagem
   "<TipoDaExcecao>: <mensagem>"` truncado em 500 caracteres; inválida → DLQ com
   `x-motivo = mensagem-invalida`; cópias preservam `MessageId`, `Type`, `Timestamp`, `versao`,
   `traceparent`, `tracestate` (FR-018, FR-018a–c)
-- [ ] T047 [US4] Em `back/tests/Bank.IntegrationTests/NovaTentativaEDlqTests.cs` (intervalos de teste
+- [X] T047 [US4] Em `back/tests/Bank.IntegrationTests/NovaTentativaEDlqTests.cs` (intervalos de teste
   100/200/400 ms; caso de uso de notificação substituído por dublê controlável no Worker de teste):
   (a) falha nas 2 primeiras execuções → notificação na 3ª, 1 linha, métricas `nova_tentativa` × 2
   e `sucesso`, e outra mensagem publicada no meio é processada sem esperar; (b) falha sempre →
@@ -383,25 +383,25 @@ inválidas direto para a DLQ; reprocessamento recomeça a contagem
   → DLQ após 1 execução com `mensagem-invalida`; (d) mover a mensagem de (b) de volta, com o dublê
   já sem falhar → processada, `x-reprocessamentos = 1` no log; (e) mover de novo com o dublê
   falhando sempre → DLQ com `x-tentativas = 4` e `x-reprocessamentos = 1`, sem loop (SC-004, SC-008)
-- [ ] T048 [US4] No mesmo arquivo: com a republicação forçada a falhar (dublê do canal de publicação
+- [X] T048 [US4] No mesmo arquivo: com a republicação forçada a falhar (dublê do canal de publicação
   que não confirma), a original recebe NACK sem requeue e chega à DLQ pela dead letter exchange,
   com `x-death` (rede de segurança, FR-018)
 
 ### Implementação da US4
 
-- [ ] T049 [P] [US4] Criar `msg/PoliticaNovaTentativa.cs` (puro, `internal`): a partir dos headers
+- [X] T049 [P] [US4] Criar `msg/PoliticaNovaTentativa.cs` (puro, `internal`): a partir dos headers
   da entrega e dos intervalos configurados, calcula a execução atual e, dado o desfecho (falha com
   exceção ou inválida), o destino (`Espera(fila, ms)` ou `Dlq(motivo)`) e os headers da cópia;
   constantes `x-tentativas`, `x-reprocessamentos`, `x-motivo`, `x-ultimo-erro`, `x-falhou-em`
   — T046 passa
-- [ ] T050 [US4] Em `msg/ConsumidorEventos.cs`: leitura inválida → DLQ; exceção no processamento →
+- [X] T050 [US4] Em `msg/ConsumidorEventos.cs`: leitura inválida → DLQ; exceção no processamento →
   rollback e destino pela política; republicar a cópia (corpo e propriedades originais, headers
   novos) na fila de espera pela exchange padrão ou na `banco.eventos.dlx` com a routing key de DLQ,
   no canal de publicação com confirms da sessão; ACK após a confirmação; se a republicação falhar,
   `BasicNackAsync(requeue: false)`; métricas `nova_tentativa`/`falha_dlq` (com `motivo`); logs 5003
   `NovaTentativa` (Warning: `eventoId`, execução, intervalo) e 5004 `EnviadoParaDlq` (Error:
   `eventoId`, motivo, tipo da exceção, execuções, reprocessamentos), nunca com payload — research R7
-- [ ] T051 [US4] Em `back/tests/Bank.IntegrationTests/BankWorkerFactory.cs`: permitir registrar um
+- [X] T051 [US4] Em `back/tests/Bank.IntegrationTests/BankWorkerFactory.cs`: permitir registrar um
   dublê de `INotificadorTransferencia` (T032) que falha nas N primeiras chamadas ou sempre, e um
   dublê de canal de publicação que não confirma; T047 e T048 passam
 

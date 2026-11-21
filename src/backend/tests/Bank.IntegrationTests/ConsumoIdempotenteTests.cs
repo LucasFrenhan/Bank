@@ -25,7 +25,7 @@ public class ConsumoIdempotenteTests(AmbienteMensageria ambiente) : IClassFixtur
     public async Task MesmaMensagemDuasVezes_UmaNotificacao()
     {
         var worker = ambiente.Worker;
-        worker.Iniciar();
+        await worker.IniciarProntoAsync();
         var eventoId = Guid.CreateVersion7();
         var corpo = Payload(eventoId);
 

@@ -62,6 +62,22 @@ public sealed class BankWorkerFactory(string connectionString, BrokerDeTeste bro
         }
     }
 
+    /// <summary>Inicia o Worker e espera o consumidor inscrito (topologia declarada) — antes de publicar à mão.</summary>
+    public async Task IniciarProntoAsync()
+    {
+        Iniciar();
+        using var saude = CreateClient();
+        var pronto = await AguardarAsync(async () =>
+        {
+            using var resposta = await saude.GetAsync(new Uri("/health/pronto", UriKind.Relative));
+            return resposta.IsSuccessStatusCode;
+        }, TimeSpan.FromSeconds(30));
+        if (!pronto)
+        {
+            throw new InvalidOperationException("O Worker não ficou pronto em 30 s.");
+        }
+    }
+
     /// <summary>Quantas medições do instrumento têm a tag <paramref name="tag"/> = <paramref name="valor"/>.</summary>
     public double Somar(string instrumento, string? tag = null, string? valor = null) =>
         Medicoes.Where(m => m.Nome == instrumento && (tag is null || (m.Tags.TryGetValue(tag, out var v) && v == valor))).Sum(m => m.Valor);
