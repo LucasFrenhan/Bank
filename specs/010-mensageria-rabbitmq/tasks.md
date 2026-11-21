@@ -337,7 +337,7 @@ notificados (quickstart, cenário 4)
 
 ### Testes da US3 (escrever primeiro)
 
-- [ ] T044 [US3] Em `back/tests/Bank.IntegrationTests/ConsumoIdempotenteTests.cs`: publicar duas vezes
+- [X] T044 [US3] Em `back/tests/Bank.IntegrationTests/ConsumoIdempotenteTests.cs`: publicar duas vezes
   a mesma mensagem (sequencial) e 5 cópias simultâneas de outra (com `Prefetch` e duas instâncias
   do Worker na mesma fila) → cada evento com 1 linha em `eventos_processados`, 1 par de logs de
   notificação e métrica `duplicado` para as demais; todas confirmadas (fila vazia) — SC-003; e,
@@ -347,7 +347,7 @@ notificados (quickstart, cenário 4)
 
 ### Implementação da US3
 
-- [ ] T045 [US3] Em `msg/ConsumidorEventos.cs`: quando `RegistrarEventoProcessado.sql` afeta 0
+- [X] T045 [US3] Em `msg/ConsumidorEventos.cs`: quando `RegistrarEventoProcessado.sql` afeta 0
   linhas, commit sem processar, `BasicAckAsync`, métrica `status=duplicado` e log 5005
   `EventoDuplicado` (Information, `eventoId`, consumidor) — FR-017
 
