@@ -155,6 +155,18 @@ Stack:
 - O endpoint Minimal API atua exclusivamente como camada de roteamento e transporte. Ele
   não acessa o banco diretamente nem contém regras de negócio.
 - Regras de negócio residem em serviços de aplicação ou no domínio.
+- Identificadores tipados: entidades e raízes de agregado do domínio MUST ter
+  identificadores tipados (`readonly record struct` que implementa
+  `IIdentificador<TSelf>`), nunca `Guid` cru. A regra vale também para referências entre
+  agregados (por exemplo `Carteira.UsuarioId`) e para as assinaturas das abstrações e dos
+  casos de uso da Application. Novos identificadores são gerados como UUIDv7 por
+  `Novo(DateTimeOffset)`.
+  - Nas fronteiras (contratos HTTP, eventos de mensageria e SQL puro), o identificador é
+    serializado como `Guid`/UUID; os contratos externos não expõem os tipos do domínio.
+  - A conversão para o EF Core fica na Infrastructure (`IdentificadorConverter`); o
+    `Domain` não depende de conversores nem de pacotes de persistência.
+  - Value objects sem identidade própria não têm identificador.
+  - A regra MUST ser verificada por teste de arquitetura.
 - Documentação de API: OpenAPI nativo do .NET + Scalar.
 - Observabilidade: OpenTelemetry (traces, métricas e logs) exportando via OTLP.
 - Frontend: React com TypeScript, sob `src/frontend/`. Toda tela MUST ter versão desktop e
@@ -213,4 +225,4 @@ Violações são corrigidas antes do merge ou justificadas explicitamente na se�
 A constituição é revisada sempre que arquitetura, contratos, segurança ou plataforma
 mudarem materialmente.
 
-**Version**: 1.1.0 | **Ratified**: 2026-11-16 | **Last Amended**: 2026-11-17
+**Version**: 1.2.0 | **Ratified**: 2026-11-16 | **Last Amended**: 2026-11-21
