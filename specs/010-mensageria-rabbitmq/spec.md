@@ -23,9 +23,10 @@ para a DLQ, sem loop), RN-05 (idempotência por `eventos_processados`) e RN-06 (
 ### Session 2026-11-21
 
 - Q: O payload da issue traz `tipoEvento`, `pagadorNome`, `recebedorNome` e `descricao`, mas o
-  contrato v1 atual exclui nomes e a transferência não tem descrição. Como fica o contrato? →
-  A: Mantém a versão 1 e acrescenta, como campos novos (compatíveis), `tipoEvento`, `versao`,
-  `pagadorNome` e `recebedorNome`. `descricao` fica de fora: a transferência não tem esse dado.
+  contrato v1 atual só tem identificadores. Como fica o contrato? → A: Mantém a versão 1 e
+  acrescenta, como campos novos (compatíveis), `tipoEvento`, `versao`, `pagadorNome`,
+  `recebedorNome` e `descricao` (opcional, como na transferência; corrigido no plano: a
+  transferência tem descrição opcional desde a spec 006).
 - Q: O que o consumidor de notificações de transferência faz nesta spec? → A: Simula a
   notificação com um log estruturado e registra o evento em `eventos_processados`; não há envio
   real (e-mail, push) nem tabela de notificações.
@@ -256,8 +257,9 @@ trace com os spans da requisição HTTP, da publicação (Producer) e do consumo
   As filas de espera existem por consumidor: as de `notificacoes.cobrancas.fila` serão
   declaradas pela spec que criar o consumidor de cobranças.
 
-- **FR-007**: A topologia MUST ser declarada automaticamente na inicialização (pela API e pelo
-  Worker), de forma idempotente, sem passo manual no ambiente.
+- **FR-007**: A topologia MUST ser declarada automaticamente pelo Worker, que hospeda o
+  publicador e o consumidor (a API não acessa o broker), a cada canal aberto e de forma
+  idempotente, sem passo manual no ambiente.
 - **FR-008**: Exchanges e filas MUST ser duráveis e toda mensagem MUST ser publicada como
   persistente (RN-03).
 - **FR-009**: A comunicação com o broker MUST usar o cliente oficial do RabbitMQ diretamente,
@@ -275,8 +277,9 @@ trace com os spans da requisição HTTP, da publicação (Producer) e do consumo
   além dos campos atuais (`eventoId`, `transferenciaId`, `pagadorUsuarioId`,
   `recebedorUsuarioId`, `valor`, `ocorridoEm`), os campos `tipoEvento`
   (`"TransferenciaConcluida"`), `versao` (`1`), `pagadorNome` e `recebedorNome` (nome da PF ou
-  razão social/nome do titular PJ no momento da transferência). Os campos novos são opcionais
-  para o consumidor (eventos antigos não os têm). Não há `descricao`.
+  razão social/nome do titular PJ no momento da transferência) e `descricao` (descrição opcional
+  da transferência; `null` quando ausente). Os campos novos são opcionais para o consumidor
+  (eventos antigos não os têm).
 - **FR-012**: O contrato `cobranca.paga` v1 MUST ser documentado (campos `eventoId`,
   `tipoEvento` `"CobrancaPaga"`, `versao`, `cobrancaId`, `lojistaUsuarioId`, `pagadorUsuarioId`,
   `valor`, `ultimosDigitosCartao` — só os 4 últimos dígitos — e `ocorridoEm`), como preparação
@@ -338,7 +341,7 @@ trace com os spans da requisição HTTP, da publicação (Producer) e do consumo
   `duplicado`, `nova_tentativa`, `falha_dlq`); `falha_dlq` também carrega a tag `motivo`
   (`mensagem-invalida` ou `tentativas-esgotadas`). O publicador MUST expor métricas de eventos publicados, falhas de
   publicação e quantidade de pendentes no outbox.
-- **FR-023**: Logs, spans e métricas MUST NOT conter nomes, valores do payload inteiro, documentos
+- **FR-023**: Logs, spans e métricas MUST NOT conter nomes, descrição, o payload, documentos
   ou dados de cartão; usam `eventoId`, tipo do evento e identificadores técnicos. As tags de
   métrica MUST NOT ter identificadores de usuário ou de evento.
 - **FR-024**: O Worker MUST exportar traces, métricas e logs via OTLP como a API, com nome de
@@ -376,13 +379,13 @@ trace com os spans da requisição HTTP, da publicação (Producer) e do consumo
 - **SC-004**: 100% das mensagens inválidas terminam na DLQ após uma única execução, e 100% das
   que falham sempre terminam na DLQ após exatamente 4 execuções (em até ~10 s); nenhuma fica em
   loop.
-- **SC-008**: Uma falha passageira de até 7 s no processamento é absorvida pelas novas
-  tentativas: a notificação é registrada uma única vez, sem ação manual.
 - **SC-005**: Após reiniciar o broker, 0 mensagens não consumidas são perdidas.
 - **SC-006**: Para 100% das transferências feitas com o trace ativo, o coletor mostra um único
   trace com os spans da requisição, da publicação e do consumo.
 - **SC-007**: O tempo de resposta das transferências não piora de forma perceptível: 95%
   continuam respondendo em menos de 1 segundo no ambiente local, com o broker no ar ou fora.
+- **SC-008**: Uma falha passageira de até 7 s no processamento é absorvida pelas novas
+  tentativas: a notificação é registrada uma única vez, sem ação manual.
 
 ## Assumptions
 
