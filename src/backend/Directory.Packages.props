@@ -2,7 +2,8 @@
   <!--
     Versões centralizadas. Toda dependência precisa de justificativa no plan.md da spec que
     a introduz (constituição, Restrições Técnicas). Justificativas:
-    specs/002-setup-api/research.md (R3) e specs/003-usuarios-carteiras/research.md (R1).
+    specs/002-setup-api/research.md (R3), specs/003-usuarios-carteiras/research.md (R1) e
+    specs/010-mensageria-rabbitmq/research.md (R2).
   -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
@@ -17,6 +18,8 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Identity.Core" Version="10.0.15" />
+    <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.21.0" />
   </ItemGroup>
   <ItemGroup Label="Api">
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.15" />
@@ -33,5 +36,6 @@
     <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.21.0" />
     <PackageVersion Include="TngTech.ArchUnitNET" Version="0.13.5" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.16.0" />
+    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.16.0" />
   </ItemGroup>
 </Project>

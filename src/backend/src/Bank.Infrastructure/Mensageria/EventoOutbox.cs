@@ -30,6 +30,21 @@ public sealed class EventoOutbox
 
     public DateTimeOffset? PublicadoEm { get; private set; }
 
+    /// <summary>
+    /// <c>traceparent</c> W3C ativo na gravação, para o despachante continuar o trace da operação
+    /// mesmo publicando depois (specs/010-mensageria-rabbitmq, FR-005, research R6).
+    /// </summary>
+    public string? TraceParent { get; private set; }
+
+    /// <summary><c>tracestate</c> W3C ativo na gravação, quando houver.</summary>
+    public string? TraceState { get; private set; }
+
+    /// <summary>Única alteração permitida depois da gravação: a confirmação do broker (FR-002).</summary>
+    public void MarcarPublicado(DateTimeOffset publicadoEm)
+    {
+        PublicadoEm ??= publicadoEm;
+    }
+
     public static EventoOutbox De(TransferenciaConcluida evento)
     {
         ArgumentNullException.ThrowIfNull(evento);

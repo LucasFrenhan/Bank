@@ -37,13 +37,13 @@ Backend em `src/backend/` (abreviado `back/`): `back/src/Bank.*` e `back/tests/B
 
 **Purpose**: dependências, projeto `Bank.Worker` e ambiente local
 
-- [ ] T001 Em `back/Directory.Packages.props`, acrescentar `RabbitMQ.Client` 7.2.2 e
+- [X] T001 Em `back/Directory.Packages.props`, acrescentar `RabbitMQ.Client` 7.2.2 e
   `OpenTelemetry.Api` 1.21.0 (grupo "Infrastructure") e `Testcontainers.RabbitMq` 4.16.0 (grupo
   "Testes"), atualizando o comentário de justificativas para citar
   `specs/010-mensageria-rabbitmq/research.md (R2)`; referenciar `RabbitMQ.Client` e
   `OpenTelemetry.Api` em `back/src/Bank.Infrastructure/Bank.Infrastructure.csproj` e
   `Testcontainers.RabbitMq` em `back/tests/Bank.IntegrationTests/Bank.IntegrationTests.csproj`
-- [ ] T002 Criar `back/src/Bank.Worker/Bank.Worker.csproj` (SDK `Microsoft.NET.Sdk.Web`, referências a
+- [X] T002 Criar `back/src/Bank.Worker/Bank.Worker.csproj` (SDK `Microsoft.NET.Sdk.Web`, referências a
   `Bank.Application` e `Bank.Infrastructure`, pacotes `OpenTelemetry.Extensions.Hosting`,
   `OpenTelemetry.Exporter.OpenTelemetryProtocol`, `OpenTelemetry.Instrumentation.AspNetCore`),
   `back/src/Bank.Worker/WorkerAssemblyMarker.cs` (classe pública vazia, para o
@@ -55,11 +55,11 @@ Backend em `src/backend/` (abreviado `back/`): `back/src/Bank.*` e `back/tests/B
   `<InternalsVisibleTo Include="Bank.IntegrationTests" />` em
   `back/src/Bank.Infrastructure/Bank.Infrastructure.csproj` (os tipos de `Mensageria/` são
   `internal`; os testes de integração usam `TopologiaMensageria` e as constantes de headers)
-- [ ] T003 [P] Em `back/Dockerfile`, transformar o estágio final em dois alvos: `api` (atual) e
+- [X] T003 [P] Em `back/Dockerfile`, transformar o estágio final em dois alvos: `api` (atual) e
   `worker` (publica `src/Bank.Worker/Bank.Worker.csproj`, mesma base `aspnet:10.0.15-alpine3.24`,
   usuário `app`, `ASPNETCORE_HTTP_PORTS=8080`, `ENTRYPOINT ["dotnet", "Bank.Worker.dll"]`); copiar
   o `.csproj` do Worker na camada de restore
-- [ ] T004 [P] Em `docker-compose.yml`: no serviço `api`, `build: { context: ./src/backend, target: api }`;
+- [X] T004 [P] Em `docker-compose.yml`: no serviço `api`, `build: { context: ./src/backend, target: api }`;
   novo serviço `worker` (`build: { context: ./src/backend, target: worker }`, `image: bank/worker:local`,
   `OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889`, `ConnectionStrings__Bank` igual à
   da API, `Mensageria__Host: rabbitmq`, `Mensageria__VirtualHost: ${RABBITMQ_VHOST:-bank}`,
@@ -68,7 +68,7 @@ Backend em `src/backend/` (abreviado `back/`): `back/src/Bank.*` e `back/tests/B
   `service_started`, healthcheck `wget -q -O /dev/null http://localhost:8080/health/pronto`
   com os mesmos tempos da API, `restart: unless-stopped`); atualizar o cabeçalho do arquivo
   citando a spec 010
-- [ ] T005 [P] Criar `back/src/Bank.Worker/appsettings.json` com a seção `Mensageria`
+- [X] T005 [P] Criar `back/src/Bank.Worker/appsettings.json` com a seção `Mensageria`
   (`Porta: 5672`, `IntervalosNovaTentativaMs: [1000, 2000, 4000]`, `Prefetch: 10`,
   `IntervaloDespachoMs: 1000`, `TamanhoLoteDespacho: 50`, `TimeoutConfirmacaoMs: 5000`) e
   `Persistencia:AplicarMigracoesNaInicializacao: false`; `appsettings.Development.json` com
@@ -87,89 +87,89 @@ todas as histórias
 
 ### Testes da fundação (escrever primeiro)
 
-- [ ] T006 [P] Em `back/tests/Bank.UnitTests/Infrastructure/MensageriaOptionsTests.cs`: validador
+- [X] T006 [P] Em `back/tests/Bank.UnitTests/Infrastructure/MensageriaOptionsTests.cs`: validador
   recusa `Host`, `VirtualHost`, `Usuario` ou `Senha` vazios, `Porta` fora de 1–65535,
   `IntervalosNovaTentativaMs` vazio, não crescente ou com valor ≤ 0, `Prefetch` < 1,
   `TamanhoLoteDespacho` < 1 e `TimeoutConfirmacaoMs` < 100; aceita os padrões (research R11)
-- [ ] T007 [P] Em `back/tests/Bank.UnitTests/Infrastructure/TopologiaMensageriaTests.cs`: nomes
+- [X] T007 [P] Em `back/tests/Bank.UnitTests/Infrastructure/TopologiaMensageriaTests.cs`: nomes
   derivados — `FilaEspera("notificacoes.transferencias.fila", 1000)` =
   `notificacoes.transferencias.espera.1000`; argumentos da fila principal
   (`x-dead-letter-exchange=banco.eventos.dlx`, `x-dead-letter-routing-key=transferencia.concluida.dlq`)
   e da espera (`x-message-ttl`, `x-dead-letter-exchange=""`, `x-dead-letter-routing-key` = fila
   principal), conforme [contracts/topologia-e-mensagens.md](contracts/topologia-e-mensagens.md)
-- [ ] T008 Criar `back/tests/Bank.IntegrationTests/RabbitMqCompartilhado.cs` (como
+- [X] T008 Criar `back/tests/Bank.IntegrationTests/RabbitMqCompartilhado.cs` (como
   `PostgresCompartilhado`: imagem `rabbitmq:4.3.7-management-alpine`, um contêiner por execução,
   um **vhost novo por fábrica** criado pela API de gestão ou `rabbitmqctl add_vhost` +
   `set_permissions`, para isolar as classes paralelas) e um método para criar um contêiner
   **exclusivo** (usado pela US2, que para e religa o broker)
-- [ ] T009 Criar `back/tests/Bank.IntegrationTests/BankWorkerFactory.cs`:
+- [X] T009 Criar `back/tests/Bank.IntegrationTests/BankWorkerFactory.cs`:
   `WebApplicationFactory<WorkerAssemblyMarker>`, ambiente `Testing`, recebe a connection string de
   uma `BankApiFactory` (banco já migrado) e o vhost/porta do RabbitMQ; acrescenta exportadores
   OpenTelemetry em memória (spans, métricas e logs) como a API faz nos testes; expõe helpers para
   abrir um canal de teste, ler mensagens de uma fila (`BasicGetAsync`), contar mensagens e
   esperar condições com timeout
-- [ ] T010 Em `back/tests/Bank.IntegrationTests/TopologiaTests.cs`: com o Worker iniciado, as 2
+- [X] T010 Em `back/tests/Bank.IntegrationTests/TopologiaTests.cs`: com o Worker iniciado, as 2
   exchanges, as 7 filas (com argumentos) e os bindings da FR-006 existem e são duráveis
   (`QueueDeclarePassiveAsync`/`ExchangeDeclarePassiveAsync` e a API de gestão para os argumentos);
   reiniciar o Worker não falha (declaração idempotente, FR-007)
-- [ ] T011 Em `back/tests/Bank.ArchitectureTests/LayerDependencyTests.cs`: carregar o assembly do
+- [X] T011 Em `back/tests/Bank.ArchitectureTests/LayerDependencyTests.cs`: carregar o assembly do
   Worker; novas regras — Domain e Application não dependem de `^RabbitMQ\.Client(\..*)?$` nem de
   `^OpenTelemetry(\..*)?$`; Worker só referencia a Infrastructure a partir de `Program`
   (composição), como a regra já existente da API
 
 ### Implementação da fundação
 
-- [ ] T012 [P] Criar `msg/MensageriaOptions.cs` (seção `Mensageria`, propriedades da research R11)
+- [X] T012 [P] Criar `msg/MensageriaOptions.cs` (seção `Mensageria`, propriedades da research R11)
   e `ValidadorMensageriaOptions` (`IValidateOptions`), registrados com `ValidateOnStart`; a senha
   nunca entra em `ToString`/log
-- [ ] T013 [P] Criar `msg/TopologiaMensageria.cs` (estático, `internal`): constantes
+- [X] T013 [P] Criar `msg/TopologiaMensageria.cs` (estático, `internal`): constantes
   `ExchangeEventos = "banco.eventos.topic"`, `ExchangeDlx = "banco.eventos.dlx"`; descritor de
   consumidor (fila principal, routing key, routing key de DLQ, fila DLQ, se tem filas de espera);
   `FilaEspera(fila, ms)` (troca o sufixo `.fila` por `.espera.<ms>`); `DeclararAsync(IChannel,
   intervalos, ct)` declarando exchanges, as filas e os bindings de
   [contracts/topologia-e-mensagens.md](contracts/topologia-e-mensagens.md) (cobranças sem filas de
   espera), todas `durable: true, exclusive: false, autoDelete: false` (research R5)
-- [ ] T014 [P] Criar `msg/TelemetriaMensageria.cs`: `ActivitySource` e `Meter` `Bank.Mensageria`
+- [X] T014 [P] Criar `msg/TelemetriaMensageria.cs`: `ActivitySource` e `Meter` `Bank.Mensageria`
   (via `IMeterFactory`), com os instrumentos da research R10 — `banco.eventos.processados`
   (`{evento}`; tags `tipo_evento`, `status`, `motivo` só em `falha_dlq`), `banco.eventos.publicados`,
   `banco.eventos.publicacao.falhas` (`motivo` em `sem-rota`/`nack`/`timeout`/`canal`) e o gauge
   observável `banco.outbox.pendentes`; métodos de registro tipados (sem tags livres)
-- [ ] T015 Criar `msg/ConexaoRabbitMq.cs` (singleton): `ConnectionFactory` com `HostName`, `Port`,
+- [X] T015 Criar `msg/ConexaoRabbitMq.cs` (singleton): `ConnectionFactory` com `HostName`, `Port`,
   `VirtualHost`, `UserName`, `Password`, `AutomaticRecoveryEnabled = false`,
   `TopologyRecoveryEnabled = false`, `RequestedHeartbeat = 10 s`, `ClientProvidedName = "bank-worker"`;
   `ObterAsync(ct)` devolve a conexão aberta ou abre outra se a atual estiver fechada (com
   `SemaphoreSlim`); log 5019 `ConexaoBrokerFechada` no `ConnectionShutdownAsync` não pedido
   (iniciador, código e motivo, sem credenciais); `DisposeAsync` fecha (research R3)
-- [ ] T016 Criar `msg/SessaoMensageria.cs`: laço reutilizável de sessões —
+- [X] T016 Criar `msg/SessaoMensageria.cs`: laço reutilizável de sessões —
   `ExecutarAsync(Func<CancellationToken, Task> sessao, nome, ct)` que roda a sessão até exceção ou
   sinal de perda, registra 5016 `SessaoPerdida`/5017 `FalhaReabertura` (Warning) e 5018
   `SessaoReaberta` (Information, com o tempo fora em ms) e reabre após 0 s, 1 s, 2 s, 4 s, 8 s e
   depois 10 s fixos; encerra na hora com o `ct` do host (research R3)
-- [ ] T017 Criar `msg/EventoProcessado.cs` (`EventoId EventoId`, `string NomeConsumidor`,
+- [X] T017 Criar `msg/EventoProcessado.cs` (`EventoId EventoId`, `string NomeConsumidor`,
   `DateTimeOffset ProcessadoEm`) e `back/src/Bank.Infrastructure/Persistencia/Configuracoes/EventoProcessadoConfiguracao.cs`:
   tabela `eventos_processados`; `evento_id uuid NOT NULL` (com `IdentificadorConverter`),
   `nome_consumidor varchar(100) NOT NULL`, `processado_em timestamptz NOT NULL`; chave
   `pk_eventos_processados (evento_id, nome_consumidor)`; `DbSet<EventoProcessado> EventosProcessados`
   em `BankDbContext` (data-model)
-- [ ] T018 Em `msg/EventoOutbox.cs` e `Persistencia/Configuracoes/EventoOutboxConfiguracao.cs`:
+- [X] T018 Em `msg/EventoOutbox.cs` e `Persistencia/Configuracoes/EventoOutboxConfiguracao.cs`:
   propriedades `string? TraceParent` (coluna `trace_parent varchar(55)` nula) e `string? TraceState`
   (coluna `trace_state varchar(512)` nula); método `MarcarPublicado(DateTimeOffset)` (única
   alteração permitida); ainda sem preencher o trace (US5)
-- [ ] T019 Gerar a migration `AdicionarMensageria` (`dotnet ef migrations add AdicionarMensageria
+- [X] T019 Gerar a migration `AdicionarMensageria` (`dotnet ef migrations add AdicionarMensageria
   --project src/Bank.Infrastructure --startup-project src/Bank.Api`) e conferir que só cria
   `eventos_processados` e as 2 colunas do outbox
-- [ ] T020 Em `back/src/Bank.Infrastructure/DependencyInjection.cs`: extrair `AddPersistencia`
+- [X] T020 Em `back/src/Bank.Infrastructure/DependencyInjection.cs`: extrair `AddPersistencia`
   (opções, `BankDbContext`, repositórios e consultas, `TimeProvider`) do `AddInfrastructure`;
   `AddInfrastructure` passa a chamar `AddPersistencia` + serviços de inicialização (migrations,
   lançamentos de abertura) + segurança, sem mudança para a API; novo `AddMensageria(configuration)`
   registrando `MensageriaOptions`, `ConexaoRabbitMq`, `TelemetriaMensageria` (os hosted services
   entram nas histórias)
-- [ ] T021 Em `back/src/Bank.Worker/Program.cs`: `AddApplication(...)`, `AddPersistencia`,
+- [X] T021 Em `back/src/Bank.Worker/Program.cs`: `AddApplication(...)`, `AddPersistencia`,
   `AddMensageria`, telemetria em `Observability/TelemetriaWorker.cs` (serviço `bank-worker`; logs
   OpenTelemetry com escopos; tracing com `Bank.Mensageria`; métricas com `System.Runtime`,
   `Bank.Mensageria` e `Bank.Notificacoes`; `UseOtlpExporter` fora do ambiente `Testing`, como em
   `TelemetryExtensions` da API) e `Saude/SaudeEndpoints.cs` com `/health` (vivo)
-- [ ] T022 Criar `msg/TopologiaNaInicializacao.cs` (hosted service do Worker, registrado em
+- [X] T022 Criar `msg/TopologiaNaInicializacao.cs` (hosted service do Worker, registrado em
   `AddMensageria`) que abre um canal e chama `TopologiaMensageria.DeclararAsync` na partida, com
   as tentativas da `SessaoMensageria` se o broker ainda não estiver pronto; T010 passa
 

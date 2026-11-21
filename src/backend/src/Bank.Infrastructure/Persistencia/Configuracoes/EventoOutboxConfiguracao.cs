@@ -19,6 +19,9 @@ internal sealed class EventoOutboxConfiguracao : IEntityTypeConfiguration<Evento
         builder.Property(e => e.Payload).HasColumnName("payload").HasColumnType("jsonb").IsRequired();
         builder.Property(e => e.OcorridoEm).HasColumnName("ocorrido_em").IsRequired();
         builder.Property(e => e.PublicadoEm).HasColumnName("publicado_em");
+        // Contexto W3C da gravação (specs/010-mensageria-rabbitmq, FR-005, data-model)
+        builder.Property(e => e.TraceParent).HasColumnName("trace_parent").HasMaxLength(55);
+        builder.Property(e => e.TraceState).HasColumnName("trace_state").HasMaxLength(512);
 
         builder.HasIndex(e => e.OcorridoEm)
             .HasFilter("publicado_em IS NULL")

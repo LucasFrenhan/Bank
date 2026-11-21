@@ -8,6 +8,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="OpenTelemetry.Exporter.InMemory" />
     <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.RabbitMq" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
@@ -15,5 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bank.Api\Bank.Api.csproj" />
     <ProjectReference Include="..\..\src\Bank.Infrastructure\Bank.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Bank.Worker\Bank.Worker.csproj" />
   </ItemGroup>
 </Project>

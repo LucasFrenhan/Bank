@@ -23,6 +23,8 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
 
     public DbSet<EventoOutbox> EventosOutbox => Set<EventoOutbox>();
 
+    public DbSet<EventoProcessado> EventosProcessados => Set<EventoProcessado>();
+
     /// <summary>Identificadores tipados do Domain gravados como <c>uuid</c> (issue #43).</summary>
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

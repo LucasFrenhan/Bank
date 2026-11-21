@@ -275,6 +275,16 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("tipo");
 
+                    b.Property<string>("TraceParent")
+                        .HasMaxLength(55)
+                        .HasColumnType("character varying(55)")
+                        .HasColumnName("trace_parent");
+
+                    b.Property<string>("TraceState")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("trace_state");
+
                     b.Property<int>("Versao")
                         .HasColumnType("integer")
                         .HasColumnName("versao");
@@ -287,6 +297,27 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasFilter("publicado_em IS NULL");
 
                     b.ToTable("outbox_eventos", (string)null);
+                });
+
+            modelBuilder.Entity("Bank.Infrastructure.Mensageria.EventoProcessado", b =>
+                {
+                    b.Property<Guid>("EventoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("evento_id");
+
+                    b.Property<string>("NomeConsumidor")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nome_consumidor");
+
+                    b.Property<DateTimeOffset>("ProcessadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processado_em");
+
+                    b.HasKey("EventoId", "NomeConsumidor")
+                        .HasName("pk_eventos_processados");
+
+                    b.ToTable("eventos_processados", (string)null);
                 });
 
             modelBuilder.Entity("Bank.Domain.Carteiras.Carteira", b =>
