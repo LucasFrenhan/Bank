@@ -191,7 +191,7 @@ public sealed class RealizarTransferenciaTests : IDisposable
         await Transferir("12ABC34501DE35", 5m);
 
         var registro = Assert.Single(_logger.Registros, r => r.Nivel == LogLevel.Warning);
-        Assert.Equal(("PorOperacao", _pf.Carteira.Id, 5m, 4m, 4m), (
+        Assert.Equal(("PorOperacao", _pf.Carteira.Id.Valor, 5m, 4m, 4m), (
             registro.Propriedades["TipoLimite"]?.ToString(),
             (Guid)registro.Propriedades["CarteiraOrigemId"]!,
             (decimal)registro.Propriedades["Valor"]!,

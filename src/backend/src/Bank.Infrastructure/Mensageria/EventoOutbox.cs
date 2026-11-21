@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 
 namespace Bank.Infrastructure.Mensageria;
@@ -16,7 +17,7 @@ public sealed class EventoOutbox
     {
     }
 
-    public Guid Id { get; private set; }
+    public EventoId Id { get; private set; }
 
     public string Tipo { get; private set; } = string.Empty;
 
@@ -38,8 +39,29 @@ public sealed class EventoOutbox
             Id = evento.EventoId,
             Tipo = TransferenciaConcluida.Tipo,
             Versao = TransferenciaConcluida.Versao,
-            Payload = JsonSerializer.Serialize(evento, Json),
+            Payload = JsonSerializer.Serialize(PayloadTransferenciaConcluida.De(evento), Json),
             OcorridoEm = evento.OcorridoEm,
         };
+    }
+
+    /// <summary>
+    /// Forma do payload v1 (contracts/evento-transferencia-concluida.md): identificadores como
+    /// <see cref="Guid"/>, independentes dos tipos do Domain (issue #43).
+    /// </summary>
+    private sealed record PayloadTransferenciaConcluida(
+        Guid EventoId,
+        Guid TransferenciaId,
+        Guid PagadorUsuarioId,
+        Guid RecebedorUsuarioId,
+        decimal Valor,
+        DateTimeOffset OcorridoEm)
+    {
+        public static PayloadTransferenciaConcluida De(TransferenciaConcluida evento) => new(
+            evento.EventoId.Valor,
+            evento.TransferenciaId.Valor,
+            evento.PagadorUsuarioId.Valor,
+            evento.RecebedorUsuarioId.Valor,
+            evento.Valor,
+            evento.OcorridoEm);
     }
 }

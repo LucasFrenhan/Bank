@@ -66,7 +66,7 @@ public class TransferenciaTests
 
         var evento = execucao.Evento;
         Assert.Equal((transferencia.Id, origem.UsuarioId, destino.UsuarioId, 4.5m, Agora), (evento.TransferenciaId, evento.PagadorUsuarioId, evento.RecebedorUsuarioId, evento.Valor, evento.OcorridoEm));
-        Assert.Equal(7, evento.EventoId.Version);
+        Assert.Equal(7, evento.EventoId.Valor.Version);
     }
 
     [Fact]

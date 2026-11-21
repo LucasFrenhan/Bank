@@ -45,8 +45,8 @@ public static class CarteirasEndpoints
 
         var carteira = resultado.Valor;
         return TypedResults.Ok(new MinhaCarteiraResposta(
-            carteira.CarteiraId,
-            carteira.UsuarioId,
+            carteira.CarteiraId.Valor,
+            carteira.UsuarioId.Valor,
             carteira.NomeTitular,
             carteira.TipoConta.ToString(),
             carteira.Saldo,

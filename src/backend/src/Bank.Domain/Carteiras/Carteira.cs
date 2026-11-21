@@ -1,4 +1,5 @@
 using Bank.Domain.Comum;
+using Bank.Domain.Usuarios;
 
 namespace Bank.Domain.Carteiras;
 
@@ -12,9 +13,9 @@ public sealed class Carteira
     {
     }
 
-    public Guid Id { get; private set; }
+    public CarteiraId Id { get; private set; }
 
-    public Guid UsuarioId { get; private set; }
+    public UsuarioId UsuarioId { get; private set; }
 
     public decimal Saldo { get; private set; }
 
@@ -22,7 +23,7 @@ public sealed class Carteira
 
     public DateTimeOffset AtualizadoEm { get; private set; }
 
-    internal static Carteira Criar(Guid usuarioId, decimal saldoInicial, DateTimeOffset agora)
+    internal static Carteira Criar(UsuarioId usuarioId, decimal saldoInicial, DateTimeOffset agora)
     {
         if (saldoInicial < 0)
         {
@@ -31,7 +32,7 @@ public sealed class Carteira
 
         return new Carteira
         {
-            Id = Guid.CreateVersion7(agora),
+            Id = CarteiraId.Novo(agora),
             UsuarioId = usuarioId,
             Saldo = Dinheiro.NormalizarEscala(saldoInicial),
             Moeda = Dinheiro.MoedaPadrao,

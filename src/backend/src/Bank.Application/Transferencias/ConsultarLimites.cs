@@ -29,7 +29,7 @@ public sealed class ConsultarLimites(
     TimeProvider relogio,
     MetricasTransferencias metricas)
 {
-    public async Task<Resultado<ResumoLimites>> ExecutarAsync(Guid usuarioId, CancellationToken cancellationToken)
+    public async Task<Resultado<ResumoLimites>> ExecutarAsync(UsuarioId usuarioId, CancellationToken cancellationToken)
     {
         var carteira = await carteiras.ObterDoUsuarioAsync(usuarioId, cancellationToken);
         if (carteira is null)

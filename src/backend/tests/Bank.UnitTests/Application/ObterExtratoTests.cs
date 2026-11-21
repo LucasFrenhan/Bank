@@ -1,5 +1,6 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Transferencias;
+using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
@@ -60,9 +61,9 @@ public sealed class ObterExtratoTests
         var agora = DateTimeOffset.UtcNow;
         _extrato.Itens =
         [
-            new(Guid.NewGuid(), TipoLancamento.Transferencia, DirecaoLancamento.Saida, Guid.NewGuid(), new ContraparteExtrato("Ana", "11144477735", TipoConta.PessoaFisica), 1m, null, agora),
-            new(Guid.NewGuid(), TipoLancamento.Transferencia, DirecaoLancamento.Saida, Guid.NewGuid(), new ContraparteExtrato("Loja", "12ABC34501DE35", TipoConta.PessoaJuridica), 1m, null, agora),
-            new(Guid.NewGuid(), TipoLancamento.Abertura, DirecaoLancamento.Entrada, null, null, 10m, Lancamento.DescricaoAbertura, agora),
+            new(LancamentoId.De(Guid.NewGuid()), TipoLancamento.Transferencia, DirecaoLancamento.Saida, TransferenciaId.De(Guid.NewGuid()), new ContraparteExtrato("Ana", "11144477735", TipoConta.PessoaFisica), 1m, null, agora),
+            new(LancamentoId.De(Guid.NewGuid()), TipoLancamento.Transferencia, DirecaoLancamento.Saida, TransferenciaId.De(Guid.NewGuid()), new ContraparteExtrato("Loja", "12ABC34501DE35", TipoConta.PessoaJuridica), 1m, null, agora),
+            new(LancamentoId.De(Guid.NewGuid()), TipoLancamento.Abertura, DirecaoLancamento.Entrada, null, null, 10m, Lancamento.DescricaoAbertura, agora),
         ];
 
         var itens = (await Executar(null, null, null)).Valor.Itens;
@@ -75,7 +76,7 @@ public sealed class ObterExtratoTests
     [Fact]
     public async Task UsuarioInexistente_NaoEncontrado()
     {
-        var resultado = await _casoDeUso.ExecutarAsync(new ObterExtratoConsulta(Guid.NewGuid(), null, null, null), CancellationToken.None);
+        var resultado = await _casoDeUso.ExecutarAsync(new ObterExtratoConsulta(UsuarioId.De(Guid.NewGuid()), null, null, null), CancellationToken.None);
 
         Assert.Equal(ErrosUsuario.NaoEncontrado, Assert.Single(resultado.Erros));
     }
@@ -87,9 +88,9 @@ public sealed class ObterExtratoTests
     {
         public IReadOnlyList<ItemExtrato> Itens { get; set; } = [];
 
-        public (Guid, DirecaoLancamento?, int, int)? UltimaChamada { get; private set; }
+        public (CarteiraId, DirecaoLancamento?, int, int)? UltimaChamada { get; private set; }
 
-        public Task<PaginaExtrato> ObterAsync(Guid carteiraId, DirecaoLancamento? direcao, int deslocamento, int quantidade, CancellationToken cancellationToken)
+        public Task<PaginaExtrato> ObterAsync(CarteiraId carteiraId, DirecaoLancamento? direcao, int deslocamento, int quantidade, CancellationToken cancellationToken)
         {
             UltimaChamada = (carteiraId, direcao, deslocamento, quantidade);
             return Task.FromResult(new PaginaExtrato(Itens, Itens.Count));

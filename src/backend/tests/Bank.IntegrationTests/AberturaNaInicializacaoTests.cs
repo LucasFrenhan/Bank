@@ -1,3 +1,4 @@
+using Bank.Domain.Carteiras;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -50,7 +51,7 @@ public class AberturaNaInicializacaoTests(BankApiFactory factory) : IClassFixtur
         _ = reiniciada.Server;
     }
 
-    private async Task<int> AberturasAsync(Guid carteiraId)
+    private async Task<int> AberturasAsync(CarteiraId carteiraId)
     {
         await using var contexto = factory.CriarContexto();
         return await contexto.Lancamentos.CountAsync(l => l.CarteiraId == carteiraId && l.Tipo == TipoLancamento.Abertura, Ct);

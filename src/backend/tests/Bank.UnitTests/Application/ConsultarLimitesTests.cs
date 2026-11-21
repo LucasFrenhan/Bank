@@ -62,7 +62,7 @@ public sealed class ConsultarLimitesTests : IDisposable
     [Fact]
     public async Task UsuarioSemCarteira_UsuarioNaoEncontrado()
     {
-        var resultado = await _casoDeUso.ExecutarAsync(Guid.NewGuid(), CancellationToken.None);
+        var resultado = await _casoDeUso.ExecutarAsync(UsuarioId.De(Guid.NewGuid()), CancellationToken.None);
 
         Assert.Equal(ErrosUsuario.NaoEncontrado, Assert.Single(resultado.Erros));
         Assert.Contains(_metricas.Medicoes, m => m.Nome == "bank.transferencias.limites.consultas" && m.Tags["resultado"] == "usuario-nao-encontrado");

@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Bank.Domain.Carteiras;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bank.IntegrationTests;
@@ -69,9 +70,10 @@ public static class ApiTransferencias
     /// <summary>Saldo − (entradas − saídas) da carteira: deve ser zero (FR-015).</summary>
     public static async Task<decimal> DiferencaSaldoRazaoAsync(BankApiFactory factory, Guid carteiraId)
     {
+        var id = CarteiraId.De(carteiraId);
         await using var contexto = factory.CriarContexto();
-        var saldo = await contexto.Carteiras.Where(c => c.Id == carteiraId).Select(c => c.Saldo).SingleAsync(Ct);
-        var razao = await contexto.Lancamentos.Where(l => l.CarteiraId == carteiraId)
+        var saldo = await contexto.Carteiras.Where(c => c.Id == id).Select(c => c.Saldo).SingleAsync(Ct);
+        var razao = await contexto.Lancamentos.Where(l => l.CarteiraId == id)
             .SumAsync(l => l.Direcao == Bank.Domain.Transferencias.DirecaoLancamento.Entrada ? l.Valor : -l.Valor, Ct);
         return saldo - razao;
     }

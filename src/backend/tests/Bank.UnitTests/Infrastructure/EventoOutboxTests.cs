@@ -1,5 +1,7 @@
 using System.Text.Json;
+using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
+using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Mensageria;
 
 namespace Bank.UnitTests.Infrastructure;
@@ -14,10 +16,10 @@ public class EventoOutboxTests
     public void De_TransferenciaConcluida_SegueOSchemaV1()
     {
         var evento = new TransferenciaConcluida(
-            Guid.CreateVersion7(),
-            Guid.CreateVersion7(),
-            Guid.CreateVersion7(),
-            Guid.CreateVersion7(),
+            EventoId.De(Guid.CreateVersion7()),
+            TransferenciaId.De(Guid.CreateVersion7()),
+            UsuarioId.De(Guid.CreateVersion7()),
+            UsuarioId.De(Guid.CreateVersion7()),
             150.50m,
             new DateTimeOffset(2026, 11, 17, 18, 30, 0, TimeSpan.Zero));
 
@@ -29,7 +31,7 @@ public class EventoOutboxTests
         using var payload = JsonDocument.Parse(outbox.Payload);
         var campos = payload.RootElement.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal);
         Assert.Equal(["eventoId", "ocorridoEm", "pagadorUsuarioId", "recebedorUsuarioId", "transferenciaId", "valor"], campos);
-        Assert.Equal(evento.TransferenciaId, payload.RootElement.GetProperty("transferenciaId").GetGuid());
+        Assert.Equal(evento.TransferenciaId.Valor, payload.RootElement.GetProperty("transferenciaId").GetGuid());
         Assert.Equal("150.50", payload.RootElement.GetProperty("valor").GetRawText());
         Assert.Equal(TimeSpan.Zero, payload.RootElement.GetProperty("ocorridoEm").GetDateTimeOffset().Offset);
     }

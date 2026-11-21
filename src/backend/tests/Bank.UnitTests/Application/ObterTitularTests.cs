@@ -8,7 +8,7 @@ namespace Bank.UnitTests.Application;
 public class ObterTitularTests
 {
     private static readonly DadosTitular Titular = new(
-        Guid.CreateVersion7(),
+        UsuarioId.De(Guid.CreateVersion7()),
         "Empresa Exemplo Ltda",
         "contato@exemplo.com.br",
         "12ABC34501DE35",
@@ -31,14 +31,14 @@ public class ObterTitularTests
     {
         var casoDeUso = new ObterTitular(new ConsultasFalsas(Titular));
 
-        var resultado = await casoDeUso.ExecutarAsync(Guid.CreateVersion7(), CancellationToken.None);
+        var resultado = await casoDeUso.ExecutarAsync(UsuarioId.De(Guid.CreateVersion7()), CancellationToken.None);
 
         Assert.Equal(ErrosUsuario.NaoEncontrado, Assert.Single(resultado.Erros));
     }
 
     private sealed class ConsultasFalsas(DadosTitular titular) : IUsuarioConsultas
     {
-        public Task<DadosTitular?> ObterTitularAsync(Guid usuarioId, CancellationToken cancellationToken) =>
+        public Task<DadosTitular?> ObterTitularAsync(UsuarioId usuarioId, CancellationToken cancellationToken) =>
             Task.FromResult(titular.UsuarioId == usuarioId ? titular : null);
 
         public Task<Destinatario?> ObterDestinatarioAsync(string documento, CancellationToken cancellationToken) =>

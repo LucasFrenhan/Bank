@@ -1,4 +1,5 @@
 using Bank.Application.Abstracoes;
+using Bank.Domain.Carteiras;
 using Bank.Domain.Transferencias;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ namespace Bank.Infrastructure.Persistencia;
 /// </summary>
 internal sealed class ExtratoConsultas(BankDbContext contexto) : IExtratoConsultas
 {
-    public async Task<PaginaExtrato> ObterAsync(Guid carteiraId, DirecaoLancamento? direcao, int deslocamento, int quantidade, CancellationToken cancellationToken)
+    public async Task<PaginaExtrato> ObterAsync(CarteiraId carteiraId, DirecaoLancamento? direcao, int deslocamento, int quantidade, CancellationToken cancellationToken)
     {
         var consulta = contexto.Lancamentos.AsNoTracking().Where(l => l.CarteiraId == carteiraId);
         if (direcao is { } filtro)

@@ -31,15 +31,16 @@ internal sealed class UnidadeDeTransferencia(BankDbContext contexto) : IUnidadeD
         _transacao = await contexto.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Carteira>> BloquearCarteirasAsync(Guid carteiraA, Guid carteiraB, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Carteira>> BloquearCarteirasAsync(CarteiraId carteiraA, CarteiraId carteiraB, CancellationToken cancellationToken)
     {
         if (_transacao is null)
         {
             throw new InvalidOperationException("O bloqueio exige uma transação iniciada.");
         }
 
-        // A ordem também está no SQL (ORDER BY id); os ids seguem ordenados por clareza.
-        Guid[] ids = carteiraA.CompareTo(carteiraB) <= 0 ? [carteiraA, carteiraB] : [carteiraB, carteiraA];
+        // A ordem também está no SQL (ORDER BY id); os ids seguem ordenados por clareza. Parâmetro de
+        // SQL puro: o conversor do EF não atua aqui, então vai o Guid (issue #43).
+        Guid[] ids = carteiraA.Valor.CompareTo(carteiraB.Valor) <= 0 ? [carteiraA.Valor, carteiraB.Valor] : [carteiraB.Valor, carteiraA.Valor];
 
         return await contexto.Carteiras
             .FromSqlRaw(SqlEmbutido.Ler(ArquivoBloqueio), new NpgsqlParameter("ids", ids))

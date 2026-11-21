@@ -16,7 +16,7 @@ public sealed class ConsultarDestinatario(IUsuarioConsultas usuarios, MetricasTr
 {
     public const string Campo = "documento";
 
-    public async Task<Resultado<DestinatarioConsultado>> ExecutarAsync(Guid pagadorUsuarioId, string? documento, CancellationToken cancellationToken)
+    public async Task<Resultado<DestinatarioConsultado>> ExecutarAsync(UsuarioId pagadorUsuarioId, string? documento, CancellationToken cancellationToken)
     {
         var normalizado = Documento.CriarSemTipo(documento, Campo);
         if (!normalizado.Sucesso)

@@ -149,10 +149,10 @@ public static class TransferenciasEndpoints
         var extrato = resultado.Valor;
         return TypedResults.Ok(new ExtratoResposta(
             [.. extrato.Itens.Select(i => new ItemExtratoResposta(
-                i.LancamentoId,
+                i.LancamentoId.Valor,
                 i.Tipo.ToString(),
                 i.Direcao.ToString(),
-                i.TransferenciaId,
+                i.TransferenciaId?.Valor,
                 i.Contraparte is null ? null : new ContraparteResposta(i.Contraparte.Nome, i.Contraparte.Documento, i.Contraparte.TipoConta.ToString()),
                 i.Valor,
                 i.Descricao,
@@ -265,10 +265,10 @@ public static class TransferenciasEndpoints
             ArgumentNullException.ThrowIfNull(comprovante);
 
             return new ComprovanteResposta(
-                comprovante.TransferenciaId,
+                comprovante.TransferenciaId.Valor,
                 comprovante.ChaveIdempotencia,
-                new PagadorResposta(comprovante.Pagador.UsuarioId, comprovante.Pagador.Nome, comprovante.Pagador.Documento),
-                new RecebedorResposta(comprovante.Recebedor.UsuarioId, comprovante.Recebedor.Nome, comprovante.Recebedor.Documento, comprovante.Recebedor.TipoConta.ToString()),
+                new PagadorResposta(comprovante.Pagador.UsuarioId.Valor, comprovante.Pagador.Nome, comprovante.Pagador.Documento),
+                new RecebedorResposta(comprovante.Recebedor.UsuarioId.Valor, comprovante.Recebedor.Nome, comprovante.Recebedor.Documento, comprovante.Recebedor.TipoConta.ToString()),
                 comprovante.Valor,
                 comprovante.Descricao,
                 comprovante.Status.ToString(),

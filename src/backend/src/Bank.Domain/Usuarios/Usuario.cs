@@ -16,7 +16,7 @@ public sealed class Usuario
     {
     }
 
-    public Guid Id { get; private set; }
+    public UsuarioId Id { get; private set; }
 
     public string NomeCompleto { get; private set; } = string.Empty;
 
@@ -78,7 +78,7 @@ public sealed class Usuario
             throw new ArgumentException(nome.Erros[0].Mensagem, nameof(nomeCompleto));
         }
 
-        var id = Guid.CreateVersion7(agora);
+        var id = UsuarioId.Novo(agora);
         var carteira = Carteira.Criar(id, saldoInicial, agora);
 
         return new Usuario

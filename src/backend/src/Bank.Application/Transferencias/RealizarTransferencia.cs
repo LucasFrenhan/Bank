@@ -1,5 +1,6 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Observabilidade;
+using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
@@ -10,7 +11,7 @@ namespace Bank.Application.Transferencias;
 
 /// <summary>Pedido de transferência; campos opcionais para que ausências virem erros por campo.</summary>
 public sealed record RealizarTransferenciaComando(
-    Guid PagadorUsuarioId,
+    UsuarioId PagadorUsuarioId,
     string? ChaveIdempotencia,
     string? DocumentoDestino,
     decimal? Valor,
@@ -150,7 +151,7 @@ public sealed partial class RealizarTransferencia(
 
             var transferencia = execucao.Valor.Transferencia;
             metricas.RegistrarConcluida(destino.TipoConta, transferencia.Valor);
-            LogConcluida(logger, transferencia.Id, transferencia.CarteiraOrigemId, transferencia.CarteiraDestinoId);
+            LogConcluida(logger, transferencia.Id.Valor, transferencia.CarteiraOrigemId.Valor, transferencia.CarteiraDestinoId.Valor);
 
             return Resultado.Ok(new TransferenciaRealizada(
                 new Comprovante(
@@ -215,10 +216,10 @@ public sealed partial class RealizarTransferencia(
     }
 
     /// <summary>Recusa por limite com log de auditoria (spec 009, FR-016): só identificadores e valores.</summary>
-    private Resultado<TransferenciaRealizada> RecusarPorLimite(IReadOnlyList<Erro> erros, Guid carteiraOrigemId, decimal valor)
+    private Resultado<TransferenciaRealizada> RecusarPorLimite(IReadOnlyList<Erro> erros, CarteiraId carteiraOrigemId, decimal valor)
     {
         var detalhes = erros[0].Detalhes!;
-        LogRecusaPorLimite(logger, (string)detalhes["tipoLimite"]!, carteiraOrigemId, valor, (decimal)detalhes["limite"]!, (decimal)detalhes["valorDisponivel"]!);
+        LogRecusaPorLimite(logger, (string)detalhes["tipoLimite"]!, carteiraOrigemId.Valor, valor, (decimal)detalhes["limite"]!, (decimal)detalhes["valorDisponivel"]!);
         return Recusar(erros);
     }
 

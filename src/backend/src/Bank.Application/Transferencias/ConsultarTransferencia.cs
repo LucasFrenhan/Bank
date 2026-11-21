@@ -7,7 +7,7 @@ using Bank.Domain.Usuarios;
 namespace Bank.Application.Transferencias;
 
 /// <summary>Identificador como chega da rota (texto); inválido vira erro no campo.</summary>
-public sealed record ConsultarTransferenciaConsulta(Guid UsuarioId, string? TransferenciaId);
+public sealed record ConsultarTransferenciaConsulta(UsuarioId UsuarioId, string? TransferenciaId);
 
 /// <summary>
 /// Reabre o comprovante de uma transferência para o pagador ou o recebedor
@@ -28,7 +28,7 @@ public sealed class ConsultarTransferencia(ITransferenciaRepositorio transferenc
             return Resultado.Falha<Comprovante>(Erro.Validacao(CampoIdentificador, "Informe um identificador de transferência válido."));
         }
 
-        var comprovante = await transferencias.ObterComprovantePorIdAsync(transferenciaId, cancellationToken);
+        var comprovante = await transferencias.ObterComprovantePorIdAsync(TransferenciaId.De(transferenciaId), cancellationToken);
         var ehPagador = comprovante?.Pagador.UsuarioId == consulta.UsuarioId;
         var ehRecebedor = comprovante?.Recebedor.UsuarioId == consulta.UsuarioId;
 

@@ -1,5 +1,6 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Observabilidade;
+using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
 using Microsoft.Extensions.Logging;
@@ -16,8 +17,8 @@ public sealed record RegistrarUsuarioComando(
     string? Senha);
 
 public sealed record UsuarioRegistrado(
-    Guid UsuarioId,
-    Guid CarteiraId,
+    UsuarioId UsuarioId,
+    CarteiraId CarteiraId,
     string NomeCompleto,
     string Email,
     string Documento,
@@ -81,7 +82,7 @@ public sealed partial class RegistrarUsuario(
         }
 
         metricas.RegistrarCadastro(usuario.TipoConta);
-        LogUsuarioRegistrado(logger, usuario.Id, usuario.TipoConta);
+        LogUsuarioRegistrado(logger, usuario.Id.Valor, usuario.TipoConta);
 
         return Resultado.Ok(new UsuarioRegistrado(
             usuario.Id,

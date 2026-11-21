@@ -7,12 +7,12 @@ namespace Bank.UnitTests.Application;
 
 public class ObterMinhaCarteiraTests
 {
-    private static readonly Guid UsuarioId = Guid.CreateVersion7();
+    private static readonly UsuarioId UsuarioId = UsuarioId.De(Guid.CreateVersion7());
 
     [Fact]
     public async Task Executar_UsuarioExistente_DevolveCarteiraComEscala2()
     {
-        var dados = new DadosCarteira(Guid.CreateVersion7(), UsuarioId, "Lucas", TipoConta.PessoaFisica, 10m, "BRL", DateTimeOffset.UtcNow);
+        var dados = new DadosCarteira(CarteiraId.De(Guid.CreateVersion7()), UsuarioId, "Lucas", TipoConta.PessoaFisica, 10m, "BRL", DateTimeOffset.UtcNow);
         var casoDeUso = new ObterMinhaCarteira(new ConsultasFalsas(dados));
 
         var resultado = await casoDeUso.ExecutarAsync(UsuarioId, CancellationToken.None);
@@ -34,7 +34,7 @@ public class ObterMinhaCarteiraTests
 
     private sealed class ConsultasFalsas(DadosCarteira? dados) : ICarteiraConsultas
     {
-        public Task<DadosCarteira?> ObterDoUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken) =>
+        public Task<DadosCarteira?> ObterDoUsuarioAsync(UsuarioId usuarioId, CancellationToken cancellationToken) =>
             Task.FromResult(dados?.UsuarioId == usuarioId ? dados : null);
     }
 }

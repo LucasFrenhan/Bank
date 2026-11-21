@@ -37,13 +37,13 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
         return usuario;
     }
 
-    public Task<DadosCarteira?> ObterDoUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken)
+    public Task<DadosCarteira?> ObterDoUsuarioAsync(UsuarioId usuarioId, CancellationToken cancellationToken)
     {
         var u = Usuarios.Find(x => x.Id == usuarioId);
         return Task.FromResult(u is null ? null : new DadosCarteira(u.Carteira.Id, u.Id, u.NomeCompleto, u.TipoConta, u.Carteira.Saldo, u.Carteira.Moeda, u.Carteira.AtualizadoEm));
     }
 
-    public Task<DadosTitular?> ObterTitularAsync(Guid usuarioId, CancellationToken cancellationToken)
+    public Task<DadosTitular?> ObterTitularAsync(UsuarioId usuarioId, CancellationToken cancellationToken)
     {
         var u = Usuarios.Find(x => x.Id == usuarioId);
         return Task.FromResult(u is null ? null : new DadosTitular(u.Id, u.NomeCompleto, u.Email, u.Documento, u.TipoConta, Agora));
@@ -55,13 +55,13 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
         return Task.FromResult(u is null ? null : new Destinatario(u.Id, u.Carteira.Id, u.NomeCompleto, u.Documento, u.TipoConta));
     }
 
-    public Task<Comprovante?> ObterComprovantePorChaveAsync(Guid carteiraOrigemId, Guid chaveIdempotencia, CancellationToken cancellationToken) =>
+    public Task<Comprovante?> ObterComprovantePorChaveAsync(CarteiraId carteiraOrigemId, Guid chaveIdempotencia, CancellationToken cancellationToken) =>
         Comprovante(Gravadas.Find(x => x.Transferencia.CarteiraOrigemId == carteiraOrigemId && x.Transferencia.ChaveIdempotencia == chaveIdempotencia));
 
     /// <summary>Quantas vezes a leitura por identificador foi chamada (spec 008).</summary>
     public int LeiturasPorId { get; private set; }
 
-    public Task<Comprovante?> ObterComprovantePorIdAsync(Guid transferenciaId, CancellationToken cancellationToken)
+    public Task<Comprovante?> ObterComprovantePorIdAsync(TransferenciaId transferenciaId, CancellationToken cancellationToken)
     {
         LeiturasPorId++;
         return Comprovante(Gravadas.Find(x => x.Transferencia.Id == transferenciaId));
@@ -93,7 +93,7 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
     /// <summary>Intervalo da última soma do dia pedida.</summary>
     public (DateTimeOffset Inicio, DateTimeOffset Fim)? UltimoIntervalo { get; private set; }
 
-    public Task<decimal> SomarEnviadasAsync(Guid carteiraOrigemId, DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken cancellationToken)
+    public Task<decimal> SomarEnviadasAsync(CarteiraId carteiraOrigemId, DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken cancellationToken)
     {
         Chamadas.Add("Somar");
         UltimoIntervalo = (inicioUtc, fimUtc);
@@ -111,13 +111,13 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyList<Carteira>> BloquearCarteirasAsync(Guid carteiraA, Guid carteiraB, CancellationToken cancellationToken)
+    public Task<IReadOnlyList<Carteira>> BloquearCarteirasAsync(CarteiraId carteiraA, CarteiraId carteiraB, CancellationToken cancellationToken)
     {
         Chamadas.Add("Bloquear");
         AntesDeBloquear?.Invoke();
         return Task.FromResult<IReadOnlyList<Carteira>>(OmitirCarteirasNoBloqueio
             ? []
-            : [.. Usuarios.Select(u => u.Carteira).Where(c => c.Id == carteiraA || c.Id == carteiraB).OrderBy(c => c.Id)]);
+            : [.. Usuarios.Select(u => u.Carteira).Where(c => c.Id == carteiraA || c.Id == carteiraB).OrderBy(c => c.Id.Valor)]);
     }
 
     public void Adicionar(ExecucaoTransferencia execucao) => _pendente = execucao;
