@@ -1,3 +1,4 @@
+using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
 
 namespace Bank.Domain.Transferencias;
@@ -26,9 +27,9 @@ public sealed class Lancamento
     {
     }
 
-    public Guid Id { get; private set; }
+    public LancamentoId Id { get; private set; }
 
-    public Guid CarteiraId { get; private set; }
+    public CarteiraId CarteiraId { get; private set; }
 
     public TipoLancamento Tipo { get; private set; }
 
@@ -36,20 +37,20 @@ public sealed class Lancamento
 
     public decimal Valor { get; private set; }
 
-    public Guid? TransferenciaId { get; private set; }
+    public TransferenciaId? TransferenciaId { get; private set; }
 
     public string? Descricao { get; private set; }
 
     public DateTimeOffset CriadoEm { get; private set; }
 
     /// <summary>Entrada do saldo de demonstração atribuído no cadastro (spec 003, RN-05).</summary>
-    public static Lancamento Abertura(Guid carteiraId, decimal valor, DateTimeOffset agora)
+    public static Lancamento Abertura(CarteiraId carteiraId, decimal valor, DateTimeOffset agora)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(valor);
 
         return new Lancamento
         {
-            Id = Guid.CreateVersion7(agora),
+            Id = LancamentoId.Novo(agora),
             CarteiraId = carteiraId,
             Tipo = TipoLancamento.Abertura,
             Direcao = DirecaoLancamento.Entrada,
@@ -60,14 +61,14 @@ public sealed class Lancamento
     }
 
     internal static Lancamento DeTransferencia(
-        Guid carteiraId,
+        CarteiraId carteiraId,
         DirecaoLancamento direcao,
         decimal valor,
-        Guid transferenciaId,
+        TransferenciaId transferenciaId,
         string? descricao,
         DateTimeOffset agora) => new()
         {
-            Id = Guid.CreateVersion7(agora),
+            Id = LancamentoId.Novo(agora),
             CarteiraId = carteiraId,
             Tipo = TipoLancamento.Transferencia,
             Direcao = direcao,

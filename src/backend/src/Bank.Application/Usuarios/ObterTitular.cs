@@ -10,7 +10,7 @@ namespace Bank.Application.Usuarios;
 /// </summary>
 public sealed class ObterTitular(IUsuarioConsultas consultas)
 {
-    public async Task<Resultado<DadosTitular>> ExecutarAsync(Guid usuarioId, CancellationToken cancellationToken)
+    public async Task<Resultado<DadosTitular>> ExecutarAsync(UsuarioId usuarioId, CancellationToken cancellationToken)
     {
         var titular = await consultas.ObterTitularAsync(usuarioId, cancellationToken);
 

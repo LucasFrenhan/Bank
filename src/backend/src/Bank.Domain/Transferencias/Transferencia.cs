@@ -1,5 +1,6 @@
 using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
+using Bank.Domain.Usuarios;
 
 namespace Bank.Domain.Transferencias;
 
@@ -10,10 +11,10 @@ public enum StatusTransferencia
 
 /// <summary>Fato publicado após cada transferência concluída (evento <c>transferencia.concluida</c> v1).</summary>
 public sealed record TransferenciaConcluida(
-    Guid EventoId,
-    Guid TransferenciaId,
-    Guid PagadorUsuarioId,
-    Guid RecebedorUsuarioId,
+    EventoId EventoId,
+    TransferenciaId TransferenciaId,
+    UsuarioId PagadorUsuarioId,
+    UsuarioId RecebedorUsuarioId,
     decimal Valor,
     DateTimeOffset OcorridoEm)
 {
@@ -39,13 +40,13 @@ public sealed class Transferencia
     {
     }
 
-    public Guid Id { get; private set; }
+    public TransferenciaId Id { get; private set; }
 
     public Guid ChaveIdempotencia { get; private set; }
 
-    public Guid CarteiraOrigemId { get; private set; }
+    public CarteiraId CarteiraOrigemId { get; private set; }
 
-    public Guid CarteiraDestinoId { get; private set; }
+    public CarteiraId CarteiraDestinoId { get; private set; }
 
     public decimal Valor { get; private set; }
 
@@ -82,7 +83,7 @@ public sealed class Transferencia
 
         var transferencia = new Transferencia
         {
-            Id = Guid.CreateVersion7(agora),
+            Id = TransferenciaId.Novo(agora),
             ChaveIdempotencia = chaveIdempotencia,
             CarteiraOrigemId = origem.Id,
             CarteiraDestinoId = destino.Id,
@@ -96,6 +97,6 @@ public sealed class Transferencia
             transferencia,
             Lancamento.DeTransferencia(origem.Id, DirecaoLancamento.Saida, valor.Valor, transferencia.Id, descricao, agora),
             Lancamento.DeTransferencia(destino.Id, DirecaoLancamento.Entrada, valor.Valor, transferencia.Id, descricao, agora),
-            new TransferenciaConcluida(Guid.CreateVersion7(agora), transferencia.Id, origem.UsuarioId, destino.UsuarioId, valor.Valor, agora)));
+            new TransferenciaConcluida(EventoId.Novo(agora), transferencia.Id, origem.UsuarioId, destino.UsuarioId, valor.Valor, agora)));
     }
 }

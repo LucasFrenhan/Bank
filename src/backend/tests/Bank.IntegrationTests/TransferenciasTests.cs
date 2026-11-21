@@ -1,4 +1,5 @@
 using System.Net;
+using Bank.Domain.Carteiras;
 using Microsoft.EntityFrameworkCore;
 using static Bank.IntegrationTests.ApiTransferencias;
 
@@ -96,7 +97,7 @@ public class TransferenciasTests(BankApiFactory factory) : IClassFixture<BankApi
         Assert.Equal((10m, 0m), (await SaldoAsync(client, pf), await SaldoAsync(client, pj)));
 
         await using var contexto = factory.CriarContexto();
-        Assert.False(await contexto.Transferencias.AnyAsync(t => t.CarteiraOrigemId == pf.CarteiraId, Ct));
+        Assert.False(await contexto.Transferencias.AnyAsync(t => t.CarteiraOrigemId == CarteiraId.De(pf.CarteiraId), Ct));
         Assert.DoesNotContain(await contexto.EventosOutbox.ToListAsync(Ct), e => e.Payload.Contains(pf.UsuarioId.ToString(), StringComparison.Ordinal));
     }
 

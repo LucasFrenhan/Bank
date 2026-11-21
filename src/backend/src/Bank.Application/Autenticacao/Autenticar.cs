@@ -73,7 +73,7 @@ public sealed partial class Autenticar(
 
         var token = emissorToken.Emitir(usuario);
         metricas.RegistrarLogin(sucesso: true);
-        LogLoginConcluido(logger, usuario.Id);
+        LogLoginConcluido(logger, usuario.Id.Valor);
 
         return Resultado.Ok(new TokenAcesso(token.Token, TokenAcesso.TipoBearer, token.ExpiraEmSegundos));
     }

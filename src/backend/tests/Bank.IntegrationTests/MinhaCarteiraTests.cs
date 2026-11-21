@@ -1,7 +1,8 @@
 using System.Globalization;
-using System.Net;
 using System.Net.Http.Headers;
+using System.Net;
 using System.Text.Json;
+using Bank.Domain.Carteiras;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -72,7 +73,7 @@ public class MinhaCarteiraTests(BankApiFactory factory) : IClassFixture<BankApiF
 
         await using (var contexto = factory.CriarContexto())
         {
-            await contexto.Carteiras.Where(c => c.Id == carteiraId).ExecuteUpdateAsync(s => s.SetProperty(c => c.Saldo, 123.45m), Ct);
+            await contexto.Carteiras.Where(c => c.Id == CarteiraId.De(carteiraId)).ExecuteUpdateAsync(s => s.SetProperty(c => c.Saldo, 123.45m), Ct);
         }
 
         using var resposta = await GetComTokenAsync(client, token);

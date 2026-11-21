@@ -1,4 +1,5 @@
 using Bank.Application.Abstracoes;
+using Bank.Domain.Usuarios;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bank.Infrastructure.Persistencia;
@@ -6,7 +7,7 @@ namespace Bank.Infrastructure.Persistencia;
 /// <summary>Leitura dos dados do titular, sempre atual e sem senha nem carteira (specs/005-usuarios-me, R1).</summary>
 internal sealed class UsuarioConsultas(BankDbContext contexto) : IUsuarioConsultas
 {
-    public Task<DadosTitular?> ObterTitularAsync(Guid usuarioId, CancellationToken cancellationToken) =>
+    public Task<DadosTitular?> ObterTitularAsync(UsuarioId usuarioId, CancellationToken cancellationToken) =>
         contexto.Usuarios
             .AsNoTracking()
             .Where(u => u.Id == usuarioId)

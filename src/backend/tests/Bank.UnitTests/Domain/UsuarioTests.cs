@@ -17,12 +17,12 @@ public class UsuarioTests
         Assert.Equal("52998224725", usuario.Documento);
         Assert.Equal(TipoConta.PessoaFisica, usuario.TipoConta);
         Assert.Equal(Agora, usuario.CriadoEm);
-        Assert.Equal(7, usuario.Id.Version);
+        Assert.Equal(7, usuario.Id.Valor.Version);
 
         var carteira = usuario.Carteira;
         Assert.NotNull(carteira);
         Assert.Equal(usuario.Id, carteira.UsuarioId);
-        Assert.Equal(7, carteira.Id.Version);
+        Assert.Equal(7, carteira.Id.Valor.Version);
         Assert.Equal("10.00", carteira.Saldo.ToString(System.Globalization.CultureInfo.InvariantCulture));
         Assert.Equal("BRL", carteira.Moeda);
         Assert.Equal(usuario.CriadoEm, carteira.AtualizadoEm);

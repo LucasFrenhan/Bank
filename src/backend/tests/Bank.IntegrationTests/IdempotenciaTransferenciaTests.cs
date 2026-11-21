@@ -1,4 +1,5 @@
 using System.Net;
+using Bank.Domain.Carteiras;
 using Microsoft.EntityFrameworkCore;
 using static Bank.IntegrationTests.ApiTransferencias;
 
@@ -67,7 +68,7 @@ public class IdempotenciaTransferenciaTests(BankApiFactory factory) : IClassFixt
         Assert.Equal(19, status.Count(s => s == HttpStatusCode.OK));
         Assert.Equal(8m, await SaldoAsync(client, pf));
         await using var contexto = factory.CriarContexto();
-        Assert.Equal(1, await contexto.Transferencias.CountAsync(t => t.CarteiraOrigemId == pf.CarteiraId, Ct));
+        Assert.Equal(1, await contexto.Transferencias.CountAsync(t => t.CarteiraOrigemId == CarteiraId.De(pf.CarteiraId), Ct));
     }
 
     [Fact]

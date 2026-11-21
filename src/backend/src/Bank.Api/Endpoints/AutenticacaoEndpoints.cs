@@ -48,8 +48,8 @@ public static class AutenticacaoEndpoints
         return TypedResults.Created(
             CarteirasEndpoints.RotaMinha,
             new UsuarioRegistradoResposta(
-                usuario.UsuarioId,
-                usuario.CarteiraId,
+                usuario.UsuarioId.Valor,
+                usuario.CarteiraId.Valor,
                 usuario.NomeCompleto,
                 usuario.Email,
                 usuario.Documento,

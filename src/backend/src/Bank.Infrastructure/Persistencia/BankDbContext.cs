@@ -1,4 +1,5 @@
 using Bank.Domain.Carteiras;
+using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Mensageria;
@@ -21,6 +22,17 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
     public DbSet<Lancamento> Lancamentos => Set<Lancamento>();
 
     public DbSet<EventoOutbox> EventosOutbox => Set<EventoOutbox>();
+
+    /// <summary>Identificadores tipados do Domain gravados como <c>uuid</c> (issue #43).</summary>
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(configurationBuilder);
+        configurationBuilder.Properties<UsuarioId>().HaveConversion<IdentificadorConverter<UsuarioId>>();
+        configurationBuilder.Properties<CarteiraId>().HaveConversion<IdentificadorConverter<CarteiraId>>();
+        configurationBuilder.Properties<TransferenciaId>().HaveConversion<IdentificadorConverter<TransferenciaId>>();
+        configurationBuilder.Properties<LancamentoId>().HaveConversion<IdentificadorConverter<LancamentoId>>();
+        configurationBuilder.Properties<EventoId>().HaveConversion<IdentificadorConverter<EventoId>>();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

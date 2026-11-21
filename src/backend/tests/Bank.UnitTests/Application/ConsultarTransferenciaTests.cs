@@ -16,7 +16,7 @@ public sealed class ConsultarTransferenciaTests : IDisposable
     private readonly Usuario _recebedor;
     private readonly Usuario _terceiro;
     private readonly Guid _chave = Guid.NewGuid();
-    private Guid _transferenciaId;
+    private TransferenciaId _transferenciaId;
 
     public ConsultarTransferenciaTests()
     {
@@ -37,7 +37,7 @@ public sealed class ConsultarTransferenciaTests : IDisposable
         _transferenciaId = resultado.Valor.Comprovante.TransferenciaId;
     }
 
-    private Task<Bank.Domain.Comum.Resultado<Comprovante>> Consultar(Guid usuarioId, string? id) =>
+    private Task<Bank.Domain.Comum.Resultado<Comprovante>> Consultar(UsuarioId usuarioId, string? id) =>
         _casoDeUso.ExecutarAsync(new ConsultarTransferenciaConsulta(usuarioId, id), CancellationToken.None);
 
     private int Consultas(string resultado) =>
@@ -116,7 +116,7 @@ public sealed class ConsultarTransferenciaTests : IDisposable
         await TransferirAsync();
 
         var maiusculas = await Consultar(_pagador.Id, _transferenciaId.ToString().ToUpperInvariant());
-        var semHifens = await Consultar(_pagador.Id, _transferenciaId.ToString("N"));
+        var semHifens = await Consultar(_pagador.Id, _transferenciaId.Valor.ToString("N"));
 
         Assert.True(maiusculas.Sucesso);
         Assert.True(semHifens.Sucesso);

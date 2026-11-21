@@ -1,4 +1,5 @@
 using Bank.Application.Abstracoes;
+using Bank.Domain.Carteiras;
 using Bank.Domain.Transferencias;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,13 +12,13 @@ namespace Bank.Infrastructure.Persistencia;
 /// </summary>
 internal sealed class TransferenciaRepositorio(BankDbContext contexto) : ITransferenciaRepositorio
 {
-    public Task<Comprovante?> ObterComprovantePorChaveAsync(Guid carteiraOrigemId, Guid chaveIdempotencia, CancellationToken cancellationToken) =>
+    public Task<Comprovante?> ObterComprovantePorChaveAsync(CarteiraId carteiraOrigemId, Guid chaveIdempotencia, CancellationToken cancellationToken) =>
         ObterAsync(contexto.Transferencias.Where(t => t.CarteiraOrigemId == carteiraOrigemId && t.ChaveIdempotencia == chaveIdempotencia), cancellationToken);
 
-    public Task<Comprovante?> ObterComprovantePorIdAsync(Guid transferenciaId, CancellationToken cancellationToken) =>
+    public Task<Comprovante?> ObterComprovantePorIdAsync(TransferenciaId transferenciaId, CancellationToken cancellationToken) =>
         ObterAsync(contexto.Transferencias.Where(t => t.Id == transferenciaId), cancellationToken);
 
-    public async Task<decimal> SomarEnviadasAsync(Guid carteiraOrigemId, DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken cancellationToken) =>
+    public async Task<decimal> SomarEnviadasAsync(CarteiraId carteiraOrigemId, DateTimeOffset inicioUtc, DateTimeOffset fimUtc, CancellationToken cancellationToken) =>
         await contexto.Transferencias
             .Where(t => t.CarteiraOrigemId == carteiraOrigemId && t.CriadoEm >= inicioUtc && t.CriadoEm < fimUtc)
             .SumAsync(t => (decimal?)t.Valor, cancellationToken) ?? 0m;

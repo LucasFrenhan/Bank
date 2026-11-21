@@ -49,7 +49,7 @@ public static class UsuariosEndpoints
         var titular = resultado.Valor;
         resposta.Headers.CacheControl = "no-store";
         return TypedResults.Ok(new TitularResposta(
-            titular.UsuarioId,
+            titular.UsuarioId.Valor,
             titular.NomeCompleto,
             titular.Email,
             titular.Documento,

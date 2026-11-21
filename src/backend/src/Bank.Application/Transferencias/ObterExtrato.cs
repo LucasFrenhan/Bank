@@ -7,7 +7,7 @@ using Bank.Domain.Usuarios;
 namespace Bank.Application.Transferencias;
 
 /// <summary>Parâmetros como chegam da query string; inválidos viram erros por parâmetro.</summary>
-public sealed record ObterExtratoConsulta(Guid UsuarioId, string? Pagina, string? TamanhoPagina, string? Direcao);
+public sealed record ObterExtratoConsulta(UsuarioId UsuarioId, string? Pagina, string? TamanhoPagina, string? Direcao);
 
 public sealed record Extrato(IReadOnlyList<ItemExtrato> Itens, int PaginaAtual, int TamanhoPagina, int TotalItens);
 
