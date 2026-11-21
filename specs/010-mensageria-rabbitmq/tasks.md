@@ -290,14 +290,14 @@ notificados (quickstart, cenário 4)
 
 ### Testes da US2 (escrever primeiro)
 
-- [ ] T040 [US2] Em `back/tests/Bank.IntegrationTests/BrokerIndisponivelTests.cs` (contêiner
+- [X] T040 [US2] Em `back/tests/Bank.IntegrationTests/BrokerIndisponivelTests.cs` (contêiner
   RabbitMQ **exclusivo**, T008): com o broker parado, 3 transferências → 201 e 3 pendentes; ao
   religar, em até 60 s os 3 têm `publicado_em` e 3 linhas em `eventos_processados`, sem reiniciar
   API nem Worker, e as 3 mensagens chegam à fila na ordem de `ocorrido_em` (US2, cenário 2 — ler
   com o consumidor parado ou por `BasicGet` numa fila de teste ligada à `banco.eventos.topic`);
   `/health/pronto` do Worker responde 503 com o broker parado e volta a 200 depois (SC-002,
   FR-003, Princípio VII)
-- [ ] T041 [US2] No mesmo arquivo: com a fila `notificacoes.transferencias.fila` apagada (sem rota)
+- [X] T041 [US2] No mesmo arquivo: com a fila `notificacoes.transferencias.fila` apagada (sem rota)
   e com o despachante segurado entre a confirmação e o commit (dublê de falha no `SaveChanges`),
   o evento continua pendente na 1ª situação (log 5002 com motivo `sem-rota`, métrica de falha) e
   é publicado de novo na 2ª, gerando 1 só notificação; mensagens persistentes não consumidas
@@ -309,7 +309,7 @@ notificados (quickstart, cenário 4)
 
 ### Implementação da US2
 
-- [ ] T042 [US2] Extrair a publicação com confirmação para `msg/PublicadorConfirmado.cs`
+- [X] T042 [US2] Extrair a publicação com confirmação para `msg/PublicadorConfirmado.cs`
   (interface `internal` `IPublicadorConfirmado` com `PublicarAsync(...)` → `Confirmado | SemRota |
   Nack | Timeout | CanalFechado`, implementação sobre o `IChannel` com confirms rastreados), para que
   o laço do despachante seja testável sem broker. Em `msg/DespachanteOutbox.cs`: rodar dentro de
@@ -319,7 +319,7 @@ notificados (quickstart, cenário 4)
   `FalhaPublicacao` (Warning, `eventoId`, `tipo`, motivo) e métrica
   `banco.eventos.publicacao.falhas`; espera entre rodadas com falha 2^n s, teto 10 s, volta ao
   intervalo normal no primeiro sucesso; canal fechado encerra a sessão (research R4)
-- [ ] T043 [US2] Em `msg/ConsumidorEventos.cs`: rodar dentro de `SessaoMensageria`; encerrar a
+- [X] T043 [US2] Em `msg/ConsumidorEventos.cs`: rodar dentro de `SessaoMensageria`; encerrar a
   sessão em `ChannelShutdownAsync` (consumo ou publicação) e em `ConsumerCancelled` pelo broker;
   ACK/NACK e republicações sempre nos canais da sessão que entregou (entrega de sessão morta é
   ignorada — o broker reentrega); atualizar o estado de prontidão (T039)

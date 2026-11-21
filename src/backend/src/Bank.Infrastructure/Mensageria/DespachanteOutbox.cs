@@ -59,6 +59,12 @@ internal sealed partial class DespachanteOutbox(
                 return; // a sessão termina; o laço abre outra
             }
 
+            if (resultado.Falha == ResultadoPublicacao.SemRota)
+            {
+                // Fila apagada: declarar de novo recria a rota antes da próxima tentativa.
+                await TopologiaMensageria.DeclararAsync(canal, configuracao.IntervalosNovaTentativaMs, cancellationToken);
+            }
+
             falhasSeguidas = resultado.Falha is null ? 0 : falhasSeguidas + 1;
             var espera = EsperaAteAProximaRodada(resultado, falhasSeguidas, configuracao);
             if (espera > TimeSpan.Zero)
