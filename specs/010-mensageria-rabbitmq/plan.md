@@ -151,11 +151,12 @@ src/backend/
     │   ├── RabbitMqCompartilhado.cs     # contêiner RabbitMQ (como PostgresCompartilhado)
     │   ├── BankWorkerFactory.cs
     │   ├── TopologiaTests.cs            # FR-006
-    │   ├── PublicacaoOutboxTests.cs     # US1, US2
+    │   ├── PublicacaoOutboxTests.cs     # US1
+    │   ├── BrokerIndisponivelTests.cs   # US2 (contêiner RabbitMQ exclusivo)
     │   ├── ConsumoIdempotenteTests.cs   # US3
-    │   ├── NovaTentativaEDlqTests.cs    # US4
+    │   ├── NovaTentativaEDlqTests.cs    # US4 (+ rede de segurança da DLQ)
     │   ├── RastreamentoMensageriaTests.cs  # US5
-    │   └── (ajustes) DadosSensiveisTelemetriaTests
+    │   └── DadosSensiveisMensageriaTests.cs  # FR-023
     └── Bank.ArchitectureTests/LayerDependencyTests.cs   # + Worker, + RabbitMQ/OpenTelemetry
 ```
 

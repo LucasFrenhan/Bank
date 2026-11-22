@@ -39,4 +39,8 @@ exige `versao` 2.
 
 ## Histórico
 
+- **v1, revisão 2026-11-21**: campos `tipoEvento`, `versao`, `pagadorNome`, `recebedorNome` e
+  `descricao` (aditivos) e transporte RabbitMQ — ver
+  [specs/010-mensageria-rabbitmq](../../010-mensageria-rabbitmq/contracts/evento-transferencia-concluida.md),
+  que passa a ser a referência deste contrato.
 - **v1** (2026-11-17): versão inicial (issues #8 e #13).

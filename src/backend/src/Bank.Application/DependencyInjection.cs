@@ -47,7 +47,19 @@ public static class DependencyInjection
         services.AddScoped<ConsultarTransferencia>();
         services.AddScoped<ConsultarLimites>();
 
-        // Notificações (specs/010-mensageria-rabbitmq, research R8)
+        return services;
+    }
+
+    /// <summary>
+    /// Casos de uso do Worker (specs/010-mensageria-rabbitmq, research R8): só as notificações. O
+    /// Worker não registra <see cref="AddApplication"/>, cujos casos de uso dependem de serviços
+    /// que só a API tem (hash de senha, emissão de token).
+    /// </summary>
+    public static IServiceCollection AddNotificacoes(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<MetricasNotificacoes>();
         services.AddScoped<INotificadorTransferencia, NotificarTransferenciaConcluida>();
 

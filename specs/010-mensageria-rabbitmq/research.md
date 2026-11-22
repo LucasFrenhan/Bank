@@ -70,7 +70,9 @@ O "despachante" (`DespachanteOutbox`) é o **publicador** da spec (FR-002–FR-0
 No primeiro evento que falha (nack, devolvido sem rota — `BasicReturn` —, timeout ou canal
 fechado), o lote para: os anteriores são marcados, o que falhou e os seguintes continuam pendentes
 (FR-002, ordem de gravação). A espera até a próxima rodada cresce 2^n s com teto de 10 s e volta a
-1 s no primeiro sucesso. Falha de canal encerra a sessão (R3).
+1 s no primeiro sucesso. Falha de canal encerra a sessão (R3). Publicação devolvida sem rota
+(fila apagada) faz o despachante declarar a topologia de novo no mesmo canal antes da próxima
+rodada, recriando a rota (ajuste da implementação; testado em `BrokerIndisponivelTests`).
 
 **Motivo**: `FOR UPDATE SKIP LOCKED` é o equivalente PostgreSQL do `UPDLOCK, READPAST` do OMS: duas
 instâncias não pegam o mesmo evento (FR-004) e não se bloqueiam. Marcar só após a confirmação
@@ -116,8 +118,13 @@ plugin `delayed-message-exchange` (exige plugin na imagem).
 - **Trace**: `outbox_eventos` ganha `trace_parent` e `trace_state` (nullable), preenchidos por
   `EventoOutbox.De` a partir de `Activity.Current` no momento da gravação (FR-005). O despachante
   abre o span Producer com esse contexto como pai e injeta o contexto **do span Producer** nos
-  headers com `Propagators.DefaultTextMapPropagator` (RN-06), como `traceparent`/`tracestate`
-  (string UTF-8). Sem contexto gravado (eventos antigos), o span Producer abre um trace novo.
+  headers (RN-06), como `traceparent`/`tracestate` (string UTF-8). Sem contexto gravado (eventos
+  antigos), o span Producer abre um trace novo.
+- **Propagador** (ajuste da implementação): em vez de ler `Propagators.DefaultTextMapPropagator`
+  — que é um propagador vazio até o SDK do OpenTelemetry ser inicializado no processo, o que
+  deixava a injeção dependente da ordem de partida e dos testes —, `CabecalhosMensagem` fixa o
+  mesmo propagador que o SDK instala como padrão: `CompositeTextMapPropagator(TraceContext,
+  Baggage)`. O formato nos headers é idêntico (W3C).
 
 **Motivo**: o despachante roda num laço de fundo; nesse momento `Activity.Current` não é a
 requisição da transferência. Guardar o contexto na gravação é o que faz o trace ir da requisição
@@ -183,7 +190,12 @@ vezes); `ConsumerDispatchConcurrency > 1` (sem necessidade de vazão na demonstr
 - **Infrastructure/Mensageria**: conexão, topologia, despachante, consumidor base (leitura,
   idempotência, espera, DLQ, spans e métricas), o leitor do contrato v1 (DTO com `Guid`,
   convertido para os tipos do Domain) e as entidades `EventoProcessado`/`EventoOutbox`.
-- **Worker**: só composição (DI, telemetria, health).
+- **Worker**: só composição (DI, telemetria, health). Registra `AddNotificacoes` (métricas e
+  `INotificadorTransferencia`), não `AddApplication`: os demais casos de uso dependem de serviços
+  que só a API tem (hash de senha, token), e em `Development` o container valida tudo no build
+  (ajuste da implementação; teste `Worker_EmDevelopment_ResolveTodasAsDependencias`).
+- O Domain recebe os nomes por `NomesTitulares(Pagador, Recebedor)`, último parâmetro de
+  `Transferencia.Executar`.
 
 **Motivo**: Princípio II (Domain sem infraestrutura; regras em Application/Domain) e a regra dos
 identificadores tipados (contrato externo em `Guid`, tipos do Domain por dentro). O caso de uso de

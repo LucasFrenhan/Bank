@@ -455,23 +455,23 @@ Consumer (quickstart, cenário 3, passo 3)
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T059 [P] Em `back/tests/Bank.IntegrationTests/DadosSensiveisTelemetriaTests.cs`: transferência
+- [X] T059 [P] Em `back/tests/Bank.IntegrationTests/DadosSensiveisMensageriaTests.cs` (classe própria, com o ambiente de mensageria): transferência
   com descrição e nomes conhecidos passando por publicação, consumo, nova tentativa e DLQ → nenhum
   nome, descrição, documento, e-mail ou payload em logs, spans e métricas da API e do Worker;
   nenhum identificador de usuário ou de evento em tags de métrica; senha do broker ausente dos
   logs (FR-023)
-- [ ] T060 [P] Em `back/tests/Bank.UnitTests/Infrastructure/ContratoEventosTests.cs`: o contrato
+- [X] T060 [P] Em `back/tests/Bank.UnitTests/Infrastructure/ContratoEventosTests.cs`: o contrato
   `cobranca.paga` serializa conforme [contracts/evento-cobranca-paga.md](contracts/evento-cobranca-paga.md)
   (record de contrato em `msg/Contratos/CobrancaPagaV1.cs`, sem produtor; `ultimosDigitosCartao`
   com exatamente 4 dígitos) — FR-012
-- [ ] T061 [P] Atualizar `specs/006-transferencias/contracts/evento-transferencia-concluida.md`
+- [X] T061 [P] Atualizar `specs/006-transferencias/contracts/evento-transferencia-concluida.md`
   (Histórico: "v1, revisão 2026-11-21 → specs/010-mensageria-rabbitmq") e
   `specs/001-infra-local/contracts/ambiente-local.md` (serviço `worker`, healthcheck, variáveis
   `Mensageria__*`) — FR-013
-- [ ] T062 [P] Em `docs/desenvolvimento.md` e `README.md`: o serviço `worker`, a seção de
+- [X] T062 [P] Em `docs/desenvolvimento.md` e `README.md`: o serviço `worker`, a seção de
   configuração `Mensageria`, como inspecionar e reprocessar a DLQ pela interface de gestão e como
   ver o trace ponta a ponta no Aspire Dashboard
-- [ ] T063 Rodar o quickstart completo (cenários 1–5), incluindo `dotnet test` em `src/backend/`;
+- [X] T063 Rodar o quickstart completo (cenários 1–5), incluindo `dotnet test` em `src/backend/`;
   medir SC-001 (20 transferências, p95 até a notificação ≤ 5 s) e SC-007 (p95 da transferência
   < 1 s com o broker no ar e fora) e registrar no PR; atualizar spec, plano e contratos se algo
   divergir (Princípio I)

@@ -62,3 +62,34 @@ public class ContratoEventosTests
         Assert.Equal(JsonValueKind.Null, payload.RootElement.GetProperty("descricao").ValueKind);
     }
 }
+
+/// <summary>Contrato <c>cobranca.paga</c> v1, preparação da Fase 4 (specs/010-mensageria-rabbitmq, FR-012).</summary>
+public class ContratoCobrancaPagaTests
+{
+    [Fact]
+    public void CobrancaPaga_SegueOContratoV1()
+    {
+        var evento = new Bank.Infrastructure.Mensageria.Contratos.CobrancaPagaV1(
+            Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(), 299.90m, "4242",
+            new DateTimeOffset(2026, 11, 17, 15, 10, 0, TimeSpan.Zero));
+
+        using var payload = JsonDocument.Parse(evento.Serializar());
+        var raiz = payload.RootElement;
+        Assert.Equal(
+            ["eventoId", "tipoEvento", "versao", "cobrancaId", "lojistaUsuarioId", "pagadorUsuarioId", "valor", "ultimosDigitosCartao", "ocorridoEm"],
+            raiz.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(("CobrancaPaga", 1, "299.90", "4242"),
+            (raiz.GetProperty("tipoEvento").GetString(), raiz.GetProperty("versao").GetInt32(), raiz.GetProperty("valor").GetRawText(), raiz.GetProperty("ultimosDigitosCartao").GetString()));
+    }
+
+    [Theory]
+    [InlineData("424")]
+    [InlineData("42424")]
+    [InlineData("4242424242424242")]
+    [InlineData("42a2")]
+    public void CobrancaPaga_SoAceitaOsQuatroUltimosDigitos(string digitos)
+    {
+        Assert.Throws<ArgumentException>(() => new Bank.Infrastructure.Mensageria.Contratos.CobrancaPagaV1(
+            Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(), 1m, digitos, DateTimeOffset.UtcNow));
+    }
+}

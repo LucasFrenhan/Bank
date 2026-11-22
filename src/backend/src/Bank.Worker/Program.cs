@@ -19,7 +19,7 @@ public static class ProgramaWorker
         builder.AddTelemetriaWorker();
 
         builder.Services
-            .AddApplication(ambienteDeProducao: builder.Environment.IsProduction())
+            .AddNotificacoes()
             .AddPersistencia(builder.Configuration)
             .AddMensageria();
 
