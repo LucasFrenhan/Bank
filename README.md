@@ -32,10 +32,10 @@ implementada.
 ├── docs/                  # documentação do projeto (guias e decisões)
 ├── specs/                 # documentação viva: uma pasta por spec (NNN-nome-curto/)
 ├── src/
-│   ├── backend/           # solução .NET 10 (Api, Application, Domain, Infrastructure, testes)
+│   ├── backend/           # solução .NET 10 (Api, Worker, Application, Domain, Infrastructure, testes)
 │   └── frontend/          # aplicação React
 ├── docker/                # imagens auxiliares do ambiente local
-├── docker-compose.yml     # ambiente local (PostgreSQL, RabbitMQ, Aspire Dashboard, API, frontend)
+├── docker-compose.yml     # ambiente local (PostgreSQL, RabbitMQ, Aspire Dashboard, API, Worker, frontend)
 ├── global.json            # versão do SDK do .NET e runner de testes
 ├── .env.example           # configuração padrão do ambiente local
 ├── .specify/              # Spec Kit: constituição, templates e scripts

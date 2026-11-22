@@ -20,13 +20,16 @@ public class LayerDependencyTests
             typeof(DomainAssemblyMarker).Assembly,
             typeof(Bank.Application.DependencyInjection).Assembly,
             typeof(Bank.Infrastructure.DependencyInjection).Assembly,
-            typeof(HealthEndpoints).Assembly)
+            typeof(HealthEndpoints).Assembly,
+            typeof(Bank.Worker.WorkerAssemblyMarker).Assembly)
         .Build();
 
     private const string AspNetCore = @"^Microsoft\.AspNetCore(\..*)?$";
     private const string EntityFrameworkCore = @"^Microsoft\.EntityFrameworkCore(\..*)?$";
     private const string IdentityModel = @"^Microsoft\.IdentityModel(\..*)?$";
     private const string Npgsql = @"^Npgsql(\..*)?$";
+    private const string RabbitMq = @"^RabbitMQ\.Client(\..*)?$";
+    private const string OpenTelemetry = @"^OpenTelemetry(\..*)?$";
 
     [Fact]
     public void Domain_NaoDependeDeOutrasCamadasNemDeFrameworks()
@@ -97,10 +100,40 @@ public class LayerDependencyTests
         AssertSemViolacoes(regra);
     }
 
+    /// <summary>Broker e telemetria ficam na Infrastructure e nas raízes de composição (spec 010, R8).</summary>
+    [Fact]
+    public void DomainEApplication_NaoDependemDoBrokerNemDoOpenTelemetry()
+    {
+        var regra = Types().That().ResideInNamespaceMatching(@"^Bank\.(Domain|Application)(\..*)?$")
+            .Should().NotDependOnAnyTypesThat().ResideInNamespaceMatching(RabbitMq + "|" + OpenTelemetry);
+
+        AssertSemViolacoes(regra);
+    }
+
+    [Fact]
+    public void Camadas_NaoDependemDoWorker()
+    {
+        var regra = Types().That().ResideInNamespaceMatching(@"^Bank\.(Domain|Application|Infrastructure|Api)(\..*)?$")
+            .Should().NotDependOnAnyTypesThat().ResideInNamespaceMatching(@"^Bank\.Worker(\..*)?$");
+
+        AssertSemViolacoes(regra);
+    }
+
+    /// <summary>O Worker só compõe: banco e broker são acessados pela Infrastructure (spec 010, R1).</summary>
+    [Fact]
+    public void Worker_NaoAcessaBancoNemBrokerDiretamente()
+    {
+        var regra = Types().That().ResideInNamespaceMatching(@"^Bank\.Worker(\..*)?$")
+            .Should().NotDependOnAnyTypesThat().ResideInNamespaceMatching(
+                EntityFrameworkCore + "|" + Npgsql + "|" + RabbitMq + "|" + @"^Bank\.Infrastructure\.Persistencia(\..*)?$");
+
+        AssertSemViolacoes(regra);
+    }
+
     [Fact]
     public void Regras_NaoSaoVazias_CadaCamadaPossuiTipos()
     {
-        foreach (var camada in new[] { @"^Bank\.Domain$", @"^Bank\.Application$", @"^Bank\.Infrastructure$", @"^Bank\.Api\.Endpoints$" })
+        foreach (var camada in new[] { @"^Bank\.Domain$", @"^Bank\.Application$", @"^Bank\.Infrastructure$", @"^Bank\.Api\.Endpoints$", @"^Bank\.Worker$" })
         {
             Assert.NotEmpty(Types().That().ResideInNamespaceMatching(camada).GetObjects(Arquitetura));
         }

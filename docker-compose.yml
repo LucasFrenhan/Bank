@@ -6,6 +6,7 @@
 #   specs/002-setup-api/contracts/api-base.md (serviço api)
 #   specs/003-usuarios-carteiras/contracts/usuarios-carteiras-api.md (banco e JWT da api)
 #   specs/004-frontend-base/contracts/frontend.md (serviço frontend)
+#   specs/010-mensageria-rabbitmq/contracts/topologia-e-mensagens.md (serviço worker)
 #
 # Subir:  docker compose up -d --wait
 # Parar:  docker compose down        (mantém os dados)
@@ -83,7 +84,9 @@ services:
 
   api:
     # API do Bank — specs/002-setup-api (research R8)
-    build: ./src/backend
+    build:
+      context: ./src/backend
+      target: api
     image: bank/api:local
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -108,6 +111,38 @@ services:
         condition: service_started
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  worker:
+    # Despachante do outbox e consumidores do RabbitMQ — specs/010-mensageria-rabbitmq (R1).
+    # Sem porta publicada: só o healthcheck usa o HTTP interno.
+    build:
+      context: ./src/backend
+      target: worker
+    image: bank/worker:local
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+      ConnectionStrings__Bank: Host=postgres;Port=5432;Database=${POSTGRES_DB:-bank};Username=${POSTGRES_USER:-bank};Password=${POSTGRES_PASSWORD:-bank_dev_password}
+      Mensageria__Host: rabbitmq
+      Mensageria__VirtualHost: ${RABBITMQ_VHOST:-bank}
+      Mensageria__Usuario: ${RABBITMQ_USER:-bank}
+      Mensageria__Senha: ${RABBITMQ_PASSWORD:-bank_dev_password}
+    depends_on:
+      # A API aplica as migrations na partida (research R9)
+      api:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      aspire-dashboard:
+        condition: service_started
+    healthcheck:
+      # Pronto = conectado ao broker e consumidores inscritos
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/health/pronto"]
       interval: 5s
       timeout: 5s
       retries: 12

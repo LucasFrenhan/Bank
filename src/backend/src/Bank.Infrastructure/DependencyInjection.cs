@@ -1,4 +1,5 @@
 using Bank.Application.Abstracoes;
+using Bank.Infrastructure.Mensageria;
 using Bank.Infrastructure.Persistencia;
 using Bank.Infrastructure.Seguranca;
 using Microsoft.EntityFrameworkCore;
@@ -9,20 +10,40 @@ using Microsoft.Extensions.Options;
 
 namespace Bank.Infrastructure;
 
-/// <summary>Registro dos serviços de infraestrutura (persistência, segurança).</summary>
+/// <summary>Registro dos serviços de infraestrutura (persistência, segurança, mensageria).</summary>
 public static class DependencyInjection
 {
+    /// <summary>Tudo o que a API usa: persistência, serviços de inicialização do banco e segurança.</summary>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        // Persistência (research R7)
+        services.AddPersistencia(configuration);
+
+        // Só a API aplica migrations e lançamentos de abertura (specs/010-mensageria-rabbitmq, R9).
+        services.AddHostedService<MigracoesNaInicializacao>();
+        services.AddHostedService<LancamentosDeAberturaNaInicializacao>(); // depois das migrations
+
+        // Segurança (research R3, R4)
+        services.AddOptions<JwtOptions>().BindConfiguration(JwtOptions.Secao).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<JwtOptions>, ValidadorJwtOptions>();
+        services.AddSingleton<IHasherSenha, HasherSenhaIdentity>();
+        services.AddSingleton<IEmissorToken, EmissorTokenJwt>();
+
+        return services;
+    }
+
+    /// <summary>Persistência compartilhada pela API e pelo Worker (research R7; spec 010, R9).</summary>
+    public static IServiceCollection AddPersistencia(this IServiceCollection services, IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
         services.AddOptions<PersistenciaOptions>().BindConfiguration(PersistenciaOptions.Secao);
         services.AddDbContext<BankDbContext>(opcoes =>
             opcoes.UseNpgsql(configuration.GetConnectionString(PersistenciaOptions.NomeConnectionString)));
-        services.AddHostedService<MigracoesNaInicializacao>();
-        services.AddHostedService<LancamentosDeAberturaNaInicializacao>(); // depois das migrations
+        services.TryAddSingleton(TimeProvider.System);
         services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
         services.AddScoped<ICarteiraConsultas, CarteiraConsultas>();
         services.AddScoped<IUsuarioConsultas, UsuarioConsultas>();
@@ -30,12 +51,27 @@ public static class DependencyInjection
         services.AddScoped<IUnidadeDeTransferencia, UnidadeDeTransferencia>();
         services.AddScoped<IExtratoConsultas, ExtratoConsultas>();
 
-        // Segurança (research R3, R4)
-        services.AddOptions<JwtOptions>().BindConfiguration(JwtOptions.Secao).ValidateOnStart();
-        services.AddSingleton<IValidateOptions<JwtOptions>, ValidadorJwtOptions>();
+        return services;
+    }
+
+    /// <summary>
+    /// Mensageria do Worker: conexão, topologia, despachante do outbox e consumidores
+    /// (specs/010-mensageria-rabbitmq, research R1, R3–R7).
+    /// </summary>
+    public static IServiceCollection AddMensageria(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddOptions<MensageriaOptions>().BindConfiguration(MensageriaOptions.Secao).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<MensageriaOptions>, ValidadorMensageriaOptions>();
         services.TryAddSingleton(TimeProvider.System);
-        services.AddSingleton<IHasherSenha, HasherSenhaIdentity>();
-        services.AddSingleton<IEmissorToken, EmissorTokenJwt>();
+        services.AddMetrics();
+        services.AddSingleton<TelemetriaMensageria>();
+        services.AddSingleton<ConexaoRabbitMq>();
+        services.AddSingleton<EstadoMensageria>();
+        services.AddHostedService<TopologiaNaInicializacao>();
+        services.AddHostedService<DespachanteOutbox>();
+        services.AddHostedService<ConsumidorNotificacoesTransferencia>();
 
         return services;
     }

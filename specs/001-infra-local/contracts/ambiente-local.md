@@ -1,6 +1,6 @@
 # Contrato: Ambiente Local
 
-**Feature**: [../spec.md](../spec.md) | **Versão do contrato**: 1.1.0 (1.1.0: serviço `api`, spec 002 — mudança compatível)
+**Feature**: [../spec.md](../spec.md) | **Versão do contrato**: 1.2.0 (1.1.0: serviço `api`, spec 002; 1.2.0: serviço `worker`, spec 010 — mudanças compatíveis)
 
 Este é o contrato que o ambiente local oferece às aplicações do projeto (API, workers) e
 às pessoas desenvolvedoras. Specs futuras dependem destes nomes, portas e endpoints;
@@ -21,6 +21,7 @@ somente em `127.0.0.1`.
 | OTLP/gRPC | `http://localhost:4317` | `http://aspire-dashboard:18889` | `4317` | sem autenticação |
 | OTLP/HTTP | `http://localhost:4318` | `http://aspire-dashboard:18890` | `4318` | sem autenticação |
 | API do Bank ([spec 002](../../002-setup-api/contracts/api-base.md)) | `http://localhost:8080` | `http://api:8080` | `8080` (`API_PORT`) | sem autenticação |
+| Worker de mensageria ([spec 010](../../010-mensageria-rabbitmq/contracts/topologia-e-mensagens.md)) | — (sem porta publicada) | `http://worker:8080` (`/health`, `/health/pronto`) | — | usa as credenciais do RabbitMQ (`Mensageria__*`) |
 
 ## Strings de conexão de referência
 
@@ -47,6 +48,9 @@ OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 
 ## Garantias
 
+- O serviço `worker` inicia somente após `api` (que aplica as migrations) e `rabbitmq` estarem
+  `healthy`; fica `healthy` quando está conectado ao broker com os consumidores inscritos
+  (`/health/pronto`).
 - O serviço `api` inicia somente após `postgres` e `rabbitmq` estarem `healthy` e após o
   `aspire-dashboard` ter iniciado (o coletor não bloqueia a API).
 - Todo serviço possui healthcheck; serviços futuros podem depender deles com

@@ -11,6 +11,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" />
+    <!-- Mensageria (specs/010-mensageria-rabbitmq, research R2) -->
+    <PackageReference Include="RabbitMQ.Client" />
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
   </ItemGroup>
   <ItemGroup>
@@ -20,5 +23,6 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Bank.UnitTests" />
     <InternalsVisibleTo Include="Bank.ArchitectureTests" />
+    <InternalsVisibleTo Include="Bank.IntegrationTests" />
   </ItemGroup>
 </Project>

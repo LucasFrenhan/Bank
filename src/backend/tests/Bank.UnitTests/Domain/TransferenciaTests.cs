@@ -50,7 +50,7 @@ public class TransferenciaTests
         var destino = NovaCarteira(0m, "12ABC34501DE35", TipoConta.PessoaJuridica);
         var chave = Guid.NewGuid();
 
-        var execucao = Transferencia.Executar(origem, destino, ValorTransferencia.Criar(4.5m).Valor, "Almoço", chave, Agora).Valor;
+        var execucao = Transferencia.Executar(origem, destino, ValorTransferencia.Criar(4.5m).Valor, "Almoço", chave, Agora, new NomesTitulares("Ana Pagadora", "Loja Recebedora")).Valor;
 
         Assert.Equal(5.5m, origem.Saldo);
         Assert.Equal(4.5m, destino.Saldo);
@@ -67,6 +67,7 @@ public class TransferenciaTests
         var evento = execucao.Evento;
         Assert.Equal((transferencia.Id, origem.UsuarioId, destino.UsuarioId, 4.5m, Agora), (evento.TransferenciaId, evento.PagadorUsuarioId, evento.RecebedorUsuarioId, evento.Valor, evento.OcorridoEm));
         Assert.Equal(7, evento.EventoId.Valor.Version);
+        Assert.Equal(("Ana Pagadora", "Loja Recebedora", "Almoço"), (evento.PagadorNome, evento.RecebedorNome, evento.Descricao));
     }
 
     [Fact]
@@ -74,7 +75,7 @@ public class TransferenciaTests
     {
         var carteira = NovaCarteira(10m);
 
-        var resultado = Transferencia.Executar(carteira, carteira, ValorTransferencia.Criar(1m).Valor, null, Guid.NewGuid(), Agora);
+        var resultado = Transferencia.Executar(carteira, carteira, ValorTransferencia.Criar(1m).Valor, null, Guid.NewGuid(), Agora, new NomesTitulares("A", "B"));
 
         Assert.Equal(ErrosTransferencia.Autotransferencia, Assert.Single(resultado.Erros));
         Assert.Equal(10m, carteira.Saldo);
@@ -86,7 +87,7 @@ public class TransferenciaTests
         var origem = NovaCarteira(10m);
         var destino = NovaCarteira(0m, "12ABC34501DE35", TipoConta.PessoaJuridica);
 
-        var resultado = Transferencia.Executar(origem, destino, ValorTransferencia.Criar(300m).Valor, null, Guid.NewGuid(), Agora);
+        var resultado = Transferencia.Executar(origem, destino, ValorTransferencia.Criar(300m).Valor, null, Guid.NewGuid(), Agora, new NomesTitulares("A", "B"));
 
         Assert.Equal(ErrosTransferencia.SaldoInsuficiente, Assert.Single(resultado.Erros));
         Assert.Equal((10m, 0m), (origem.Saldo, destino.Saldo));

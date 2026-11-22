@@ -36,6 +36,7 @@ docker compose down -v
 | Aspire Dashboard (traces, métricas e logs) | <http://localhost:18888> | sem login |
 | OTLP gRPC / HTTP | `http://localhost:4317` / `http://localhost:4318` | sem autenticação |
 | API (`/health`, `/scalar/v1`) | <http://localhost:8080> | sem autenticação |
+| Worker de mensageria (`/health/pronto`) | sem porta publicada (`docker compose ps worker`) | usa as credenciais do RabbitMQ |
 | Frontend | <http://localhost:3000> | conta criada na própria tela |
 
 - O `docker compose up -d --wait` também constrói e sobe a API e o frontend (use `--build` após alterar
@@ -153,13 +154,45 @@ Definidos em [`specs/006-transferencias`](../specs/006-transferencias/spec.md) �
     `E. South America Standard Time`; sem nenhum dos dois, a API não sobe.
 - **Razão**: transferências e lançamentos são imutáveis (trigger no banco) e toda carteira tem
   saldo = soma dos lançamentos. O evento `transferencia.concluida` é gravado em `outbox_eventos`
-  na mesma transação (a publicação no broker fica para a issue #9).
+  na mesma transação e publicado pelo Worker (ver "Mensageria", abaixo).
 - **Abertura**: o saldo de demonstração vira um lançamento `Abertura` no cadastro; fora de
   `Production`, ao subir a API, carteiras antigas sem abertura a recebem
   (`Persistencia:CriarLancamentosDeAberturaNaInicializacao`).
 - **SQL puro** (bloqueio `FOR UPDATE`, trigger, abertura) fica em arquivos `.sql` em
   `src/backend/src/Bank.Infrastructure/Persistencia/Sql/`, embutidos no assembly (constituição
   v1.1.0).
+
+### Mensageria (Worker)
+
+Definida em [`specs/010-mensageria-rabbitmq`](../specs/010-mensageria-rabbitmq/spec.md) —
+[topologia e mensagens](../specs/010-mensageria-rabbitmq/contracts/topologia-e-mensagens.md),
+[evento](../specs/010-mensageria-rabbitmq/contracts/evento-transferencia-concluida.md) e
+[roteiro de validação](../specs/010-mensageria-rabbitmq/quickstart.md).
+
+- **Processo**: `src/backend/src/Bank.Worker` (serviço `worker` do Compose) hospeda o
+  despachante do outbox e o consumidor de notificações; a API não fala com o broker. Pelo SDK:
+  `dotnet run --project src/backend/src/Bank.Worker` (porta 5081), com a API já tendo aplicado
+  as migrations.
+- **Publicação**: a cada 1 s o despachante reserva até 50 eventos pendentes de `outbox_eventos`
+  (`FOR UPDATE SKIP LOCKED`), publica em `banco.eventos.topic` com `mandatory` e confirmação do
+  broker e só então preenche `publicado_em`. Com o broker fora do ar, as transferências seguem
+  concluindo e os eventos esperam no outbox.
+- **Consumo**: `notificacoes.transferencias.fila`; cada evento é registrado em
+  `eventos_processados` na mesma transação da notificação (hoje, um log estruturado), então
+  entregas duplicadas são descartadas.
+- **Falhas**: 3 novas tentativas pelas filas `notificacoes.transferencias.espera.{1000,2000,4000}`;
+  depois, ou se a mensagem for inválida, ela vai para `notificacoes.transferencias.dlq` com os
+  headers `x-tentativas`, `x-motivo`, `x-ultimo-erro` e `x-falhou-em`.
+- **Reprocessar a DLQ**: na interface de gestão (<http://localhost:15672>), Queues →
+  `notificacoes.transferencias.dlq` → *Get messages* para inspecionar e *Move messages* para
+  `notificacoes.transferencias.fila` depois de corrigir a causa. A contagem de tentativas
+  recomeça e `x-reprocessamentos` é incrementado.
+- **Trace ponta a ponta**: no Aspire Dashboard, o trace do `POST /api/v1/transferencias` mostra
+  `banco.eventos.topic publish` e `notificacoes.transferencias.fila process` (serviço
+  `bank-worker`), mesmo quando a publicação acontece depois (o contexto W3C fica no outbox).
+- **Configuração** (seção `Mensageria`): `Host`, `Porta`, `VirtualHost`, `Usuario`, `Senha`,
+  `IntervalosNovaTentativaMs`, `Prefetch`, `IntervaloDespachoMs`, `TamanhoLoteDespacho` e
+  `TimeoutConfirmacaoMs`. No Compose, vêm das variáveis `RABBITMQ_*` do `.env`.
 
 ## Frontend
 

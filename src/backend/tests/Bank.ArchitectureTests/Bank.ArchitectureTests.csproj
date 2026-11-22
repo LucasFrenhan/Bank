@@ -15,5 +15,6 @@
     <ProjectReference Include="..\..\src\Bank.Application\Bank.Application.csproj" />
     <ProjectReference Include="..\..\src\Bank.Domain\Bank.Domain.csproj" />
     <ProjectReference Include="..\..\src\Bank.Infrastructure\Bank.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Bank.Worker\Bank.Worker.csproj" />
   </ItemGroup>
 </Project>
