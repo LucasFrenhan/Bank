@@ -1,5 +1,6 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Usuarios;
+using Bank.Domain.Bancos;
 using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -12,6 +13,7 @@ public sealed class RegistrarUsuarioTests : IDisposable
     private static readonly DateTimeOffset Agora = new(2026, 11, 17, 18, 0, 0, TimeSpan.Zero);
 
     private readonly RepositorioFalso _repositorio = new();
+    private readonly GeradorNumeroContaFalso _gerador = new(7);
     private readonly HasherFalso _hasher = new();
     private readonly MetricasCapturadas _metricas = new();
     private readonly RegistrarUsuario _casoDeUso;
@@ -20,6 +22,7 @@ public sealed class RegistrarUsuarioTests : IDisposable
     {
         _casoDeUso = new RegistrarUsuario(
             _repositorio,
+            _gerador,
             _hasher,
             Options.Create(new SaldoInicialOptions { PessoaFisica = 10m, PessoaJuridica = 0m }),
             new RelogioFixo(Agora),
@@ -121,6 +124,38 @@ public sealed class RegistrarUsuarioTests : IDisposable
         Assert.Equal("bank.usuarios.cadastros", medicao.Nome);
         Assert.Equal(1, medicao.Valor);
         Assert.Equal("PessoaFisica", medicao.Tags["tipo_conta"]);
+    }
+
+    [Fact]
+    public async Task Executar_Sucesso_CriaContaCorrenteNoOneBankComNumeroDoGerador()
+    {
+        await _casoDeUso.ExecutarAsync(ComandoPf(), CancellationToken.None);
+
+        var carteira = _repositorio.Usuarios[0].Carteira;
+        Assert.Equal("001", carteira.CodigoBanco);
+        Assert.Equal("0001", carteira.Agencia);
+        Assert.Equal("00000007", carteira.NumeroConta);
+        Assert.Equal(ContaBancaria.CalcularDigito("0001", "00000007"), carteira.DigitoConta);
+        Assert.Equal(TipoContaBancaria.ContaCorrente, carteira.TipoContaBancaria);
+        Assert.Equal(1, _gerador.Chamadas);
+    }
+
+    [Fact]
+    public async Task Executar_ComandoInvalido_NaoConsomeNumeroDeConta()
+    {
+        await _casoDeUso.ExecutarAsync(new RegistrarUsuarioComando(" ", "invalido", "123", "PF", "fraca"), CancellationToken.None);
+
+        Assert.Equal(0, _gerador.Chamadas);
+    }
+
+    [Fact]
+    public async Task Executar_EmailJaExistente_NaoConsomeNumeroDeConta()
+    {
+        await _casoDeUso.ExecutarAsync(ComandoPf(), CancellationToken.None);
+
+        await _casoDeUso.ExecutarAsync(ComandoPf(documento: "12345678909"), CancellationToken.None);
+
+        Assert.Equal(1, _gerador.Chamadas);
     }
 
     private static RegistrarUsuarioComando ComandoPf(string email = "Lucas@Exemplo.com.br", string documento = "529.982.247-25") =>

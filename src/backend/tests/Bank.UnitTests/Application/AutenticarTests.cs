@@ -24,6 +24,7 @@ public sealed class AutenticarTests : IDisposable
             Email.Criar("lucas@exemplo.com.br").Valor,
             Documento.Criar("52998224725", TipoConta.PessoaFisica).Valor,
             _hasher.GerarHash("SenhaForte@123"),
+            ContasDeTeste.Corrente(),
             10m,
             DateTimeOffset.UtcNow);
         _repositorio.Usuarios.Add(_usuario);

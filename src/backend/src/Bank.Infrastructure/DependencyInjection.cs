@@ -45,6 +45,7 @@ public static class DependencyInjection
             opcoes.UseNpgsql(configuration.GetConnectionString(PersistenciaOptions.NomeConnectionString)));
         services.TryAddSingleton(TimeProvider.System);
         services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
+        services.AddScoped<IGeradorNumeroConta, GeradorNumeroConta>(); // spec 012, R2
         services.AddScoped<ICarteiraConsultas, CarteiraConsultas>();
         services.AddScoped<IUsuarioConsultas, UsuarioConsultas>();
         services.AddScoped<ITransferenciaRepositorio, TransferenciaRepositorio>();

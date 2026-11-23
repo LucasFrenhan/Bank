@@ -1,3 +1,4 @@
+using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
 
@@ -58,13 +59,15 @@ public sealed class Usuario
 
     /// <summary>
     /// Cria o usuário e sua carteira em uma única operação (RN-04). O tipo de conta vem do
-    /// documento, garantindo CPF para PF e CNPJ para PJ.
+    /// documento, garantindo CPF para PF e CNPJ para PJ. A carteira recebe os dados bancários
+    /// <paramref name="conta"/> (specs/012-dados-bancarios-carteira, FR-005).
     /// </summary>
     public static Usuario Criar(
         string nomeCompleto,
         Email email,
         Documento documento,
         string senhaHash,
+        ContaBancaria conta,
         decimal saldoInicial,
         DateTimeOffset agora)
     {
@@ -79,7 +82,7 @@ public sealed class Usuario
         }
 
         var id = UsuarioId.Novo(agora);
-        var carteira = Carteira.Criar(id, saldoInicial, agora);
+        var carteira = Carteira.Criar(id, conta, saldoInicial, agora);
 
         return new Usuario
         {

@@ -32,7 +32,7 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
 
     public Usuario Criar(string nome, string documento, TipoConta tipo, decimal saldo)
     {
-        var usuario = Usuario.Criar(nome, Email.Criar($"{Guid.NewGuid():N}@exemplo.com.br").Valor, Documento.Criar(documento, tipo).Valor, "hash", saldo, Agora);
+        var usuario = Usuario.Criar(nome, Email.Criar($"{Guid.NewGuid():N}@exemplo.com.br").Valor, Documento.Criar(documento, tipo).Valor, "hash", ContasDeTeste.Corrente(Usuarios.Count + 1), saldo, Agora);
         Usuarios.Add(usuario);
         return usuario;
     }
