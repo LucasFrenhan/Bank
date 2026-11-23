@@ -250,7 +250,9 @@ cadastro, login, consulta e transferências.
 
 - Agência única 0001 para o nosso banco nesta entrega; múltiplas agências ficam para o futuro.
 - Número da conta com 8 dígitos e dígito verificador de 1 dígito (exibido como `12345678-9`);
-  a regra de cálculo (módulo 11 é a referência) é decidida no plano e documentada.
+  a regra de cálculo é o algoritmo de Luhn (módulo 10) sobre agência + número, escolhido no
+  plano porque detecta todo erro de um dígito e sempre resulta em um único dígito (o módulo
+  11 gera 10/11 em alguns casos) — ver [research R1](research.md).
 - Os códigos 002 a 005 e seus nomes simbólicos são fictícios e não correspondem a bancos reais.
 - A exibição dos dados bancários no frontend fica fora do escopo; esta entrega muda apenas o
   contrato da consulta da carteira (campos novos, compatível com os clientes atuais). A
