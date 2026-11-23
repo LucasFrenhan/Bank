@@ -13,7 +13,7 @@ description: "Lista de tarefas da feature 012-dados-bancarios-carteira"
 
 **Tests**: obrigatórios (constituição, Princípio VII): unitários (Domain, Application) e
 integração contra PostgreSQL em contêiner. Em cada história os testes são escritos primeiro e
-devem falhar antes da implementação. Exceção: os testes da US2 (T024–T025) verificam o backfill,
+devem falhar antes da implementação. Exceção: os testes da US2 (T021–T022) verificam o backfill,
 que nasce junto com a migration da US1 (uma migration única, R7), e por isso já nascem verdes.
 
 **Organization**: fundação (catálogo de bancos, tipo de conta, `ContaBancaria` com Luhn,
