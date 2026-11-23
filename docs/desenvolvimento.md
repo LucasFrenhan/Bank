@@ -178,8 +178,18 @@ Definida em [`specs/010-mensageria-rabbitmq`](../specs/010-mensageria-rabbitmq/s
   broker e só então preenche `publicado_em`. Com o broker fora do ar, as transferências seguem
   concluindo e os eventos esperam no outbox.
 - **Consumo**: `notificacoes.transferencias.fila`; cada evento é registrado em
-  `eventos_processados` na mesma transação da notificação (hoje, um log estruturado), então
-  entregas duplicadas são descartadas.
+  `eventos_processados` na mesma transação da notificação, então entregas duplicadas são
+  descartadas.
+- **Notificações** ([spec 011](../specs/011-notificacoes-auditoria/spec.md),
+  [contrato](../specs/011-notificacoes-auditoria/contracts/notificacoes-auditoria.md)): cada
+  transferência gera duas linhas em `notificacoes_auditoria`, o comprovante de envio (pagador) e
+  o aviso de crédito (recebedor), no canal `simulado` (não há envio real), além de um log
+  estruturado sem nomes. Para consultar:
+
+  ```sql
+  SELECT tipo, usuario_destino_id, mensagem, criado_em
+  FROM notificacoes_auditoria ORDER BY criado_em DESC, tipo LIMIT 10;
+  ```
 - **Falhas**: 3 novas tentativas pelas filas `notificacoes.transferencias.espera.{1000,2000,4000}`;
   depois, ou se a mensagem for inválida, ela vai para `notificacoes.transferencias.dlq` com os
   headers `x-tentativas`, `x-motivo`, `x-ultimo-erro` e `x-falhou-em`.

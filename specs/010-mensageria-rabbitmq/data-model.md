@@ -72,6 +72,11 @@ Entrada do caso de uso `NotificarTransferenciaConcluida`. Nomes e descrição ch
 não entram no comando: a notificação simulada é um log, e logs não levam nome nem descrição
 (FR-023). O envio real (issue futura) acrescentará os campos de que precisar.
 
+> **Spec 011** ([data-model](../011-notificacoes-auditoria/data-model.md)): o comando ganhou
+> `PagadorNome` e `RecebedorNome` opcionais, usados só no texto das notificações persistidas em
+> `notificacoes_auditoria` (logs continuam sem nomes), e o caso de uso passou a gravar o
+> comprovante de envio e o aviso de crédito na transação do consumidor.
+
 ## Mensagem em trânsito (não persistida)
 
 Corpo = `payload` do outbox; propriedades e headers em

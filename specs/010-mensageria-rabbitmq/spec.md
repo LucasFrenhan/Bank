@@ -363,7 +363,10 @@ trace com os spans da requisição HTTP, da publicação (Producer) e do consumo
   chave `(evento_id, nome_consumidor)`, com `processado_em`.
 - **Topologia**: exchanges, filas, bindings e DLQs da FR-006.
 - **Notificação de transferência**: efeito do consumo (log estruturado), não persistido como
-  entidade.
+  entidade nesta spec. Desde a
+  [spec 011](../011-notificacoes-auditoria/spec.md) também é persistida: comprovante de envio
+  (pagador) e aviso de crédito (recebedor) em `notificacoes_auditoria`, na mesma transação de
+  `eventos_processados`.
 
 ## Success Criteria *(mandatory)*
 

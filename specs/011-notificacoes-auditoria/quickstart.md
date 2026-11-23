@@ -26,7 +26,7 @@ opcionais); integração cobrindo US1–US3 ([research R8](research.md)); arquit
 
 ## Cenário 2 — Transferência gera duas notificações (US1)
 
-1. Cadastre e entre com uma PF **A** e uma PJ **B**; transfira R$ 1.234,50 de A para B.
+1. Cadastre e entre com uma PF **A** e uma PJ **B**; transfira R$ 4,50 de A para B (a PF nasce com R$ 10,00 de demonstração; o separador de milhar é coberto pelos testes unitários).
 2. Em até 5 s:
 
    ```sql
@@ -34,8 +34,8 @@ opcionais); integração cobrindo US1–US3 ([research R8](research.md)); arquit
    FROM notificacoes_auditoria ORDER BY criado_em DESC, tipo LIMIT 2;
    ```
 
-   **Esperado**: `comprovante_envio` para A (`Você enviou R$ 1.234,50 para <nome de B>.`) e
-   `aviso_credito` para B (`Você recebeu R$ 1.234,50 de <nome de A>.`), canal `simulado`, mesmo
+   **Esperado**: `comprovante_envio` para A (`Você enviou R$ 4,50 para <nome de B>.`) e
+   `aviso_credito` para B (`Você recebeu R$ 4,50 de <nome de A>.`), canal `simulado`, mesmo
    `evento_id` de `eventos_processados`.
 3. `docker compose logs worker`: as duas linhas de log de notificação continuam sem nomes e sem o
    texto.

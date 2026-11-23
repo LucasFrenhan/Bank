@@ -257,16 +257,16 @@ DLQ sem linhas; reprocessamento da DLQ → 2 linhas (quickstart, cenário 4)
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T024 [P] Em `it/DadosSensiveisMensageriaTests.cs`: com uma transferência de nomes conhecidos, nenhum
+- [X] T024 [P] Em `it/DadosSensiveisMensageriaTests.cs`: com uma transferência de nomes conhecidos, nenhum
   log, span ou tag de métrica do Worker contém os nomes nem o texto das notificações gravadas
   (FR-010)
-- [ ] T025 [P] Atualizar a spec 010 (FR-011): em `specs/010-mensageria-rabbitmq/spec.md`, na
+- [X] T025 [P] Atualizar a spec 010 (FR-011): em `specs/010-mensageria-rabbitmq/spec.md`, na
   Key Entity "Notificação de transferência", acrescentar que desde a spec 011 ela também é
   persistida em `notificacoes_auditoria`; em `specs/010-mensageria-rabbitmq/data-model.md`, na
   seção "Application — notificação", nota apontando os nomes opcionais e a persistência da spec 011
-- [ ] T026 [P] Em `docs/desenvolvimento.md`, seção "Mensageria (Worker)",
+- [X] T026 [P] Em `docs/desenvolvimento.md`, seção "Mensageria (Worker)",
   acrescentar a tabela `notificacoes_auditoria` e a consulta do quickstart, cenário 2
-- [ ] T027 Rodar `dotnet build` e `dotnet test` em Release (como no CI) com o Docker em execução;
+- [X] T027 Rodar `dotnet build` e `dotnet test` em Release (como no CI) com o Docker em execução;
   depois, no Compose (`docker compose up -d --build --wait`), executar os cenários 2–5 do
   [quickstart.md](quickstart.md) e registrar o resultado no PR
 - [ ] T028 Marcar na issue #21 os itens entregues pela spec 010 (PR #47) e os entregues aqui
