@@ -225,7 +225,7 @@ DLQ sem linhas; reprocessamento da DLQ → 2 linhas (quickstart, cenário 4)
 
 ### Testes da US3 (escrever primeiro)
 
-- [ ] T022 [US3] Em `it/NotificacoesAuditoriaTests.cs`, classe `NotificacoesAuditoriaFalhasTests`
+- [X] T022 [US3] Em `it/NotificacoesAuditoriaTests.cs`, classe `NotificacoesAuditoriaFalhasTests`
   com o ambiente `AmbienteNotificacoesControlaveis`
   (deriva de `AmbienteMensageria`, sobrescreve `ConfigurarServicosDoWorker` como
   `AmbienteNotificadorControlavel` em `it/NovaTentativaEDlqTests.cs`) com o dublê
@@ -245,7 +245,7 @@ DLQ sem linhas; reprocessamento da DLQ → 2 linhas (quickstart, cenário 4)
 
 ### Implementação da US3
 
-- [ ] T023 [US3] Sem código de produção novo esperado (atomicidade vem de R2: mesma transação do
+- [X] T023 [US3] Sem código de produção novo esperado (atomicidade vem de R2: mesma transação do
   consumidor). Se algum teste de T022 falhar, corrigir a causa em
   `back/src/Bank.Infrastructure/Persistencia/NotificacoesAuditoriaRepositorio.cs` ou em
   `NotificarTransferenciaConcluida.cs`, nunca em `ConsumidorEventos.cs` sem atualizar a spec e o
