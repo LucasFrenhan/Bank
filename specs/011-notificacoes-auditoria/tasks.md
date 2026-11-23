@@ -269,7 +269,7 @@ DLQ sem linhas; reprocessamento da DLQ → 2 linhas (quickstart, cenário 4)
 - [X] T027 Rodar `dotnet build` e `dotnet test` em Release (como no CI) com o Docker em execução;
   depois, no Compose (`docker compose up -d --build --wait`), executar os cenários 2–5 do
   [quickstart.md](quickstart.md) e registrar o resultado no PR
-- [ ] T028 Marcar na issue #21 os itens entregues pela spec 010 (PR #47) e os entregues aqui
+- [X] T028 Marcar na issue #21 os itens entregues pela spec 010 (PR #47) e os entregues aqui
   (2.1 `NotificacaoAuditoria` e migration; testes 3.1 de idempotência e 3.2 ponta a ponta) e
   abrir o PR com `Closes #21` e `--assignee @me`
 
