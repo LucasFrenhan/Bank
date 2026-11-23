@@ -97,7 +97,8 @@ public class NovaTentativaEDlqTests(AmbienteNotificadorControlavel ambiente) : I
         Assert.Null(NovaTentativaEDlqTests.Header(naDlq, "x-reprocessamentos"));
         Assert.Equal(("transferencia.concluida", 1), (naDlq.BasicProperties.Type, Inteiro(naDlq, "versao")));
         Assert.Null(await ProcessadoEmAsync(eventoId));
-        Assert.Contains(worker.Medicoes, m => m.Nome == "banco.eventos.processados" && m.Tags["status"] == "falha_dlq" && m.Tags.GetValueOrDefault("motivo") == "tentativas-esgotadas");
+        // A cópia é confirmada na DLQ antes do ACK e da métrica: aguarda o registro.
+        Assert.True(await BankWorkerFactory.AguardarAsync(() => TemFalhaDlq(worker, "tentativas-esgotadas")));
 
         // Reprocessamento manual com a causa corrigida: processada uma vez.
         ambiente.Notificador.Normalizar(eventoId);
@@ -139,8 +140,11 @@ public class NovaTentativaEDlqTests(AmbienteNotificadorControlavel ambiente) : I
         var naDlq = await AguardarNaDlqAsync(messageId);
         Assert.Equal((1, "mensagem-invalida"), (Inteiro(naDlq, "x-tentativas"), Texto(naDlq, "x-motivo")));
         Assert.StartsWith("MensagemInvalida:", Texto(naDlq, "x-ultimo-erro"), StringComparison.Ordinal);
-        Assert.Contains(worker.Medicoes, m => m.Nome == "banco.eventos.processados" && m.Tags["status"] == "falha_dlq" && m.Tags.GetValueOrDefault("motivo") == "mensagem-invalida");
+        Assert.True(await BankWorkerFactory.AguardarAsync(() => TemFalhaDlq(worker, "mensagem-invalida")));
     }
+
+    private static bool TemFalhaDlq(BankWorkerFactory worker, string motivo) =>
+        worker.Medicoes.Any(m => m.Nome == "banco.eventos.processados" && m.Tags["status"] == "falha_dlq" && m.Tags.GetValueOrDefault("motivo") == motivo);
 
     private async Task PublicarAsync(Guid eventoId)
     {
@@ -260,6 +264,8 @@ public class RedeDeSegurancaDlqTests(AmbienteSemFilasDeEspera ambiente) : IClass
         Assert.True(await BankWorkerFactory.AguardarAsync(async () => (naDlq = await NovaTentativaEDlqTests.LerDaDlqAsync(worker, eventoId)) is not null));
         Assert.NotNull(NovaTentativaEDlqTests.Header(naDlq!, "x-death"));
         Assert.Null(NovaTentativaEDlqTests.Texto(naDlq!, "x-motivo"));
-        Assert.Contains(worker.TextosDosLogs(), t => t.Contains($"EventoId={eventoId}", StringComparison.Ordinal) && t.Contains("sem confirmação", StringComparison.Ordinal));
+        // O NACK precede o log: a mensagem pode chegar à DLQ antes de o log ser escrito.
+        Assert.True(await BankWorkerFactory.AguardarAsync(() => worker.TextosDosLogs().Any(t => t.Contains($"EventoId={eventoId}", StringComparison.Ordinal) && t.Contains("sem confirmação", StringComparison.Ordinal))),
+            "O log de republicação sem confirmação não foi escrito.");
     }
 }
