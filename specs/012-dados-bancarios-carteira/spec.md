@@ -25,6 +25,16 @@ repositório; esta spec o substitui.
   (banco, agência, número, tipo, nome e documento do titular), sem usuário, login nem saldo.
 - Q: A conta poupança criada por script pertence a quem? → A: A um novo titular no banco 001,
   cuja única conta é a poupança; a regra de uma carteira por usuário é mantida.
+- Q: Os números de conta são gerados em sequência ou de forma aleatória? → A: Em sequência,
+  por um contador único no banco de dados, usado também pela atualização das contas antigas e
+  pelo script de poupança.
+- Q: Na consulta da carteira, os dados bancários vêm agrupados ou como campos soltos? → A:
+  Agrupados em `contaBancaria`: `{ banco: { codigo, nome }, agencia, numero, digito, tipo }`.
+- Q: Quais nomes os cinco bancos devem ter? → A: 001 "One Bank" (o nosso), 002 "Banco
+  Aurora", 003 "Banco Horizonte", 004 "Banco Atlântico", 005 "Banco Cerrado". O frontend deve
+  passar a usar o nome "One Bank" na task futura de atualização do frontend.
+- Q: Os dados bancários aparecem só na consulta da própria carteira ou também em outras
+  respostas? → A: Só na consulta da própria carteira; as demais respostas não mudam.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -138,8 +148,8 @@ cadastro, login, consulta e transferências.
 
 ### Edge Cases
 
-- Dois cadastros simultâneos não podem receber o mesmo número de conta; se houver colisão, o
-  cadastro não pode falhar para o usuário por causa disso.
+- Dois cadastros simultâneos não podem receber o mesmo número de conta; como o número vem de
+  um contador sequencial único, não há colisão nem nova tentativa.
 - O número gerado precisa ter o dígito verificador correto também para as contas atribuídas
   na atualização das contas existentes.
 - Tentativa de gravar (por script) uma conta com código de banco fora dos cinco conhecidos ou
@@ -160,8 +170,8 @@ cadastro, login, consulta e transferências.
 ### Functional Requirements
 
 - **FR-001**: O sistema MUST manter um cadastro fixo de exatamente cinco bancos, cada um com
-  código de 3 dígitos e nome: 001 (o nosso banco) e quatro bancos com nomes simbólicos
-  (códigos 002 a 005).
+  código de 3 dígitos e nome: 001 "One Bank" (o nosso banco), 002 "Banco Aurora", 003 "Banco
+  Horizonte", 004 "Banco Atlântico" e 005 "Banco Cerrado" (os quatro últimos são simbólicos).
 - **FR-002**: Toda carteira MUST ter, de forma obrigatória, código do banco (um dos cinco),
   agência (4 dígitos), número da conta (8 dígitos) com dígito verificador (1 dígito) e tipo da
   conta (conta corrente ou conta poupança).
@@ -177,11 +187,18 @@ cadastro, login, consulta e transferências.
 - **FR-007**: A atualização MUST atribuir dados bancários (banco 001, agência 0001, número
   inédito com dígito verificador, tipo conta corrente) a todas as carteiras existentes,
   preservando todos os demais dados, e só então tornar os campos obrigatórios.
-- **FR-008**: A geração de números para novos cadastros MUST continuar a partir dos números já
-  atribuídos, sem colidir com eles.
-- **FR-009**: A consulta da própria carteira MUST expor código e nome do banco, agência, número
-  da conta, dígito verificador e tipo da conta, mantendo todos os campos atuais com o mesmo
-  nome e significado.
+- **FR-008**: Os números de conta do banco 001 MUST ser sequenciais (o próximo número
+  disponível de um contador único), começando em 00000001; a atualização das contas
+  existentes, os novos cadastros e o script de poupança usam o mesmo contador, de modo que
+  nunca colidem, mesmo com cadastros simultâneos. Números consumidos por cadastros que falharam
+  podem ficar sem uso (lacunas são aceitas).
+- **FR-009**: A consulta da própria carteira MUST expor os dados bancários agrupados em um
+  objeto `contaBancaria` — `banco` (`codigo` de 3 dígitos e `nome`), `agencia` (4 dígitos),
+  `numero` (8 dígitos), `digito` (1 dígito) e `tipo` (`ContaCorrente` ou `ContaPoupanca`),
+  todos como texto para preservar zeros à esquerda —, mantendo todos os campos atuais com o
+  mesmo nome e significado (o `tipoConta` PF/PJ continua sendo o tipo do titular). Nenhuma
+  outra resposta da API (dados do usuário, cadastro, comprovante e consulta de transferência,
+  extrato) passa a expor dados bancários nesta entrega.
 - **FR-010**: O sistema MUST fornecer scripts de banco de dados, reexecutáveis sem duplicar
   dados, para (a) registrar ao menos uma conta em cada banco de 002 a 005 e (b) criar um novo
   titular no banco 001 cuja única conta é do tipo poupança; nenhuma funcionalidade do sistema
@@ -236,7 +253,10 @@ cadastro, login, consulta e transferências.
   a regra de cálculo (módulo 11 é a referência) é decidida no plano e documentada.
 - Os códigos 002 a 005 e seus nomes simbólicos são fictícios e não correspondem a bancos reais.
 - A exibição dos dados bancários no frontend fica fora do escopo; esta entrega muda apenas o
-  contrato da consulta da carteira (campos novos, compatível com os clientes atuais).
+  contrato da consulta da carteira (campos novos, compatível com os clientes atuais). A
+  atualização do frontend será feita em outra task, de preferência depois que esta for
+  finalizada (contrato da API já estável). Essa task também deve passar a exibir o nome do
+  nosso banco como "One Bank".
 - A escolha do tipo de conta no cadastro é funcionalidade futura; o modelo já suporta os dois
   tipos.
 - Os dados bancários não substituem o documento como forma de identificar o destinatário de
