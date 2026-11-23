@@ -32,7 +32,7 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
 
     public Usuario Criar(string nome, string documento, TipoConta tipo, decimal saldo)
     {
-        var usuario = Usuario.Criar(nome, Email.Criar($"{Guid.NewGuid():N}@exemplo.com.br").Valor, Documento.Criar(documento, tipo).Valor, "hash", saldo, Agora);
+        var usuario = Usuario.Criar(nome, Email.Criar($"{Guid.NewGuid():N}@exemplo.com.br").Valor, Documento.Criar(documento, tipo).Valor, "hash", ContasDeTeste.Corrente(Usuarios.Count + 1), saldo, Agora);
         Usuarios.Add(usuario);
         return usuario;
     }
@@ -40,7 +40,7 @@ internal sealed class BancoFalso : ICarteiraConsultas, IUsuarioConsultas, ITrans
     public Task<DadosCarteira?> ObterDoUsuarioAsync(UsuarioId usuarioId, CancellationToken cancellationToken)
     {
         var u = Usuarios.Find(x => x.Id == usuarioId);
-        return Task.FromResult(u is null ? null : new DadosCarteira(u.Carteira.Id, u.Id, u.NomeCompleto, u.TipoConta, u.Carteira.Saldo, u.Carteira.Moeda, u.Carteira.AtualizadoEm));
+        return Task.FromResult(u is null ? null : new DadosCarteira(u.Carteira.Id, u.Id, u.NomeCompleto, u.TipoConta, u.Carteira.Saldo, u.Carteira.Moeda, u.Carteira.AtualizadoEm, new DadosContaBancaria(u.Carteira.CodigoBanco, "One Bank", u.Carteira.Agencia, u.Carteira.NumeroConta, u.Carteira.DigitoConta, u.Carteira.TipoContaBancaria)));
     }
 
     public Task<DadosTitular?> ObterTitularAsync(UsuarioId usuarioId, CancellationToken cancellationToken)

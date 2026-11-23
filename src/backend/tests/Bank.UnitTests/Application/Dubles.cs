@@ -120,3 +120,17 @@ internal sealed class MetricasCapturadas : IDisposable
         }
     }
 }
+
+/// <summary>Gerador de número de conta em sequência, a partir de um valor inicial (spec 012).</summary>
+internal sealed class GeradorNumeroContaFalso(long proximo = 1) : IGeradorNumeroConta
+{
+    private long _proximo = proximo;
+
+    public int Chamadas { get; private set; }
+
+    public Task<long> ProximoAsync(CancellationToken cancellationToken)
+    {
+        Chamadas++;
+        return Task.FromResult(_proximo++);
+    }
+}

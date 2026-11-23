@@ -128,6 +128,38 @@ public class OpenApiTests(BankApiFactory factory) : IClassFixture<BankApiFactory
         }
     }
 
+    /// <summary>specs/012-dados-bancarios-carteira (contracts/carteira-minha.md 1.1.0; FR-009).</summary>
+    [Fact]
+    public async Task DocumentoOpenApi_ContaBancariaSoNaConsultaDaCarteira()
+    {
+        using var client = factory.CreateClient();
+
+        using var resposta = await client.GetAsync(DocumentoOpenApi, TestContext.Current.CancellationToken);
+
+        using var documento = JsonDocument.Parse(await resposta.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var esquemas = documento.RootElement.GetProperty("components").GetProperty("schemas");
+
+        var minha = esquemas.GetProperty("MinhaCarteiraResposta");
+        Assert.True(minha.GetProperty("properties").TryGetProperty("contaBancaria", out _));
+        Assert.Contains("contaBancaria", minha.GetProperty("required").EnumerateArray().Select(c => c.GetString()));
+
+        var conta = esquemas.GetProperty("ContaBancariaResposta").GetProperty("properties");
+        foreach (var campo in new[] { "agencia", "numero", "digito", "tipo" })
+        {
+            Assert.Equal("string", conta.GetProperty(campo).GetProperty("type").GetString());
+        }
+
+        var banco = esquemas.GetProperty("BancoResposta").GetProperty("properties");
+        Assert.Equal("string", banco.GetProperty("codigo").GetProperty("type").GetString());
+        Assert.Equal("string", banco.GetProperty("nome").GetProperty("type").GetString());
+
+        var outros = esquemas.EnumerateObject()
+            .Where(e => e.Name != "MinhaCarteiraResposta" && e.Value.TryGetProperty("properties", out var p) && p.TryGetProperty("contaBancaria", out _))
+            .Select(e => e.Name)
+            .ToList();
+        Assert.Empty(outros);
+    }
+
     [Fact]
     public async Task Scalar_ForaDeProducao_RetornaPaginaHtml()
     {

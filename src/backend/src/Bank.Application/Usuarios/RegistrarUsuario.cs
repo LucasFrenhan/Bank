@@ -1,5 +1,6 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Observabilidade;
+using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
@@ -28,10 +29,13 @@ public sealed record UsuarioRegistrado(
 
 /// <summary>
 /// Caso de uso de cadastro (US1): valida todos os campos, garante unicidade de e-mail e
-/// documento e cria usuário + carteira atomicamente (RN-01 a RN-05).
+/// documento e cria usuário + carteira atomicamente (RN-01 a RN-05). A carteira nasce sempre como
+/// conta corrente no banco 001, agência 0001, com o próximo número sequencial; o comando não
+/// escolhe o tipo (specs/012-dados-bancarios-carteira, FR-005, FR-006).
 /// </summary>
 public sealed partial class RegistrarUsuario(
     IUsuarioRepositorio repositorio,
+    IGeradorNumeroConta geradorNumeroConta,
     IHasherSenha hasherSenha,
     IOptions<SaldoInicialOptions> saldoInicial,
     TimeProvider relogio,
@@ -64,11 +68,16 @@ public sealed partial class RegistrarUsuario(
             ? saldoInicial.Value.PessoaFisica
             : saldoInicial.Value.PessoaJuridica;
 
+        // Só depois das validações e das verificações de duplicidade, para não gastar números à toa.
+        var numeroConta = await geradorNumeroConta.ProximoAsync(cancellationToken);
+        var conta = ContaBancaria.Nova(Banco.OneBank, ContaBancaria.AgenciaPadrao, numeroConta, TipoContaBancaria.ContaCorrente);
+
         var usuario = Usuario.Criar(
             nome,
             email,
             documento,
             hasherSenha.GerarHash(comando.Senha!),
+            conta,
             saldo,
             relogio.GetUtcNow());
 

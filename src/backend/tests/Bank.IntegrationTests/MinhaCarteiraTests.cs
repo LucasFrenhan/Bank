@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net.Http.Headers;
 using System.Net;
 using System.Text.Json;
+using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -33,6 +34,33 @@ public class MinhaCarteiraTests(BankApiFactory factory) : IClassFixture<BankApiF
         Assert.Equal("PessoaFisica", json.GetProperty("tipoConta").GetString());
         Assert.Equal("BRL", json.GetProperty("moeda").GetString());
         Assert.Equal(TimeSpan.Zero, json.GetProperty("atualizadoEm").GetDateTimeOffset().Offset);
+    }
+
+    /// <summary>specs/012-dados-bancarios-carteira (contracts/carteira-minha.md 1.1.0; FR-009).</summary>
+    [Fact]
+    public async Task UsuarioAutenticado_ContaBancariaComOsDadosGravados()
+    {
+        using var client = factory.CreateClient();
+        var email = Dados.Email();
+        var cadastro = await ApiBank.RegistrarAsync(client, Dados.CadastroPf(email));
+        var token = await ApiBank.ObterTokenAsync(client, email);
+        await using var contexto = factory.CriarContexto();
+        var carteira = await contexto.Carteiras.AsNoTracking()
+            .SingleAsync(c => c.Id == CarteiraId.De(Guid.Parse(cadastro.GetProperty("carteiraId").GetString()!)), Ct);
+
+        using var resposta = await GetComTokenAsync(client, token);
+
+        var conta = (await ApiBank.LerJsonAsync(resposta)).GetProperty("contaBancaria");
+        var banco = conta.GetProperty("banco");
+        Assert.Equal(JsonValueKind.String, banco.GetProperty("codigo").ValueKind);
+        Assert.Equal("001", banco.GetProperty("codigo").GetString());
+        Assert.Equal("One Bank", banco.GetProperty("nome").GetString());
+        Assert.Equal("0001", conta.GetProperty("agencia").GetString());
+        Assert.Equal(JsonValueKind.String, conta.GetProperty("numero").ValueKind);
+        Assert.Equal(carteira.NumeroConta, conta.GetProperty("numero").GetString());
+        Assert.Equal(carteira.DigitoConta, conta.GetProperty("digito").GetString());
+        Assert.Equal(ContaBancaria.CalcularDigito("0001", carteira.NumeroConta), conta.GetProperty("digito").GetString());
+        Assert.Equal("ContaCorrente", conta.GetProperty("tipo").GetString());
     }
 
     [Fact]

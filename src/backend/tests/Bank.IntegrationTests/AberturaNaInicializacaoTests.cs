@@ -19,15 +19,17 @@ public class AberturaNaInicializacaoTests(BankApiFactory factory) : IClassFixtur
     public async Task CarteiraSemAbertura_RecebeAoReiniciar_SemDuplicar_ESoComAFlag()
     {
         // Carteira gravada sem o lançamento, como as criadas pela spec 003.
-        var legado = Usuario.Criar(
-            "Conta Antiga",
-            Email.Criar(Dados.Email()).Valor,
-            Documento.Criar(Dados.Cpf(), TipoConta.PessoaFisica).Valor,
-            "hash",
-            10m,
-            DateTimeOffset.UtcNow);
+        Usuario legado;
         await using (var contexto = factory.CriarContexto())
         {
+            legado = Usuario.Criar(
+                "Conta Antiga",
+                Email.Criar(Dados.Email()).Valor,
+                Documento.Criar(Dados.Cpf(), TipoConta.PessoaFisica).Valor,
+                "hash",
+                await ContasDeTeste.ProximaCorrenteAsync(contexto, Ct),
+                10m,
+                DateTimeOffset.UtcNow);
             contexto.Usuarios.Add(legado);
             await contexto.SaveChangesAsync(Ct);
         }

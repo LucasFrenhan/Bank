@@ -1,3 +1,4 @@
+using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
 using Bank.Domain.Usuarios;
 
@@ -11,7 +12,17 @@ public sealed record DadosCarteira(
     TipoConta TipoConta,
     decimal Saldo,
     string Moeda,
-    DateTimeOffset AtualizadoEm);
+    DateTimeOffset AtualizadoEm,
+    DadosContaBancaria ContaBancaria);
+
+/// <summary>Dados bancários da carteira, com o nome do banco (specs/012-dados-bancarios-carteira, FR-009).</summary>
+public sealed record DadosContaBancaria(
+    string CodigoBanco,
+    string NomeBanco,
+    string Agencia,
+    string Numero,
+    string Digito,
+    TipoContaBancaria Tipo);
 
 /// <summary>Consultas de leitura de carteiras (implementadas em Infrastructure).</summary>
 public interface ICarteiraConsultas

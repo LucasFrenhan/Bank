@@ -11,7 +11,7 @@ public class LancamentoAberturaTests
     [Fact]
     public void UsuarioCriar_ComSaldo_GeraAberturaDeEntrada()
     {
-        var usuario = Usuario.Criar("Lucas", Email.Criar("a@b.com.br").Valor, Documento.Criar("52998224725", TipoConta.PessoaFisica).Valor, "hash", 10m, Agora);
+        var usuario = Usuario.Criar("Lucas", Email.Criar("a@b.com.br").Valor, Documento.Criar("52998224725", TipoConta.PessoaFisica).Valor, "hash", ContasDeTeste.Corrente(), 10m, Agora);
 
         var abertura = usuario.LancamentoDeAbertura!;
         Assert.Equal((usuario.Carteira.Id, TipoLancamento.Abertura, DirecaoLancamento.Entrada, 10m, null as TransferenciaId?), (abertura.CarteiraId, abertura.Tipo, abertura.Direcao, abertura.Valor, abertura.TransferenciaId));
@@ -22,7 +22,7 @@ public class LancamentoAberturaTests
     [Fact]
     public void UsuarioCriar_SemSaldo_NaoGeraAbertura()
     {
-        var usuario = Usuario.Criar("Empresa", Email.Criar("e@b.com.br").Valor, Documento.Criar("12ABC34501DE35", TipoConta.PessoaJuridica).Valor, "hash", 0m, Agora);
+        var usuario = Usuario.Criar("Empresa", Email.Criar("e@b.com.br").Valor, Documento.Criar("12ABC34501DE35", TipoConta.PessoaJuridica).Valor, "hash", ContasDeTeste.Corrente(), 0m, Agora);
 
         Assert.Null(usuario.LancamentoDeAbertura);
     }

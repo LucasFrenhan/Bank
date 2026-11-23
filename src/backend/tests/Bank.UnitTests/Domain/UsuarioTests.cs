@@ -1,4 +1,5 @@
 using System.Reflection;
+using Bank.Domain.Bancos;
 using Bank.Domain.Usuarios;
 
 namespace Bank.UnitTests.Domain;
@@ -70,12 +71,36 @@ public class UsuarioTests
             m => m.Name.Contains("TipoConta", StringComparison.Ordinal) && !m.IsSpecialName);
     }
 
+    [Fact]
+    public void Criar_GravaOsDadosBancariosNaCarteira()
+    {
+        var conta = ContasDeTeste.Corrente(42);
+
+        var carteira = Usuario.Criar("Lucas", Email.Criar("lucas@exemplo.com.br").Valor, Documento.Criar("52998224725", TipoConta.PessoaFisica).Valor, "hash", conta, 10m, Agora).Carteira;
+
+        Assert.Equal("001", carteira.CodigoBanco);
+        Assert.Equal("0001", carteira.Agencia);
+        Assert.Equal("00000042", carteira.NumeroConta);
+        Assert.Equal("0", carteira.DigitoConta);
+        Assert.Equal(TipoContaBancaria.ContaCorrente, carteira.TipoContaBancaria);
+        Assert.Equal(conta, carteira.ContaBancaria);
+    }
+
+    [Fact]
+    public void Criar_ContaDeOutroBanco_Recusa()
+    {
+        var conta = ContaBancaria.Nova(Banco.Aurora, "0001", 1, TipoContaBancaria.ContaCorrente);
+
+        Assert.Throws<ArgumentException>(() => Usuario.Criar("Lucas", Email.Criar("lucas@exemplo.com.br").Valor, Documento.Criar("52998224725", TipoConta.PessoaFisica).Valor, "hash", conta, 10m, Agora));
+    }
+
     private static Usuario CriarUsuario(string nome, string documento, TipoConta tipo, decimal saldo) =>
         Usuario.Criar(
             nome,
             Email.Criar("Lucas@Exemplo.com.br").Valor,
             Documento.Criar(documento, tipo).Valor,
             "hash",
+            ContasDeTeste.Corrente(),
             saldo,
             Agora);
 }

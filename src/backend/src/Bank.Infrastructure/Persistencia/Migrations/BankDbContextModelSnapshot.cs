@@ -22,15 +22,147 @@ namespace Bank.Infrastructure.Persistencia.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("seq_numero_conta_one_bank")
+                .HasMax(99999999L);
+
+            modelBuilder.Entity("Bank.Domain.Bancos.Banco", b =>
+                {
+                    b.Property<string>("Codigo")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("codigo");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("nome");
+
+                    b.HasKey("Codigo")
+                        .HasName("pk_bancos");
+
+                    b.ToTable("bancos", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Codigo = "001",
+                            Nome = "One Bank"
+                        },
+                        new
+                        {
+                            Codigo = "002",
+                            Nome = "Banco Aurora"
+                        },
+                        new
+                        {
+                            Codigo = "003",
+                            Nome = "Banco Horizonte"
+                        },
+                        new
+                        {
+                            Codigo = "004",
+                            Nome = "Banco Atlântico"
+                        },
+                        new
+                        {
+                            Codigo = "005",
+                            Nome = "Banco Cerrado"
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Bancos.ContaExterna", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Agencia")
+                        .IsRequired()
+                        .HasColumnType("char(4)")
+                        .HasColumnName("agencia");
+
+                    b.Property<string>("CodigoBanco")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("codigo_banco");
+
+                    b.Property<DateTimeOffset>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<string>("DigitoConta")
+                        .IsRequired()
+                        .HasColumnType("char(1)")
+                        .HasColumnName("digito_conta");
+
+                    b.Property<string>("NumeroConta")
+                        .IsRequired()
+                        .HasColumnType("char(8)")
+                        .HasColumnName("numero_conta");
+
+                    b.Property<string>("TipoContaBancaria")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("tipo_conta_bancaria");
+
+                    b.Property<string>("TitularDocumento")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)")
+                        .HasColumnName("titular_documento");
+
+                    b.Property<string>("TitularNome")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("titular_nome");
+
+                    b.HasKey("Id")
+                        .HasName("pk_contas_externas");
+
+                    b.HasIndex("CodigoBanco", "Agencia", "NumeroConta")
+                        .IsUnique()
+                        .HasDatabaseName("ux_contas_externas_conta_bancaria");
+
+                    b.ToTable("contas_externas", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_contas_externas_codigo_banco", "codigo_banco <> '001'");
+
+                            t.HasCheckConstraint("ck_contas_externas_digito_conta", "digito_conta = calcular_digito_conta(agencia, numero_conta)");
+
+                            t.HasCheckConstraint("ck_contas_externas_formato_conta", "agencia ~ '^[0-9]{4}$' AND numero_conta ~ '^[0-9]{8}$' AND digito_conta ~ '^[0-9]$'");
+
+                            t.HasCheckConstraint("ck_contas_externas_tipo_conta_bancaria", "tipo_conta_bancaria IN ('conta_corrente', 'conta_poupanca')");
+
+                            t.HasCheckConstraint("ck_contas_externas_titular_documento", "titular_documento ~ '^([0-9]{11}|[0-9]{14})$'");
+                        });
+                });
+
             modelBuilder.Entity("Bank.Domain.Carteiras.Carteira", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Agencia")
+                        .IsRequired()
+                        .HasColumnType("char(4)")
+                        .HasColumnName("agencia");
+
                     b.Property<DateTimeOffset>("AtualizadoEm")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("atualizado_em");
+
+                    b.Property<string>("CodigoBanco")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("codigo_banco");
+
+                    b.Property<string>("DigitoConta")
+                        .IsRequired()
+                        .HasColumnType("char(1)")
+                        .HasColumnName("digito_conta");
 
                     b.Property<string>("Moeda")
                         .IsRequired()
@@ -39,9 +171,20 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasColumnName("moeda")
                         .HasDefaultValueSql("'BRL'");
 
+                    b.Property<string>("NumeroConta")
+                        .IsRequired()
+                        .HasColumnType("char(8)")
+                        .HasColumnName("numero_conta");
+
                     b.Property<decimal>("Saldo")
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("saldo");
+
+                    b.Property<string>("TipoContaBancaria")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("tipo_conta_bancaria");
 
                     b.Property<Guid>("UsuarioId")
                         .HasColumnType("uuid")
@@ -60,11 +203,23 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_carteiras_usuario_id");
 
+                    b.HasIndex("CodigoBanco", "Agencia", "NumeroConta")
+                        .IsUnique()
+                        .HasDatabaseName("ux_carteiras_conta_bancaria");
+
                     b.ToTable("carteiras", null, t =>
                         {
+                            t.HasCheckConstraint("ck_carteiras_codigo_banco", "codigo_banco = '001'");
+
+                            t.HasCheckConstraint("ck_carteiras_digito_conta", "digito_conta = calcular_digito_conta(agencia, numero_conta)");
+
+                            t.HasCheckConstraint("ck_carteiras_formato_conta", "agencia ~ '^[0-9]{4}$' AND numero_conta ~ '^[0-9]{8}$' AND digito_conta ~ '^[0-9]$'");
+
                             t.HasCheckConstraint("ck_carteiras_moeda", "moeda = 'BRL'");
 
                             t.HasCheckConstraint("ck_carteiras_saldo_nao_negativo", "saldo >= 0");
+
+                            t.HasCheckConstraint("ck_carteiras_tipo_conta_bancaria", "tipo_conta_bancaria IN ('conta_corrente', 'conta_poupanca')");
                         });
                 });
 
@@ -374,8 +529,25 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                     b.ToTable("eventos_processados", (string)null);
                 });
 
+            modelBuilder.Entity("Bank.Domain.Bancos.ContaExterna", b =>
+                {
+                    b.HasOne("Bank.Domain.Bancos.Banco", null)
+                        .WithMany()
+                        .HasForeignKey("CodigoBanco")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_contas_externas_bancos_codigo_banco");
+                });
+
             modelBuilder.Entity("Bank.Domain.Carteiras.Carteira", b =>
                 {
+                    b.HasOne("Bank.Domain.Bancos.Banco", null)
+                        .WithMany()
+                        .HasForeignKey("CodigoBanco")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_carteiras_bancos_codigo_banco");
+
                     b.HasOne("Bank.Domain.Usuarios.Usuario", null)
                         .WithOne("Carteira")
                         .HasForeignKey("Bank.Domain.Carteiras.Carteira", "UsuarioId")

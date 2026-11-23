@@ -94,5 +94,5 @@ public class TransferenciaTests
     }
 
     private static Carteira NovaCarteira(decimal saldo, string documento = "52998224725", TipoConta tipo = TipoConta.PessoaFisica) =>
-        Usuario.Criar("Titular", Email.Criar($"{Guid.NewGuid():N}@exemplo.com.br").Valor, Documento.Criar(documento, tipo).Valor, "hash", saldo, Agora).Carteira;
+        Usuario.Criar("Titular", Email.Criar($"{Guid.NewGuid():N}@exemplo.com.br").Valor, Documento.Criar(documento, tipo).Valor, "hash", ContasDeTeste.Corrente(), saldo, Agora).Carteira;
 }

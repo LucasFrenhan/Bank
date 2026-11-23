@@ -26,6 +26,7 @@ public class EmissorTokenJwtTests
             Email.Criar("lucas@exemplo.com.br").Valor,
             Documento.Criar("52998224725", TipoConta.PessoaFisica).Valor,
             "hash",
+            ContasDeTeste.Corrente(),
             10m,
             Agora);
 

@@ -83,7 +83,8 @@ public sealed class TelemetriaCompletaApiFactory : BankApiFactory
 }
 
 /// <summary>
-/// SC-006 / FR-025: senha, token, documento e e-mail nunca aparecem em logs ou traces; FR-027:
+/// SC-006 / FR-025: senha, token, documento, e-mail e número da conta (spec 012, FR-013) nunca
+/// aparecem em logs ou traces; FR-027:
 /// métricas de negócio publicadas com as tags corretas (research R9).
 /// </summary>
 public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory) : IClassFixture<TelemetriaCompletaApiFactory>
@@ -102,11 +103,13 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
 
         (await client.PostAsJsonAsync(ApiBank.Registrar, cadastro, Ct)).Dispose();
         (await client.PostAsJsonAsync(ApiBank.Login, new { email, senha = "Errada#2026xyz" }, Ct)).Dispose();
+        string numeroConta;
         var token = await ApiBank.ObterTokenAsync(client, email, senha);
         using (var requisicao = new HttpRequestMessage(HttpMethod.Get, ApiBank.MinhaCarteira))
         {
             requisicao.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            (await client.SendAsync(requisicao, Ct)).Dispose();
+            using var resposta = await client.SendAsync(requisicao, Ct);
+            numeroConta = (await ApiBank.LerJsonAsync(resposta)).GetProperty("contaBancaria").GetProperty("numero").GetString()!;
         }
 
         // specs/005-usuarios-me: a consulta dos dados do titular também não deixa rastro sensível.
@@ -121,7 +124,8 @@ public class DadosSensiveisTelemetriaTests(TelemetriaCompletaApiFactory factory)
 
         var textos = TextosExportados();
         Assert.NotEmpty(textos);
-        string[] sensiveis = [senha, "Errada#2026xyz", token, token.Split('.')[1], cnpj, Dados.CnpjComMascara(cnpj), email];
+        // specs/012-dados-bancarios-carteira (FR-013): o número da conta também não aparece.
+        string[] sensiveis = [senha, "Errada#2026xyz", token, token.Split('.')[1], cnpj, Dados.CnpjComMascara(cnpj), email, numeroConta];
         foreach (var sensivel in sensiveis)
         {
             Assert.DoesNotContain(textos, t => t.Contains(sensivel, StringComparison.OrdinalIgnoreCase));

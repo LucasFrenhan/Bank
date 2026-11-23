@@ -1,5 +1,6 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Carteiras;
+using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
 using Bank.Domain.Usuarios;
 
@@ -12,7 +13,7 @@ public class ObterMinhaCarteiraTests
     [Fact]
     public async Task Executar_UsuarioExistente_DevolveCarteiraComEscala2()
     {
-        var dados = new DadosCarteira(CarteiraId.De(Guid.CreateVersion7()), UsuarioId, "Lucas", TipoConta.PessoaFisica, 10m, "BRL", DateTimeOffset.UtcNow);
+        var dados = new DadosCarteira(CarteiraId.De(Guid.CreateVersion7()), UsuarioId, "Lucas", TipoConta.PessoaFisica, 10m, "BRL", DateTimeOffset.UtcNow, new DadosContaBancaria("001", "One Bank", "0001", "00000001", "6", TipoContaBancaria.ContaCorrente));
         var casoDeUso = new ObterMinhaCarteira(new ConsultasFalsas(dados));
 
         var resultado = await casoDeUso.ExecutarAsync(UsuarioId, CancellationToken.None);

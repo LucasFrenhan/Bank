@@ -1,3 +1,4 @@
+using Bank.Domain.Bancos;
 using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
 
@@ -23,8 +24,29 @@ public sealed class Carteira
 
     public DateTimeOffset AtualizadoEm { get; private set; }
 
-    internal static Carteira Criar(UsuarioId usuarioId, decimal saldoInicial, DateTimeOffset agora)
+    /// <summary>Código do banco; sempre 001 para carteiras (specs/012-dados-bancarios-carteira, FR-014).</summary>
+    public string CodigoBanco { get; private set; } = string.Empty;
+
+    public string Agencia { get; private set; } = string.Empty;
+
+    public string NumeroConta { get; private set; } = string.Empty;
+
+    public string DigitoConta { get; private set; } = string.Empty;
+
+    public TipoContaBancaria TipoContaBancaria { get; private set; }
+
+    /// <summary>Dados bancários da conta (não mudam depois da criação).</summary>
+    public ContaBancaria ContaBancaria =>
+        ContaBancaria.Reconstituir(CodigoBanco, Agencia, NumeroConta, DigitoConta, TipoContaBancaria);
+
+    internal static Carteira Criar(UsuarioId usuarioId, ContaBancaria conta, decimal saldoInicial, DateTimeOffset agora)
     {
+        ArgumentNullException.ThrowIfNull(conta);
+        if (conta.CodigoBanco != Banco.CodigoOneBank)
+        {
+            throw new ArgumentException($"Carteiras pertencem sempre ao banco {Banco.CodigoOneBank}.", nameof(conta));
+        }
+
         if (saldoInicial < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(saldoInicial), saldoInicial, "O saldo inicial não pode ser negativo.");
@@ -37,6 +59,11 @@ public sealed class Carteira
             Saldo = Dinheiro.NormalizarEscala(saldoInicial),
             Moeda = Dinheiro.MoedaPadrao,
             AtualizadoEm = agora,
+            CodigoBanco = conta.CodigoBanco,
+            Agencia = conta.Agencia,
+            NumeroConta = conta.Numero,
+            DigitoConta = conta.Digito,
+            TipoContaBancaria = conta.Tipo,
         };
     }
 
