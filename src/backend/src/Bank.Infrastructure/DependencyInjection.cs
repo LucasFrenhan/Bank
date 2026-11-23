@@ -50,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<ITransferenciaRepositorio, TransferenciaRepositorio>();
         services.AddScoped<IUnidadeDeTransferencia, UnidadeDeTransferencia>();
         services.AddScoped<IExtratoConsultas, ExtratoConsultas>();
+        services.AddScoped<INotificacoesAuditoria, NotificacoesAuditoriaRepositorio>(); // spec 011, R2
 
         return services;
     }

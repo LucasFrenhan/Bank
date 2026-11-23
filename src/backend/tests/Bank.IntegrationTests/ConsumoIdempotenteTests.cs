@@ -14,10 +14,14 @@ public class ConsumoIdempotenteTests(AmbienteMensageria ambiente) : IClassFixtur
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    internal static string Payload(Guid eventoId) => $$"""
+    /// <summary>
+    /// Payload v1 publicado à mão. Pagador e recebedor precisam existir em <c>usuarios</c>: as
+    /// notificações gravadas os referenciam por chave estrangeira (spec 011; <see cref="UsuariosDeTeste"/>).
+    /// </summary>
+    internal static string Payload(Guid eventoId, Guid pagadorUsuarioId, Guid recebedorUsuarioId) => $$"""
         {"eventoId":"{{eventoId}}","tipoEvento":"TransferenciaConcluida","versao":1,
-         "transferenciaId":"{{Guid.CreateVersion7()}}","pagadorUsuarioId":"{{Guid.CreateVersion7()}}","pagadorNome":"Pagador",
-         "recebedorUsuarioId":"{{Guid.CreateVersion7()}}","recebedorNome":"Recebedor","valor":1.00,"descricao":null,
+         "transferenciaId":"{{Guid.CreateVersion7()}}","pagadorUsuarioId":"{{pagadorUsuarioId}}","pagadorNome":"Pagador",
+         "recebedorUsuarioId":"{{recebedorUsuarioId}}","recebedorNome":"Recebedor","valor":1.00,"descricao":null,
          "ocorridoEm":"2026-11-21T12:00:00+00:00"}
         """;
 
@@ -27,7 +31,8 @@ public class ConsumoIdempotenteTests(AmbienteMensageria ambiente) : IClassFixtur
         var worker = ambiente.Worker;
         await worker.IniciarProntoAsync();
         var eventoId = Guid.CreateVersion7();
-        var corpo = Payload(eventoId);
+        var (pagador, recebedor) = await UsuariosDeTeste.CriarParAsync(ambiente.Api);
+        var corpo = Payload(eventoId, pagador, recebedor);
 
         var (conexao, canal) = await worker.AbrirCanalAsync(Ct);
         await using (conexao)
@@ -55,7 +60,8 @@ public class ConsumoIdempotenteTests(AmbienteMensageria ambiente) : IClassFixtur
         await AguardarProntoAsync(segundo);
 
         var eventoId = Guid.CreateVersion7();
-        var corpo = Payload(eventoId);
+        var (pagador, recebedor) = await UsuariosDeTeste.CriarParAsync(ambiente.Api);
+        var corpo = Payload(eventoId, pagador, recebedor);
         var duplicadosAntes = Medicoes(worker, "duplicado") + Medicoes(segundo, "duplicado");
 
         var (conexao, canal) = await worker.AbrirCanalAsync(Ct);

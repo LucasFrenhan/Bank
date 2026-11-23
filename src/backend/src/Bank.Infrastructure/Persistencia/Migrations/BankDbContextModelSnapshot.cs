@@ -68,6 +68,60 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bank.Domain.Notificacoes.NotificacaoAuditoria", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Canal")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("canal");
+
+                    b.Property<DateTimeOffset>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<Guid>("EventoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("evento_id");
+
+                    b.Property<string>("Mensagem")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("mensagem");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipo");
+
+                    b.Property<Guid>("UsuarioDestinoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_destino_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notificacoes_auditoria");
+
+                    b.HasIndex("UsuarioDestinoId")
+                        .HasDatabaseName("ix_notificacoes_auditoria_usuario_destino_id");
+
+                    b.HasIndex("EventoId", "Tipo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_notificacoes_auditoria_evento_tipo");
+
+                    b.ToTable("notificacoes_auditoria", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_notificacoes_auditoria_canal", "canal IN ('simulado')");
+
+                            t.HasCheckConstraint("ck_notificacoes_auditoria_tipo", "tipo IN ('comprovante_envio', 'aviso_credito')");
+                        });
+                });
+
             modelBuilder.Entity("Bank.Domain.Transferencias.Lancamento", b =>
                 {
                     b.Property<Guid>("Id")
@@ -328,6 +382,16 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_carteiras_usuarios");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Notificacoes.NotificacaoAuditoria", b =>
+                {
+                    b.HasOne("Bank.Domain.Usuarios.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioDestinoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_notificacoes_auditoria_usuarios_usuario_destino_id");
                 });
 
             modelBuilder.Entity("Bank.Domain.Transferencias.Lancamento", b =>

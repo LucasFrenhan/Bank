@@ -148,11 +148,12 @@ public class NovaTentativaEDlqTests(AmbienteNotificadorControlavel ambiente) : I
 
     private async Task PublicarAsync(Guid eventoId)
     {
+        var (pagador, recebedor) = await UsuariosDeTeste.CriarParAsync(ambiente.Api);
         var (conexao, canal) = await ambiente.Worker.AbrirCanalAsync(Ct);
         await using (conexao)
         await using (canal)
         {
-            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId), eventoId.ToString(), cancellationToken: Ct);
+            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId, pagador, recebedor), eventoId.ToString(), cancellationToken: Ct);
         }
     }
 
@@ -251,13 +252,14 @@ public class RedeDeSegurancaDlqTests(AmbienteSemFilasDeEspera ambiente) : IClass
 
         var eventoId = Guid.CreateVersion7();
         ambiente.Notificador.FalharSempre(eventoId);
+        var (pagador, recebedor) = await UsuariosDeTeste.CriarParAsync(ambiente.Api);
         var (conexao, canal) = await worker.AbrirCanalAsync(Ct);
         await using (conexao)
         await using (canal)
         {
             // Sem a fila de espera, a cópia volta sem rota (mandatory) e não é confirmada.
             await canal.QueueDeleteAsync("notificacoes.transferencias.espera.100", cancellationToken: Ct);
-            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId), eventoId.ToString(), cancellationToken: Ct);
+            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId, pagador, recebedor), eventoId.ToString(), cancellationToken: Ct);
         }
 
         BasicGetResult? naDlq = null;

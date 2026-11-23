@@ -48,15 +48,15 @@ histórias usam
 
 **⚠️ CRITICAL**: nenhuma história começa antes desta fase
 
-- [ ] T001 [P] Criar `back/src/Bank.Domain/Notificacoes/NotificacaoAuditoriaId.cs`:
+- [X] T001 [P] Criar `back/src/Bank.Domain/Notificacoes/NotificacaoAuditoriaId.cs`:
   `public readonly record struct NotificacaoAuditoriaId(Guid Valor) : IIdentificador<NotificacaoAuditoriaId>`
   com `De(Guid)`, `Novo(DateTimeOffset agora)` (`Guid.CreateVersion7(agora)`) e `ToString()`, no
   mesmo formato de `back/src/Bank.Domain/Usuarios/UsuarioId.cs`
-- [ ] T002 [P] Criar `back/src/Bank.Domain/Notificacoes/TipoNotificacao.cs`
+- [X] T002 [P] Criar `back/src/Bank.Domain/Notificacoes/TipoNotificacao.cs`
   (`enum TipoNotificacao { ComprovanteEnvio, AvisoCredito }`) e
   `back/src/Bank.Domain/Notificacoes/CanalNotificacao.cs` (`enum CanalNotificacao { Simulado }`),
   com comentário XML citando `specs/011-notificacoes-auditoria` (data-model)
-- [ ] T003 [P] Escrever `back/tests/Bank.UnitTests/Domain/NotificacaoAuditoriaTests.cs` (deve
+- [X] T003 [P] Escrever `back/tests/Bank.UnitTests/Domain/NotificacaoAuditoriaTests.cs` (deve
   falhar): `ComprovanteEnvio` com nome → `Tipo` `ComprovanteEnvio`, `UsuarioDestinoId` = pagador,
   `Canal` `Simulado`, `Mensagem` `"Você enviou R$ 150,00 para Maria Souza."`; `AvisoCredito` com
   nome → `"Você recebeu R$ 150,00 de João Silva."`; nome `null`, `""` ou `"   "` →
@@ -64,7 +64,7 @@ histórias usam
   `1234.5m` → `1.234,50`, `1234567.89m` → `1.234.567,89`; nome `"  Maria Souza  "` sem espaços
   nas extremidades no texto; `Id` não vazio e `CriadoEm` igual ao `agora` recebido; mesmo
   resultado com `CultureInfo.CurrentCulture` trocada (o formato não depende da cultura — R5)
-- [ ] T004 Criar `back/src/Bank.Domain/Notificacoes/NotificacaoAuditoria.cs` (research R1, R5):
+- [X] T004 Criar `back/src/Bank.Domain/Notificacoes/NotificacaoAuditoria.cs` (research R1, R5):
   propriedades só de leitura `Id`, `EventoId`, `UsuarioDestinoId` (`UsuarioId`), `Tipo`, `Canal`,
   `Mensagem`, `CriadoEm`; construtor privado sem parâmetros para o EF Core; fábricas
   `ComprovanteEnvio(EventoId eventoId, UsuarioId pagador, decimal valor, string? recebedorNome, DateTimeOffset agora)`
@@ -76,12 +76,12 @@ histórias usam
   `CultureInfo("pt-BR")` (`InvariantGlobalization=true`); constante pública
   `TamanhoMaximoMensagem = 500` e `TamanhoMaximoTipo`/`TamanhoMaximoCanal = 30`; sem métodos de
   alteração (FR-007). T003 passa
-- [ ] T005 [P] Criar `back/src/Bank.Application/Abstracoes/INotificacoesAuditoria.cs` (research R2):
+- [X] T005 [P] Criar `back/src/Bank.Application/Abstracoes/INotificacoesAuditoria.cs` (research R2):
   `Task<bool> ExistemParaEventoAsync(EventoId eventoId, CancellationToken cancellationToken)` e
   `Task AdicionarAsync(IReadOnlyCollection<NotificacaoAuditoria> notificacoes, CancellationToken cancellationToken)`;
   comentário XML: implementação grava no `DbContext` do escopo, dentro da transação do consumidor,
   sem transação própria
-- [ ] T006 Criar `back/src/Bank.Infrastructure/Persistencia/Configuracoes/NotificacaoAuditoriaConfiguracao.cs`
+- [X] T006 Criar `back/src/Bank.Infrastructure/Persistencia/Configuracoes/NotificacaoAuditoriaConfiguracao.cs`
   (data-model, research R7): tabela `notificacoes_auditoria`; PK `pk_notificacoes_auditoria (id)`;
   colunas `id` (uuid, `ValueGeneratedNever`), `evento_id` (uuid, obrigatório),
   `usuario_destino_id` (uuid, obrigatório), `tipo` (varchar(30), obrigatório, conversor enum ↔
@@ -93,27 +93,27 @@ histórias usam
   checks `ck_notificacoes_auditoria_tipo` (`tipo IN ('comprovante_envio', 'aviso_credito')`) e
   `ck_notificacoes_auditoria_canal` (`canal IN ('simulado')`); sem navegação na entidade de domínio
   (FK só por `HasOne<Usuario>().WithMany().HasForeignKey(n => n.UsuarioDestinoId)`)
-- [ ] T007 Em `back/src/Bank.Infrastructure/Persistencia/BankDbContext.cs`: `DbSet<NotificacaoAuditoria> NotificacoesAuditoria`
+- [X] T007 Em `back/src/Bank.Infrastructure/Persistencia/BankDbContext.cs`: `DbSet<NotificacaoAuditoria> NotificacoesAuditoria`
   e, em `ConfigureConventions`,
   `configurationBuilder.Properties<NotificacaoAuditoriaId>().HaveConversion<IdentificadorConverter<NotificacaoAuditoriaId>>()`
   (depende de T001, T004, T006)
-- [ ] T008 Gerar a migration `AdicionarNotificacoesAuditoria`
+- [X] T008 Gerar a migration `AdicionarNotificacoesAuditoria`
   (`dotnet ef migrations add AdicionarNotificacoesAuditoria --project src/Bank.Infrastructure --startup-project src/Bank.Api`)
   e conferir que só cria `notificacoes_auditoria` com a PK, o índice único, a FK `RESTRICT`, o
   índice da FK e os 2 checks; o snapshot muda só nessa tabela (depende de T007)
-- [ ] T009 Criar `back/src/Bank.Infrastructure/Persistencia/NotificacoesAuditoriaRepositorio.cs`
+- [X] T009 Criar `back/src/Bank.Infrastructure/Persistencia/NotificacoesAuditoriaRepositorio.cs`
   (`internal sealed`, implementa `INotificacoesAuditoria` com o `BankDbContext` injetado):
   `ExistemParaEventoAsync` = `AnyAsync(n => n.EventoId == eventoId)`; `AdicionarAsync` =
   `AddRange` + `SaveChangesAsync` (sem abrir transação: usa a do consumidor — R2); registrar como
   scoped em `AddPersistencia` de `back/src/Bank.Infrastructure/DependencyInjection.cs` (depende de
   T005, T007)
-- [ ] T010 Dados de teste com usuários reais (a FK `RESTRICT` rejeitaria os ids aleatórios do
+- [X] T010 Dados de teste com usuários reais (a FK `RESTRICT` rejeitaria os ids aleatórios do
   `Payload` da spec 010): em `it/ConsumoIdempotenteTests.cs`, trocar
   `Payload(Guid eventoId)` por `Payload(Guid eventoId, Guid pagadorUsuarioId, Guid recebedorUsuarioId)`
   e criar um auxiliar `it/UsuariosDeTeste.cs` com
-  `Task<(Guid Pagador, Guid Recebedor)> CriarParAsync(BankApiFactory api, CancellationToken ct)` que
-  insere dois usuários válidos (PF e PJ) direto no banco pelo `CriarContexto()` (usando as fábricas
-  do Domain, como os demais testes que preparam dados); atualizar os chamadores em
+  `Task<(Guid Pagador, Guid Recebedor)> CriarParAsync(BankApiFactory api)` que
+  cadastra uma PF e uma PJ pela API (`CriarPfAsync`/`CriarPjAsync`, com carteira, como
+  usuários reais); atualizar os chamadores em
   `it/ConsumoIdempotenteTests.cs`, `it/NovaTentativaEDlqTests.cs` e
   `it/RastreamentoMensageriaTests.cs`; rodar esses testes e confirmar que continuam passando antes
   de seguir (depende de T008)

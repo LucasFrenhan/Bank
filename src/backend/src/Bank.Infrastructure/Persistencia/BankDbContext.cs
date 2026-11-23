@@ -1,5 +1,6 @@
 using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
+using Bank.Domain.Notificacoes;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Mensageria;
@@ -25,6 +26,8 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
 
     public DbSet<EventoProcessado> EventosProcessados => Set<EventoProcessado>();
 
+    public DbSet<NotificacaoAuditoria> NotificacoesAuditoria => Set<NotificacaoAuditoria>();
+
     /// <summary>Identificadores tipados do Domain gravados como <c>uuid</c> (issue #43).</summary>
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -34,6 +37,7 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
         configurationBuilder.Properties<TransferenciaId>().HaveConversion<IdentificadorConverter<TransferenciaId>>();
         configurationBuilder.Properties<LancamentoId>().HaveConversion<IdentificadorConverter<LancamentoId>>();
         configurationBuilder.Properties<EventoId>().HaveConversion<IdentificadorConverter<EventoId>>();
+        configurationBuilder.Properties<NotificacaoAuditoriaId>().HaveConversion<IdentificadorConverter<NotificacaoAuditoriaId>>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
