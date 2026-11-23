@@ -93,6 +93,21 @@ public sealed class NotificarTransferenciaConcluidaTests : IDisposable
     }
 
     [Fact]
+    public async Task MesmoEventoDuasVezes_UmUnicoPar()
+    {
+        var notificacao = Notificacao();
+        var casoDeUso = CasoDeUso();
+
+        await casoDeUso.NotificarAsync(notificacao, TestContext.Current.CancellationToken);
+        await casoDeUso.NotificarAsync(notificacao, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, _notificacoes.Gravadas.Count);
+        Assert.Equal(1, _notificacoes.ChamadasAdicionar);
+        Assert.Equal(2, _logger.Registros.Count(r => r.Nivel == Microsoft.Extensions.Logging.LogLevel.Information));
+        Assert.Equal(2, _metricas.Medicoes.Count(m => m.Nome == "bank.notificacoes.enviadas"));
+    }
+
+    [Fact]
     public async Task Notificar_LogsSemNomesNemTexto()
     {
         await CasoDeUso().NotificarAsync(Notificacao(), TestContext.Current.CancellationToken);

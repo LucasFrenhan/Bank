@@ -1,5 +1,7 @@
 using System.Net;
 using Bank.Domain.Comum;
+using Bank.Domain.Notificacoes;
+using Bank.Domain.Usuarios;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 using static Bank.IntegrationTests.ApiTransferencias;
@@ -46,6 +48,42 @@ public class ConsumoIdempotenteTests(AmbienteMensageria ambiente) : IClassFixtur
         Assert.True(await BankWorkerFactory.AguardarAsync(() => Medicoes(worker, "duplicado") >= 1));
         Assert.Equal(1, await ContarProcessadosAsync(eventoId));
         Assert.Equal(2, ContarNotificacoes(worker, eventoId));
+        await AssertUmParGravadoAsync(eventoId);
+        await AssertFilaVaziaAsync();
+    }
+
+    /// <summary>
+    /// Defeito simulado na 1ª camada (spec 011, research R3): o par já está gravado, mas o evento
+    /// não está em <c>eventos_processados</c>. O caso de uso não grava de novo.
+    /// </summary>
+    [Fact]
+    public async Task NotificacoesJaGravadas_SemEventoProcessado_NaoDuplica()
+    {
+        var worker = ambiente.Worker;
+        await worker.IniciarProntoAsync();
+        var eventoId = Guid.CreateVersion7();
+        var (pagador, recebedor) = await UsuariosDeTeste.CriarParAsync(ambiente.Api);
+        await using (var contexto = ambiente.Api.CriarContexto())
+        {
+            var agora = DateTimeOffset.UtcNow;
+            contexto.NotificacoesAuditoria.AddRange(
+                NotificacaoAuditoria.ComprovanteEnvio(EventoId.De(eventoId), UsuarioId.De(pagador), 1m, "Recebedor", agora),
+                NotificacaoAuditoria.AvisoCredito(EventoId.De(eventoId), UsuarioId.De(recebedor), 1m, "Pagador", agora));
+            await contexto.SaveChangesAsync(Ct);
+        }
+
+        var sucessosAntes = Medicoes(worker, "sucesso");
+        var (conexao, canal) = await worker.AbrirCanalAsync(Ct);
+        await using (conexao)
+        await using (canal)
+        {
+            await BankWorkerFactory.PublicarAsync(canal, Payload(eventoId, pagador, recebedor), eventoId.ToString(), cancellationToken: Ct);
+        }
+
+        Assert.True(await BankWorkerFactory.AguardarAsync(async () => await ContarProcessadosAsync(eventoId) == 1),
+            "O evento deveria ser processado sem nova tentativa nem DLQ.");
+        Assert.True(await BankWorkerFactory.AguardarAsync(() => Medicoes(worker, "sucesso") - sucessosAntes >= 1));
+        await AssertUmParGravadoAsync(eventoId);
         await AssertFilaVaziaAsync();
     }
 
@@ -75,6 +113,7 @@ public class ConsumoIdempotenteTests(AmbienteMensageria ambiente) : IClassFixtur
             Medicoes(worker, "duplicado") + Medicoes(segundo, "duplicado") - duplicadosAntes == 4));
         Assert.Equal(1, await ContarProcessadosAsync(eventoId));
         Assert.Equal(2, ContarNotificacoes(worker, eventoId) + ContarNotificacoes(segundo, eventoId));
+        await AssertUmParGravadoAsync(eventoId);
         await AssertFilaVaziaAsync();
     }
 
@@ -138,6 +177,17 @@ public class ConsumoIdempotenteTests(AmbienteMensageria ambiente) : IClassFixtur
     {
         await using var contexto = ambiente.Api.CriarContexto();
         return await contexto.EventosProcessados.CountAsync(e => e.EventoId == EventoId.De(eventoId), Ct);
+    }
+
+    /// <summary>Exatamente 2 notificações persistidas, uma de cada tipo (spec 011, FR-006; SC-003).</summary>
+    private async Task AssertUmParGravadoAsync(Guid eventoId)
+    {
+        await using var contexto = ambiente.Api.CriarContexto();
+        var tipos = await contexto.NotificacoesAuditoria
+            .Where(n => n.EventoId == EventoId.De(eventoId))
+            .Select(n => n.Tipo)
+            .ToListAsync(Ct);
+        Assert.Equal([TipoNotificacao.ComprovanteEnvio, TipoNotificacao.AvisoCredito], tipos.Order());
     }
 
     private async Task AssertFilaVaziaAsync()

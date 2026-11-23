@@ -26,6 +26,13 @@ public sealed partial class NotificarTransferenciaConcluida(
     {
         ArgumentNullException.ThrowIfNull(notificacao);
 
+        // 2ª camada de idempotência (research R3): a 1ª é eventos_processados, no consumidor.
+        if (await notificacoes.ExistemParaEventoAsync(notificacao.EventoId, cancellationToken))
+        {
+            LogJaRegistradas(logger, notificacao.EventoId.Valor);
+            return;
+        }
+
         var agora = relogio.GetUtcNow();
         var comprovante = NotificacaoAuditoria.ComprovanteEnvio(
             notificacao.EventoId, notificacao.PagadorUsuarioId, notificacao.Valor, notificacao.RecebedorNome, agora);
@@ -45,4 +52,8 @@ public sealed partial class NotificarTransferenciaConcluida(
     [LoggerMessage(EventId = 5100, EventName = "NotificacaoTransferencia", Level = LogLevel.Information,
         Message = "Notificação de transferência para o {Papel} {UsuarioId}: evento {EventoId}, transferência {TransferenciaId}, valor {Valor}")]
     private static partial void LogNotificacao(ILogger logger, string papel, Guid usuarioId, Guid eventoId, Guid transferenciaId, decimal valor);
+
+    [LoggerMessage(EventId = 5101, EventName = "NotificacoesJaRegistradas", Level = LogLevel.Debug,
+        Message = "Notificações do evento {EventoId} já registradas; nada a gravar")]
+    private static partial void LogJaRegistradas(ILogger logger, Guid eventoId);
 }

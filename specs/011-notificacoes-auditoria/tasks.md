@@ -184,17 +184,17 @@ notificações por evento (FR-006)
 
 ### Testes da US2 (escrever primeiro)
 
-- [ ] T018 [P] [US2] Em `back/tests/Bank.UnitTests/Application/NotificarTransferenciaConcluidaTests.cs`:
+- [X] T018 [P] [US2] Em `back/tests/Bank.UnitTests/Application/NotificarTransferenciaConcluidaTests.cs`:
   o mesmo `NotificacaoTransferencia` processado 2 vezes pelo caso de uso → o repositório em memória
   tem 1 único par; a 2ª chamada não chama `AdicionarAsync`, não emite log 5100 nem métrica (R3;
   FR-012)
-- [ ] T019 [P] [US2] Em `it/ConsumoIdempotenteTests.cs`: em `MesmaMensagemDuasVezes_UmaNotificacao` e
+- [X] T019 [P] [US2] Em `it/ConsumoIdempotenteTests.cs`: em `MesmaMensagemDuasVezes_UmaNotificacao` e
   `CopiasSimultaneasEmDoisWorkers_UmaNotificacao`, além da contagem de logs, verificar
   exatamente 2 linhas em `notificacoes_auditoria` para o `eventoId` (uma de cada tipo); novo teste
   `NotificacoesJaGravadas_SemEventoProcessado_NaoDuplica`: inserir à mão o par de notificações do
   evento (sem linha em `eventos_processados`, simulando um defeito na 1ª camada), publicar a
   mensagem e verificar que continuam 2 linhas e que a mensagem foi confirmada como `sucesso`
-- [ ] T020 [P] [US2] Novo `it/NotificacoesAuditoriaTests.cs`, classe
+- [X] T020 [P] [US2] Novo `it/NotificacoesAuditoriaTests.cs`, classe
   `NotificacoesAuditoriaIntegridadeTests` (`IClassFixture<BankApiFactory>`, só banco; a classe de
   falhas da T022 fica no mesmo arquivo, com outro ambiente):
   - `IndiceUnico_RejeitaSegundaNotificacaoDoMesmoTipo`: inserir pelo contexto uma
@@ -206,7 +206,7 @@ notificações por evento (FR-006)
 
 ### Implementação da US2
 
-- [ ] T021 [US2] Em `back/src/Bank.Application/Notificacoes/NotificarTransferenciaConcluida.cs`: no
+- [X] T021 [US2] Em `back/src/Bank.Application/Notificacoes/NotificarTransferenciaConcluida.cs`: no
   início, `if (await notificacoes.ExistemParaEventoAsync(eventoId))` → log `Debug`
   (`EventId` 5101, `"Notificações do evento {EventoId} já registradas; nada a gravar"`) e retorno,
   sem métrica (T018 e T019 passam)
