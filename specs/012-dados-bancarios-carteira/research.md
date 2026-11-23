@@ -129,7 +129,8 @@
   `scripts/sql/dados-bancarios/`:
   - `registrar-contas-outros-bancos.sql`: insere contas fixas (duas por banco 002–005, uma
     corrente e uma poupança), com titulares fictícios, `id = uuidv7()` (PostgreSQL 18) e dígito
-    pela function; `ON CONFLICT ON CONSTRAINT ux_contas_externas_conta_bancaria DO NOTHING`.
+    pela function; `ON CONFLICT (codigo_banco, agencia, numero_conta) DO NOTHING` (índice único
+    `ux_contas_externas_conta_bancaria`).
   - `criar-conta-poupanca.sql`: cria, se o e-mail ainda não existir, um usuário PF de
     demonstração (e-mail, CPF e nome fixos, hash de senha V3 do Identity pré-calculado para a
     senha documentada no quickstart) com carteira no banco 001, agência 0001, número da

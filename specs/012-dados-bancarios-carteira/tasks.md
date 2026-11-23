@@ -255,7 +255,7 @@ conta poupança
 
 ### Testes da US4 (escrever primeiro)
 
-- [ ] T028 [US4] Criar `it/ScriptsDadosBancariosTests.cs` (`IClassFixture<BankApiFactory>`): lê
+- [X] T028 [US4] Criar `it/ScriptsDadosBancariosTests.cs` (`IClassFixture<BankApiFactory>`): lê
   os arquivos de `scripts/sql/dados-bancarios/` a partir da raiz do repositório (subindo
   diretórios até achar `CONSTITUTION.md`) e executa cada um duas vezes com `NpgsqlCommand`;
   conferir: `contas_externas` com contas em cada banco 002–005, ambos os tipos, dígitos válidos,
@@ -269,19 +269,19 @@ conta poupança
 
 ### Implementação da US4
 
-- [ ] T029 [P] [US4] Criar `scripts/sql/dados-bancarios/registrar-contas-outros-bancos.sql`
+- [X] T029 [P] [US4] Criar `scripts/sql/dados-bancarios/registrar-contas-outros-bancos.sql`
   (cabeçalho: spec 012, como executar, que é reexecutável): dentro de `BEGIN/COMMIT`, insere
   duas contas por banco 002–005 (uma `conta_corrente`, uma `conta_poupanca`), agência e número
   fixos, dígito por `calcular_digito_conta`, titulares e documentos fictícios (CPF/CNPJ válidos),
-  `id = uuidv7()`, `criado_em = now()`; `ON CONFLICT ON CONSTRAINT
-  ux_contas_externas_conta_bancaria DO NOTHING`
-- [ ] T030 [P] [US4] Criar `scripts/sql/dados-bancarios/criar-conta-poupanca.sql` (cabeçalho:
+  `id = uuidv7()`, `criado_em = now()`; `ON CONFLICT (codigo_banco, agencia,
+  numero_conta) DO NOTHING` (índice único `ux_contas_externas_conta_bancaria`)
+- [X] T030 [P] [US4] Criar `scripts/sql/dados-bancarios/criar-conta-poupanca.sql` (cabeçalho:
   spec 012, e-mail e senha de demonstração, reexecutável): dentro de `BEGIN/COMMIT`, se o e-mail
   não existir, insere o usuário PF (nome, e-mail, CPF válido fixo, `tipo_conta = 'PessoaFisica'` (valor gravado por
   `UsuarioConfiguracao`, `HasConversion<string>`), `senha_hash` V3 do Identity pré-calculado para a senha documentada — gerar com
   `HasherSenhaIdentity` uma vez) e a carteira com `id = uuidv7()`, saldo 0, banco 001, agência
   0001, número `nextval`, dígito pela function e `conta_poupanca` (FR-010)
-- [ ] T031 [US4] Rodar T028 até ficar verde
+- [X] T031 [US4] Rodar T028 até ficar verde
 
 **Checkpoint**: contas de outros bancos e poupança disponíveis por script
 
