@@ -133,17 +133,17 @@ esperados (quickstart, cenário 2)
 
 ### Testes da US1 (escrever primeiro)
 
-- [ ] T011 [P] [US1] Em `back/tests/Bank.UnitTests/Infrastructure/LeitorTransferenciaConcluidaTests.cs`:
+- [X] T011 [P] [US1] Em `back/tests/Bank.UnitTests/Infrastructure/LeitorTransferenciaConcluidaTests.cs`:
   payload com `pagadorNome`/`recebedorNome` → `NotificacaoTransferencia` com os nomes; ausentes,
   `null`, `""` ou `"   "` → `null`, e a leitura continua válida (eventos antigos; R4)
-- [ ] T012 [P] [US1] Em `back/tests/Bank.UnitTests/Application/NotificarTransferenciaConcluidaTests.cs`,
+- [X] T012 [P] [US1] Em `back/tests/Bank.UnitTests/Application/NotificarTransferenciaConcluidaTests.cs`,
   com um `INotificacoesAuditoria` em memória (lista + `ExistemParaEventoAsync` por `EventoId`) e
   `RelogioFixo` (de `back/tests/Bank.UnitTests/Application/Dubles.cs`): o caso de uso grava exatamente 2 notificações — `ComprovanteEnvio` para
   `PagadorUsuarioId` com o nome do recebedor no texto e `AvisoCredito` para `RecebedorUsuarioId`
   com o nome do pagador —, ambas com `EventoId` da notificação e `CriadoEm` = relógio; sem nomes →
   textos sem nome; o teste atual de log e métrica continua valendo (2 logs, sem nome nem texto nas
   propriedades; métrica por papel)
-- [ ] T013 [P] [US1] Em `it/PublicacaoOutboxTests.cs`, no teste `Transferencia_EPublicadaENotificadaUmaVez`:
+- [X] T013 [P] [US1] Em `it/PublicacaoOutboxTests.cs`, no teste `Transferencia_EPublicadaENotificadaUmaVez`:
   depois do processamento, ler `NotificacoesAuditoria` do `eventoId` pelo `CriarContexto()` e
   verificar 2 linhas — `comprovante_envio` para o pagador e `aviso_credito` para o recebedor —,
   canal `simulado`, textos `"Você enviou R$ {valor} para {nome do recebedor}."` /
@@ -153,20 +153,20 @@ esperados (quickstart, cenário 2)
 
 ### Implementação da US1
 
-- [ ] T014 [US1] Em `back/src/Bank.Application/Abstracoes/INotificadorTransferencia.cs`: acrescentar a
+- [X] T014 [US1] Em `back/src/Bank.Application/Abstracoes/INotificadorTransferencia.cs`: acrescentar a
   `NotificacaoTransferencia` os parâmetros finais `string? PagadorNome = null` e
   `string? RecebedorNome = null`; atualizar o comentário XML (os nomes entram para o texto
   persistido da notificação — spec 011 —, mas continuam fora de logs; FR-010)
-- [ ] T015 [US1] Em `back/src/Bank.Infrastructure/Mensageria/LeitorTransferenciaConcluida.cs`: ler
+- [X] T015 [US1] Em `back/src/Bank.Infrastructure/Mensageria/LeitorTransferenciaConcluida.cs`: ler
   `pagadorNome` e `recebedorNome` no `ConteudoLido` (opcionais; em branco → `null`) e passá-los ao
   `NotificacaoTransferencia`; não exigir os campos (T011 passa)
-- [ ] T016 [US1] Em `back/src/Bank.Application/Notificacoes/NotificarTransferenciaConcluida.cs`
+- [X] T016 [US1] Em `back/src/Bank.Application/Notificacoes/NotificarTransferenciaConcluida.cs`
   (research R3, R6): injetar `INotificacoesAuditoria` e `TimeProvider`; criar
   `NotificacaoAuditoria.ComprovanteEnvio(...)` e `NotificacaoAuditoria.AvisoCredito(...)` com
   `agora = relogio.GetUtcNow()`; `await AdicionarAsync([comprovante, aviso])`; só depois manter os
   2 logs `EventId` 5100 e `metricas.RegistrarEnviada(papel)` (sem nomes nem texto); atualizar o
   comentário da classe citando a spec 011 (T012 passa)
-- [ ] T017 [US1] Conferir que `back/src/Bank.Application/DependencyInjection.cs` (`AddNotificacoes`) e o
+- [X] T017 [US1] Conferir que `back/src/Bank.Application/DependencyInjection.cs` (`AddNotificacoes`) e o
   `Bank.Worker` resolvem as novas dependências (`INotificacoesAuditoria` vem de `AddPersistencia`,
   `TimeProvider` já registrado); rodar `Worker_EmDevelopment_ResolveTodasAsDependencias` e T013
 
