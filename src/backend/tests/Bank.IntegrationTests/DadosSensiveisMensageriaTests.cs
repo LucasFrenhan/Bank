@@ -1,4 +1,6 @@
 using System.Net;
+using Bank.Domain.Usuarios;
+using Microsoft.EntityFrameworkCore;
 using static Bank.IntegrationTests.ApiTransferencias;
 
 namespace Bank.IntegrationTests;
@@ -6,7 +8,8 @@ namespace Bank.IntegrationTests;
 /// <summary>
 /// Nomes, descrição, documentos, e-mails, payload e credenciais do broker nunca aparecem em logs,
 /// spans ou métricas da mensageria, e as tags de métrica não têm identificadores
-/// (specs/010-mensageria-rabbitmq, FR-023; constituição, Princípio VI).
+/// (specs/010-mensageria-rabbitmq, FR-023; constituição, Princípio VI). O texto das notificações
+/// persistidas, que leva os nomes, também fica fora da telemetria (specs/011-notificacoes-auditoria, FR-010).
 /// </summary>
 public class DadosSensiveisMensageriaTests(AmbienteMensageria ambiente) : IClassFixture<AmbienteMensageria>
 {
@@ -61,6 +64,22 @@ public class DadosSensiveisMensageriaTests(AmbienteMensageria ambiente) : IClass
             .Concat(worker.Medicoes.SelectMany(m => m.Tags.Select(t => $"{m.Nome} {t.Key}={t.Value}")))
             .ToList();
         Assert.NotEmpty(textos);
+
+        // Spec 011 (FR-010): os nomes entram só no texto persistido, nunca na telemetria.
+        // O log da notificação sai antes do commit do consumidor: aguarda a linha ficar visível.
+        List<string> mensagens = [];
+        Assert.True(await BankWorkerFactory.AguardarAsync(async () =>
+        {
+            await using var contexto = ambiente.Api.CriarContexto();
+            mensagens = await contexto.NotificacoesAuditoria
+                .Where(n => n.UsuarioDestinoId == UsuarioId.De(pagador.UsuarioId))
+                .Select(n => n.Mensagem)
+                .ToListAsync(Ct);
+            return mensagens.Count == 1;
+        }));
+
+        Assert.Equal($"Você enviou R$ 1,00 para {nomeRecebedor}.", mensagens[0]);
+        Assert.DoesNotContain(textos, t => t.Contains("Você enviou", StringComparison.Ordinal) || t.Contains("Você recebeu", StringComparison.Ordinal));
         foreach (var sensivel in sensiveis)
         {
             Assert.DoesNotContain(textos, t => t.Contains(sensivel, StringComparison.OrdinalIgnoreCase));

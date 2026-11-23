@@ -85,12 +85,13 @@ public class RastreamentoMensageriaTests(AmbienteMensageria ambiente) : IClassFi
         var worker = ambiente.Worker;
         await worker.IniciarProntoAsync();
         var eventoId = Guid.CreateVersion7();
+        var (pagador, recebedor) = await UsuariosDeTeste.CriarParAsync(ambiente.Api);
 
         var (conexao, canal) = await worker.AbrirCanalAsync(Ct);
         await using (conexao)
         await using (canal)
         {
-            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId), eventoId.ToString(), cancellationToken: Ct);
+            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId, pagador, recebedor), eventoId.ToString(), cancellationToken: Ct);
         }
 
         Assert.True(await BankWorkerFactory.AguardarAsync(() => SpansMensageria.DoEvento(worker, SpansMensageria.Consumer, eventoId.ToString()) is not null));

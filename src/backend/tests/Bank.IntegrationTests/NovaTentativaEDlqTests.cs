@@ -67,9 +67,11 @@ public class NovaTentativaEDlqTests(AmbienteNotificadorControlavel ambiente) : I
         var rapida = Guid.CreateVersion7();
         ambiente.Notificador.Falhar(lenta, 2);
         var novasTentativasAntes = Contar(worker, "nova_tentativa");
+        // Usuários criados antes: as duas publicações precisam sair seguidas, dentro da 1ª espera (100 ms).
+        var usuarios = await UsuariosDeTeste.CriarParAsync(ambiente.Api);
 
-        await PublicarAsync(lenta);
-        await PublicarAsync(rapida);
+        await PublicarAsync(lenta, usuarios);
+        await PublicarAsync(rapida, usuarios);
 
         Assert.True(await BankWorkerFactory.AguardarAsync(async () => await ProcessadoEmAsync(lenta) is not null));
         var (emLenta, emRapida) = (await ProcessadoEmAsync(lenta), await ProcessadoEmAsync(rapida));
@@ -146,13 +148,14 @@ public class NovaTentativaEDlqTests(AmbienteNotificadorControlavel ambiente) : I
     private static bool TemFalhaDlq(BankWorkerFactory worker, string motivo) =>
         worker.Medicoes.Any(m => m.Nome == "banco.eventos.processados" && m.Tags["status"] == "falha_dlq" && m.Tags.GetValueOrDefault("motivo") == motivo);
 
-    private async Task PublicarAsync(Guid eventoId)
+    private async Task PublicarAsync(Guid eventoId, (Guid Pagador, Guid Recebedor)? usuarios = null)
     {
+        var (pagador, recebedor) = usuarios ?? await UsuariosDeTeste.CriarParAsync(ambiente.Api);
         var (conexao, canal) = await ambiente.Worker.AbrirCanalAsync(Ct);
         await using (conexao)
         await using (canal)
         {
-            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId), eventoId.ToString(), cancellationToken: Ct);
+            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId, pagador, recebedor), eventoId.ToString(), cancellationToken: Ct);
         }
     }
 
@@ -251,13 +254,14 @@ public class RedeDeSegurancaDlqTests(AmbienteSemFilasDeEspera ambiente) : IClass
 
         var eventoId = Guid.CreateVersion7();
         ambiente.Notificador.FalharSempre(eventoId);
+        var (pagador, recebedor) = await UsuariosDeTeste.CriarParAsync(ambiente.Api);
         var (conexao, canal) = await worker.AbrirCanalAsync(Ct);
         await using (conexao)
         await using (canal)
         {
             // Sem a fila de espera, a cópia volta sem rota (mandatory) e não é confirmada.
             await canal.QueueDeleteAsync("notificacoes.transferencias.espera.100", cancellationToken: Ct);
-            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId), eventoId.ToString(), cancellationToken: Ct);
+            await BankWorkerFactory.PublicarAsync(canal, ConsumoIdempotenteTests.Payload(eventoId, pagador, recebedor), eventoId.ToString(), cancellationToken: Ct);
         }
 
         BasicGetResult? naDlq = null;

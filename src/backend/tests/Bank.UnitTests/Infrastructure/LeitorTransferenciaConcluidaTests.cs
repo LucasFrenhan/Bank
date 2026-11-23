@@ -53,6 +53,39 @@ public class LeitorTransferenciaConcluidaTests
     }
 
     [Fact]
+    public void Completo_LeOsNomes()
+    {
+        var n = Ler(Completo()).Conteudo!;
+
+        Assert.Equal(("Lucas Silva", "Cafeteria"), (n.PagadorNome, n.RecebedorNome));
+    }
+
+    [Fact]
+    public void Antigo_SemNomes_NomesNulos()
+    {
+        var leitura = Ler(Antigo);
+
+        Assert.True(leitura.Valida);
+        Assert.Equal((null, null), (leitura.Conteudo!.PagadorNome, leitura.Conteudo.RecebedorNome));
+    }
+
+    [Theory]
+    [InlineData("null")]
+    [InlineData("\"\"")]
+    [InlineData("\"   \"")]
+    public void NomeNuloOuEmBranco_Nulo_EMensagemValida(string nomeJson)
+    {
+        var corpo = Completo()
+            .Replace("\"Lucas Silva\"", nomeJson, StringComparison.Ordinal)
+            .Replace("\"Cafeteria\"", nomeJson, StringComparison.Ordinal);
+
+        var leitura = Ler(corpo);
+
+        Assert.True(leitura.Valida);
+        Assert.Equal((null, null), (leitura.Conteudo!.PagadorNome, leitura.Conteudo.RecebedorNome));
+    }
+
+    [Fact]
     public void CampoDesconhecido_Ignorado()
     {
         Assert.True(Ler(Completo().Replace("\"valor\"", "\"campoNovo\":42,\"valor\"", StringComparison.Ordinal)).Valida);

@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Net;
 using Bank.Domain.Comum;
+using Bank.Domain.Notificacoes;
+using Bank.Domain.Usuarios;
 using Microsoft.EntityFrameworkCore;
 using static Bank.IntegrationTests.ApiTransferencias;
 
@@ -15,7 +17,7 @@ public class PublicacaoOutboxTests(AmbienteMensageria ambiente) : IClassFixture<
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     [Fact]
-    public async Task Transferencia_EPublicadaENotificadaUmaVez()
+    public async Task Transferencia_EPublicadaENotificadaUmaVez_ComDuasNotificacoesRegistradas()
     {
         ambiente.Worker.Iniciar();
         using var client = ambiente.Api.CreateClient();
@@ -48,6 +50,30 @@ public class PublicacaoOutboxTests(AmbienteMensageria ambiente) : IClassFixture<
             worker.TextosDosLogs().Count(t => t.Contains($"EventoId={eventoId}", StringComparison.Ordinal) && t.Contains("Notificação de transferência", StringComparison.Ordinal)) == 2));
         Assert.Equal(1, worker.Medicoes.Count(m => m.Nome == "banco.eventos.processados" && m.Tags["status"] == "sucesso" && m.Tags["tipo_evento"] == "transferencia.concluida"));
         Assert.True(worker.Somar("banco.eventos.publicados", "tipo_evento", "transferencia.concluida") >= 1);
+
+        // Spec 011 (US1, FR-001–FR-004): comprovante para o pagador e aviso de crédito para o recebedor.
+        await using (var contexto = ambiente.Api.CriarContexto())
+        {
+            var evento = EventoId.De(eventoId);
+            var notificacoes = await contexto.NotificacoesAuditoria.Where(n => n.EventoId == evento).ToListAsync(Ct);
+            var nomePf = await contexto.Usuarios.Where(u => u.Id == UsuarioId.De(pf.UsuarioId)).Select(u => u.NomeCompleto).SingleAsync(Ct);
+            var nomePj = await contexto.Usuarios.Where(u => u.Id == UsuarioId.De(pj.UsuarioId)).Select(u => u.NomeCompleto).SingleAsync(Ct);
+            var ocorridoEm = await contexto.EventosOutbox.Where(e => e.Id == evento).Select(e => e.OcorridoEm).SingleAsync(Ct);
+
+            Assert.Equal(2, notificacoes.Count);
+            var comprovante = Assert.Single(notificacoes, n => n.Tipo == TipoNotificacao.ComprovanteEnvio);
+            var aviso = Assert.Single(notificacoes, n => n.Tipo == TipoNotificacao.AvisoCredito);
+            Assert.Equal(UsuarioId.De(pf.UsuarioId), comprovante.UsuarioDestinoId);
+            Assert.Equal(UsuarioId.De(pj.UsuarioId), aviso.UsuarioDestinoId);
+            Assert.Equal($"Você enviou R$ 1,00 para {nomePj}.", comprovante.Mensagem);
+            Assert.Equal($"Você recebeu R$ 1,00 de {nomePf}.", aviso.Mensagem);
+            Assert.All(notificacoes, n =>
+            {
+                Assert.Equal(CanalNotificacao.Simulado, n.Canal);
+                Assert.True(n.CriadoEm >= ocorridoEm, "A notificação não pode ser anterior ao evento.");
+                Assert.DoesNotContain("Café", n.Mensagem, StringComparison.Ordinal); // FR-004: sem descrição
+            });
+        }
     }
 
     [Fact]

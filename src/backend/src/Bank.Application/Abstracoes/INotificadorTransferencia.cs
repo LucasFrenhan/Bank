@@ -5,9 +5,10 @@ using Bank.Domain.Usuarios;
 namespace Bank.Application.Abstracoes;
 
 /// <summary>
-/// O que uma notificação de transferência precisa (specs/010-mensageria-rabbitmq, data-model).
-/// Nomes e descrição chegam no evento, mas não entram aqui: a notificação simulada é um log, e
-/// logs não levam nome nem descrição (FR-023).
+/// O que uma notificação de transferência precisa (specs/010-mensageria-rabbitmq, data-model;
+/// specs/011-notificacoes-auditoria, research R4). Os nomes, opcionais (eventos antigos não os
+/// têm), entram só no texto persistido da notificação; continuam fora de logs, spans e métricas
+/// (spec 011, FR-010). A descrição da transferência não entra (spec 011, FR-004).
 /// </summary>
 public sealed record NotificacaoTransferencia(
     EventoId EventoId,
@@ -15,7 +16,9 @@ public sealed record NotificacaoTransferencia(
     UsuarioId PagadorUsuarioId,
     UsuarioId RecebedorUsuarioId,
     decimal Valor,
-    DateTimeOffset OcorridoEm);
+    DateTimeOffset OcorridoEm,
+    string? PagadorNome = null,
+    string? RecebedorNome = null);
 
 /// <summary>
 /// Efeito do consumo de <c>transferencia.concluida</c> (research R8). Implementado pelo caso de uso

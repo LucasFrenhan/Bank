@@ -78,9 +78,14 @@ internal static class LeitorTransferenciaConcluida
                 UsuarioId.De(lido.PagadorUsuarioId!.Value),
                 UsuarioId.De(lido.RecebedorUsuarioId!.Value),
                 lido.Valor!.Value,
-                lido.OcorridoEm!.Value),
+                lido.OcorridoEm!.Value,
+                NomeOuNulo(lido.PagadorNome),
+                NomeOuNulo(lido.RecebedorNome)),
             lido.EventoId.Value);
     }
+
+    /// <summary>Nomes são opcionais (eventos antigos não os têm); em branco equivale a ausente (spec 011, R4).</summary>
+    private static string? NomeOuNulo(string? nome) => string.IsNullOrWhiteSpace(nome) ? null : nome;
 
     private static void Exigir<T>(T? valor, string campo, List<string> ausentes)
         where T : struct
@@ -99,5 +104,7 @@ internal static class LeitorTransferenciaConcluida
         Guid? PagadorUsuarioId,
         Guid? RecebedorUsuarioId,
         decimal? Valor,
-        DateTimeOffset? OcorridoEm);
+        DateTimeOffset? OcorridoEm,
+        string? PagadorNome,
+        string? RecebedorNome);
 }
