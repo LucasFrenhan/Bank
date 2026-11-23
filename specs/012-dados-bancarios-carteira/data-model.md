@@ -111,9 +111,10 @@ numero_conta)`.
 
 ### Backfill (`Sql/Migracoes/PreencherDadosBancariosCarteiras.sql`)
 
-Para cada carteira sem dados, em ordem de `id`: `codigo_banco = '001'`, `agencia = '0001'`,
-`numero_conta = lpad(nextval(...)::text, 8, '0')`, `digito_conta =
-calcular_digito_conta(...)`, `tipo_conta_bancaria = 'conta_corrente'`. Saldo, `atualizado_em`
+Para cada carteira sem dados, numerada por `row_number() OVER (ORDER BY id)`:
+`codigo_banco = '001'`, `agencia = '0001'`, `numero_conta = lpad(n::text, 8, '0')`,
+`digito_conta = calcular_digito_conta(...)`, `tipo_conta_bancaria = 'conta_corrente'`; depois,
+`setval('seq_numero_conta_one_bank', max)` (ou `setval(..., 1, false)` com a tabela vazia). Saldo, `atualizado_em`
 e demais tabelas não são tocados (FR-007). A coluna `xmin` muda, mas o update é feito antes de
 qualquer uso da aplicação.
 

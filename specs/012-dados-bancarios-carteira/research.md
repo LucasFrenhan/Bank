@@ -105,8 +105,12 @@
   sequence; (3) cria a function `calcular_digito_conta` lendo
   `Sql/Procedures/CalcularDigitoConta.sql`; (4) adiciona as colunas de `carteiras` como
   anuláveis; (5) executa `Sql/Migracoes/PreencherDadosBancariosCarteiras.sql`, que numera as
-  carteiras existentes em ordem de `id` (UUIDv7 = ordem de criação) com `nextval`, banco 001,
-  agência 0001, dígito pela function e tipo `conta_corrente`; (6) torna as colunas obrigatórias
+  carteiras existentes com `row_number() OVER (ORDER BY id)` (UUIDv7 = ordem de criação), banco
+  001, agência 0001, dígito pela function e tipo `conta_corrente`, e depois ajusta a sequence
+  com `setval` para o maior número atribuído (`setval(..., 1, false)` se não houver carteiras),
+  de modo que o próximo cadastro continue dali (FR-008). `nextval` não é usado no backfill
+  porque, numa subconsulta, uma função volátil pode ser avaliada antes do `ORDER BY` e a ordem
+  dos números não seria garantida; (6) torna as colunas obrigatórias
   e cria índice, FK e `CHECK`; (7) cria `contas_externas`. O `Down` desfaz na ordem inversa
   (a numeração atribuída é descartada).
 - **Rationale**: FR-007 (preencher antes de tornar obrigatório); tudo numa transação de

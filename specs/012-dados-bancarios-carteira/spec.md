@@ -118,8 +118,8 @@ dados bancários batem com os gravados e que os campos anteriores continuam pres
 
 ### User Story 4 - Contas de outros bancos e conta poupança por script (Priority: P3)
 
-A equipe consegue, por scripts de banco de dados (fora do sistema), registrar contas em
-qualquer um dos cinco bancos e criar contas do tipo poupança. As contas dos bancos 002 a 005
+A equipe consegue, por scripts de banco de dados (fora do sistema), registrar contas nos
+bancos 002 a 005 e criar contas do tipo poupança no banco 001. As contas dos bancos 002 a 005
 são apenas registros que simulam a existência de outros bancos para uma futura integração.
 
 **Why this priority**: prepara a simulação de integração com outros bancos e o uso de
@@ -172,7 +172,7 @@ cadastro, login, consulta e transferências.
 - **FR-001**: O sistema MUST manter um cadastro fixo de exatamente cinco bancos, cada um com
   código de 3 dígitos e nome: 001 "One Bank" (o nosso banco), 002 "Banco Aurora", 003 "Banco
   Horizonte", 004 "Banco Atlântico" e 005 "Banco Cerrado" (os quatro últimos são simbólicos).
-- **FR-002**: Toda carteira MUST ter, de forma obrigatória, código do banco (um dos cinco),
+- **FR-002**: Toda carteira MUST ter, de forma obrigatória, código do banco (001, ver FR-014),
   agência (4 dígitos), número da conta (8 dígitos) com dígito verificador (1 dígito) e tipo da
   conta (conta corrente ou conta poupança).
 - **FR-003**: A combinação banco + agência + número da conta MUST ser única.
@@ -207,14 +207,14 @@ cadastro, login, consulta e transferências.
   com banco, agência, número, dígito verificador, tipo e nome e documento do titular, sem
   usuário, senha nem saldo — e MUST NOT permitir login, consulta de carteira ou transferência
   nesta entrega.
-- **FR-014**: As carteiras do nosso cadastro MUST pertencer sempre ao banco 001, e as contas
-  registradas de outros bancos MUST pertencer a um dos bancos 002 a 005.
 - **FR-012**: As funcionalidades existentes (cadastro, login, consulta de usuário, transferência
   por documento, extrato, limites, mensageria e notificações) MUST continuar funcionando sem
   mudança de comportamento.
 - **FR-013**: Os dados bancários MUST NOT ser escritos em logs ou telemetria além do que já é
   permitido para identificadores (seguindo a mesma regra de dados sensíveis das specs
   anteriores).
+- **FR-014**: As carteiras do nosso cadastro MUST pertencer sempre ao banco 001, e as contas
+  registradas de outros bancos MUST pertencer a um dos bancos 002 a 005.
 
 ### Key Entities
 

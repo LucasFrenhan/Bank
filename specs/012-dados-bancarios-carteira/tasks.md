@@ -125,7 +125,8 @@ sem número repetido
   cadastro PF e PJ → linhas de `carteiras` com `001`, `0001`, número de 8 dígitos, dígito igual a
   `ContaBancaria.CalcularDigito` e `conta_corrente`, números diferentes; 50 cadastros simultâneos
   (`Task.WhenAll`) → 50 números distintos (SC-003); cadastro recusado por e-mail repetido não
-  cria carteira (US1-3)
+  cria carteira (US1-3); cadastro com o campo a mais `"tipoContaBancaria": "ContaPoupanca"` no
+  corpo é aceito e a conta nasce `conta_corrente` (FR-006)
 - [ ] T011 [P] [US1] Criar `it/DadosBancariosRestricoesTests.cs` (`IClassFixture<BankApiFactory>`):
   para os vetores do contrato, `SELECT calcular_digito_conta(...)` = `ContaBancaria.CalcularDigito`;
   em uma carteira cadastrada, `UPDATE` com dígito errado → `ck_carteiras_digito_conta`;
@@ -164,9 +165,11 @@ sem número repetido
   FK `fk_carteiras_bancos_codigo_banco` (RESTRICT, sem navegação); índice único
   `ux_carteiras_conta_bancaria`; nomes em constantes públicas para os testes
 - [ ] T018 [US1] Criar `sql/Migracoes/PreencherDadosBancariosCarteiras.sql` (cabeçalho citando a
-  spec 012 e R7): `UPDATE carteiras` das linhas com `numero_conta IS NULL`, em ordem de `id`,
-  com `001`, `0001`, `lpad(nextval('seq_numero_conta_one_bank')::text, 8, '0')`, dígito pela
-  function e `conta_corrente` (numeração ordenada por subconsulta com `ORDER BY id`)
+  spec 012 e R7): `UPDATE carteiras` das linhas com `numero_conta IS NULL`, numeradas por
+  `row_number() OVER (ORDER BY id)` (sem `nextval`, cuja avaliação pode ocorrer antes da
+  ordenação), com `001`, `0001`, `lpad(n::text, 8, '0')`, dígito pela function e
+  `conta_corrente`; em seguida `setval('seq_numero_conta_one_bank', max(numero_conta)::bigint)`
+  ou, sem carteiras, `setval(..., 1, false)`, para o próximo `nextval` continuar dali (FR-008)
 - [ ] T019 [US1] Gerar a migration `AdicionarDadosBancariosCarteira` (`dotnet ef migrations add
   AdicionarDadosBancariosCarteira -p src/Bank.Infrastructure -s src/Bank.Api`) e reordenar o `Up`
   conforme R7: `bancos` + dados; sequence; `migrationBuilder.Sql(SqlEmbutido.Ler(
@@ -258,7 +261,9 @@ conta poupança
   o e-mail do script e carteira `conta_poupanca` no 001, só uma após a segunda execução; login
   com a senha documentada no script e `GET /carteiras/minha` → `contaBancaria.tipo`
   `"ContaPoupanca"`; `INSERT` manual em `contas_externas` com banco `'999'` → FK e com `'001'`
-  → `ck_contas_externas_codigo_banco` (FR-011, FR-014)
+  → `ck_contas_externas_codigo_banco` (FR-011, FR-014); transferência (`POST
+  /api/v1/transferencias`) de um usuário real para o documento de um titular de
+  `contas_externas` que não é usuário → 404 `destinatario-nao-encontrado`, como hoje (US4-4)
 
 ### Implementação da US4
 
@@ -270,8 +275,8 @@ conta poupança
   ux_contas_externas_conta_bancaria DO NOTHING`
 - [ ] T030 [P] [US4] Criar `scripts/sql/dados-bancarios/criar-conta-poupanca.sql` (cabeçalho:
   spec 012, e-mail e senha de demonstração, reexecutável): dentro de `BEGIN/COMMIT`, se o e-mail
-  não existir, insere o usuário PF (nome, e-mail, CPF válido fixo, `tipo_conta` como o mapeamento
-  atual grava, `senha_hash` V3 do Identity pré-calculado para a senha documentada — gerar com
+  não existir, insere o usuário PF (nome, e-mail, CPF válido fixo, `tipo_conta = 'PessoaFisica'` (valor gravado por
+  `UsuarioConfiguracao`, `HasConversion<string>`), `senha_hash` V3 do Identity pré-calculado para a senha documentada — gerar com
   `HasherSenhaIdentity` uma vez) e a carteira com `id = uuidv7()`, saldo 0, banco 001, agência
   0001, número `nextval`, dígito pela function e `conta_poupanca` (FR-010)
 - [ ] T031 [US4] Rodar T028 até ficar verde
@@ -282,7 +287,7 @@ conta poupança
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T032 [P] Em `it/DadosSensiveisTelemetriaTests.cs` (ou equivalente da spec 003/006):
+- [ ] T032 [P] Em `it/DadosSensiveisTelemetriaTests.cs` (`TelemetriaCompletaApiFactory`):
   depois de um cadastro e uma consulta da carteira, nenhum log, span ou tag de métrica contém o
   número da conta (FR-013)
 - [ ] T033 [P] Em `docs/desenvolvimento.md`: seção "Dados bancários" com os cinco bancos, a
