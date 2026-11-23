@@ -289,10 +289,10 @@ conta poupança
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T032 [P] Em `it/DadosSensiveisTelemetriaTests.cs` (`TelemetriaCompletaApiFactory`):
+- [X] T032 [P] Em `it/DadosSensiveisTelemetriaTests.cs` (`TelemetriaCompletaApiFactory`):
   depois de um cadastro e uma consulta da carteira, nenhum log, span ou tag de métrica contém o
   número da conta (FR-013)
-- [ ] T033 [P] Em `docs/desenvolvimento.md`: seção "Dados bancários" com os cinco bancos, a
+- [X] T033 [P] Em `docs/desenvolvimento.md`: seção "Dados bancários" com os cinco bancos, a
   regra do dígito (Luhn), a sequence e os comandos dos scripts (quickstart, cenário 4)
 - [ ] T034 Rodar `dotnet build` e `dotnet test` em Release (como no CI) com o Docker em execução;
   depois, no Compose, validar os cenários 2–5 do [quickstart.md](quickstart.md) (para o cenário

@@ -114,6 +114,27 @@ definidos em [`specs/003-usuarios-carteiras`](../specs/003-usuarios-carteiras/sp
 - **Dados do titular**: `GET /api/v1/usuarios/me` devolve nome, e-mail, documento (sem
   máscara), tipo de conta e data de cadastro do usuário do token, com `Cache-Control: no-store`
   — [contrato](../specs/005-usuarios-me/contracts/usuarios-me-api.md) (spec 005).
+- **Dados bancários** ([spec 012](../specs/012-dados-bancarios-carteira/spec.md)): toda carteira
+  tem banco, agência, número de 8 dígitos com dígito verificador e tipo, expostos em
+  `contaBancaria` de `GET /api/v1/carteiras/minha`
+  ([contrato 1.1.0](../specs/012-dados-bancarios-carteira/contracts/carteira-minha.md)).
+  - Bancos fixos (tabela `bancos`): 001 One Bank (o nosso), 002 Banco Aurora, 003 Banco
+    Horizonte, 004 Banco Atlântico e 005 Banco Cerrado (os quatro últimos são simbólicos).
+  - O cadastro cria sempre **conta corrente** no 001, agência 0001, com o próximo número da
+    sequence `seq_numero_conta_one_bank` (lacunas são normais quando um cadastro falha).
+  - Dígito verificador: Luhn (módulo 10) sobre agência + número, em C#
+    (`ContaBancaria.CalcularDigito`) e na function SQL `calcular_digito_conta`, conferida por
+    `CHECK` nas tabelas.
+  - Contas de outros bancos e conta poupança só por script (reexecutáveis), na raiz do
+    repositório:
+
+    ```bash
+    docker compose exec -T postgres psql -U bank -d bank -v ON_ERROR_STOP=1 < scripts/sql/dados-bancarios/registrar-contas-outros-bancos.sql
+    docker compose exec -T postgres psql -U bank -d bank -v ON_ERROR_STOP=1 < scripts/sql/dados-bancarios/criar-conta-poupanca.sql
+    ```
+
+    O segundo cria o titular `poupanca.demo@exemplo.com.br` (senha `Poupanca@123`) com conta
+    poupança no 001. As contas dos bancos 002–005 ficam em `contas_externas`, sem login nem saldo.
 
 ### Transferências e extrato
 
