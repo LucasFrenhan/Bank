@@ -1,3 +1,4 @@
+using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
 using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
@@ -28,6 +29,13 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
 
     public DbSet<NotificacaoAuditoria> NotificacoesAuditoria => Set<NotificacaoAuditoria>();
 
+    public DbSet<Banco> Bancos => Set<Banco>();
+
+    public DbSet<ContaExterna> ContasExternas => Set<ContaExterna>();
+
+    /// <summary>Sequence dos números de conta do banco 001 (specs/012-dados-bancarios-carteira, research R2).</summary>
+    public const string SequenceNumeroConta = "seq_numero_conta_one_bank";
+
     /// <summary>Identificadores tipados do Domain gravados como <c>uuid</c> (issue #43).</summary>
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -38,11 +46,17 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
         configurationBuilder.Properties<LancamentoId>().HaveConversion<IdentificadorConverter<LancamentoId>>();
         configurationBuilder.Properties<EventoId>().HaveConversion<IdentificadorConverter<EventoId>>();
         configurationBuilder.Properties<NotificacaoAuditoriaId>().HaveConversion<IdentificadorConverter<NotificacaoAuditoriaId>>();
+        configurationBuilder.Properties<ContaExternaId>().HaveConversion<IdentificadorConverter<ContaExternaId>>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
+        modelBuilder.HasSequence<long>(SequenceNumeroConta)
+            .StartsAt(1)
+            .IncrementsBy(1)
+            .HasMax(ContaBancaria.NumeroMaximo)
+            .IsCyclic(false);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BankDbContext).Assembly);
     }
 }
