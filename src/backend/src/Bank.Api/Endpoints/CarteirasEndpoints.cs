@@ -6,7 +6,8 @@ using Bank.Application.Carteiras;
 namespace Bank.Api.Endpoints;
 
 /// <summary>
-/// Consulta da própria carteira (US3; contracts/usuarios-carteiras-api.md). O usuário vem do
+/// Consulta da própria carteira (US3; contracts/usuarios-carteiras-api.md; dados bancários desde a
+/// specs/012-dados-bancarios-carteira, contracts/carteira-minha.md 1.1.0). O usuário vem do
 /// token (transporte); o caso de uso busca sempre o saldo atual.
 /// </summary>
 public static class CarteirasEndpoints
@@ -51,7 +52,13 @@ public static class CarteirasEndpoints
             carteira.TipoConta.ToString(),
             carteira.Saldo,
             carteira.Moeda,
-            carteira.AtualizadoEm));
+            carteira.AtualizadoEm,
+            new ContaBancariaResposta(
+                new BancoResposta(carteira.ContaBancaria.CodigoBanco, carteira.ContaBancaria.NomeBanco),
+                carteira.ContaBancaria.Agencia,
+                carteira.ContaBancaria.Numero,
+                carteira.ContaBancaria.Digito,
+                carteira.ContaBancaria.Tipo.ToString())));
     }
 
     public sealed record MinhaCarteiraResposta(
@@ -61,5 +68,16 @@ public static class CarteirasEndpoints
         string TipoConta,
         decimal Saldo,
         string Moeda,
-        DateTimeOffset AtualizadoEm);
+        DateTimeOffset AtualizadoEm,
+        ContaBancariaResposta ContaBancaria);
+
+    /// <summary>Dados bancários da conta, todos como texto (specs/012-dados-bancarios-carteira, contrato 1.1.0).</summary>
+    public sealed record ContaBancariaResposta(
+        BancoResposta Banco,
+        string Agencia,
+        string Numero,
+        string Digito,
+        string Tipo);
+
+    public sealed record BancoResposta(string Codigo, string Nome);
 }

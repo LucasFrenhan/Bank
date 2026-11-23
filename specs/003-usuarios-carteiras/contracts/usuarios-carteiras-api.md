@@ -88,6 +88,10 @@ idêntico para e-mail inexistente e senha incorreta.
 
 ## `GET /api/v1/carteiras/minha`
 
+> **Versão atual: 1.1.0** — desde a spec 012 a resposta também traz o objeto `contaBancaria`
+> (banco, agência, número, dígito e tipo). Ver
+> [specs/012-dados-bancarios-carteira/contracts/carteira-minha.md](../../012-dados-bancarios-carteira/contracts/carteira-minha.md).
+
 **Acesso**: autenticado — `Authorization: Bearer <tokenAcesso>`; política
 `UsuarioAutenticado` (claims `sub`, `tipo_conta`, `carteira_id`).
 

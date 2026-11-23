@@ -219,26 +219,26 @@ sem número repetido
 
 ### Testes da US3 (escrever primeiro)
 
-- [ ] T023 [P] [US3] Em `it/MinhaCarteiraTests.cs`: a resposta traz `contaBancaria.banco.codigo`
+- [X] T023 [P] [US3] Em `it/MinhaCarteiraTests.cs`: a resposta traz `contaBancaria.banco.codigo`
   `"001"`, `banco.nome` `"One Bank"`, `agencia` `"0001"`, `numero` igual ao gravado em
   `carteiras`, `digito` válido e `tipo` `"ContaCorrente"`, todos como string JSON; os campos da
   v1.0.0 continuam iguais (FR-009)
-- [ ] T024 [P] [US3] Em `it/OpenApiTests.cs`: o schema de `MinhaCarteiraResposta` tem
+- [X] T024 [P] [US3] Em `it/OpenApiTests.cs`: o schema de `MinhaCarteiraResposta` tem
   `contaBancaria` obrigatório com `banco` (`codigo`, `nome`), `agencia`, `numero`, `digito` e
   `tipo` do tipo string; as respostas de cadastro, `usuarios/me`, transferência e extrato não
   ganham `contaBancaria` (FR-009)
 
 ### Implementação da US3
 
-- [ ] T025 [US3] Em `back/src/Bank.Application/Abstracoes/ICarteiraConsultas.cs`: `DadosContaBancaria
+- [X] T025 [US3] Em `back/src/Bank.Application/Abstracoes/ICarteiraConsultas.cs`: `DadosContaBancaria
   (string CodigoBanco, string NomeBanco, string Agencia, string Numero, string Digito,
   TipoContaBancaria Tipo)` e o campo `ContaBancaria` em `DadosCarteira`; em
   `back/src/Bank.Infrastructure/Persistencia/CarteiraConsultas.cs`, preencher com join em
   `contexto.Bancos` pelo código
-- [ ] T026 [US3] Em `back/src/Bank.Api/Endpoints/CarteirasEndpoints.cs`: `MinhaCarteiraResposta`
+- [X] T026 [US3] Em `back/src/Bank.Api/Endpoints/CarteirasEndpoints.cs`: `MinhaCarteiraResposta`
   ganha `ContaBancariaResposta ContaBancaria` (`BancoResposta Banco`, `Agencia`, `Numero`,
   `Digito`, `Tipo` como `ToString()` do enum), mapeado de `DadosCarteira` (faz T023–T024 passarem)
-- [ ] T027 [P] [US3] Em `specs/003-usuarios-carteiras/contracts/usuarios-carteiras-api.md`, seção
+- [X] T027 [P] [US3] Em `specs/003-usuarios-carteiras/contracts/usuarios-carteiras-api.md`, seção
   `GET /api/v1/carteiras/minha`: nota apontando para a versão 1.1.0 em
   `specs/012-dados-bancarios-carteira/contracts/carteira-minha.md`
 
