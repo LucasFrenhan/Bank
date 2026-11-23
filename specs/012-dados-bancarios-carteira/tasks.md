@@ -294,11 +294,11 @@ conta poupança
   número da conta (FR-013)
 - [X] T033 [P] Em `docs/desenvolvimento.md`: seção "Dados bancários" com os cinco bancos, a
   regra do dígito (Luhn), a sequence e os comandos dos scripts (quickstart, cenário 4)
-- [ ] T034 Rodar `dotnet build` e `dotnet test` em Release (como no CI) com o Docker em execução;
+- [X] T034 Rodar `dotnet build` e `dotnet test` em Release (como no CI) com o Docker em execução;
   depois, no Compose, validar os cenários 2–5 do [quickstart.md](quickstart.md) (para o cenário
   2, subir a `main` anterior, cadastrar e transferir, e então subir esta branch) e registrar o
   resultado no PR
-- [ ] T035 Marcar na issue #28 os itens entregues (enum; propriedades + configuração com índice
+- [X] T035 Marcar na issue #28 os itens entregues (enum; propriedades + configuração com índice
   único; migration com backfill; gerador de número com dígito — no caso de uso `RegistrarUsuario`,
   não em um `AutenticacaoServico`, que não existe; DTO e testes) e abrir o PR com `Closes #28` e
   `--assignee @me`, citando que o frontend fica para uma task posterior
