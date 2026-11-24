@@ -35,7 +35,7 @@ acessa a rede. Textos exatos da tela vêm de [contracts/frontend.md](contracts/f
 
 **Purpose**: ambiente no ar, para gerar os tipos e rodar o e2e
 
-- [ ] T001 Subir o Compose na raiz (`docker compose up -d --build --wait`) e instalar dependências
+- [X] T001 Subir o Compose na raiz (`docker compose up -d --build --wait`) e instalar dependências
   com `npm ci` em `src/frontend/` e o navegador com `npx playwright install chromium`; registrar o
   estado de partida com `npm run lint`, `npm run typecheck` e `npm test` verdes
 
@@ -48,25 +48,25 @@ três histórias
 
 **⚠️ CRITICAL**: nenhuma história começa antes desta fase
 
-- [ ] T002 Regenerar `front/src/api/schema.d.ts` com `npm run api:tipos` e
+- [X] T002 Regenerar `front/src/api/schema.d.ts` com `npm run api:tipos` e
   `BANK_API_URL=http://localhost:8080` (API do Compose); conferir no diff que só entram
   `contaBancaria` em `MinhaCarteiraResposta`, `ContaBancariaResposta` e `BancoResposta`, com todos os
   campos `string`; qualquer outra diferença é analisada antes de seguir
-- [ ] T003 Em `front/src/api/cliente.ts`, exportar `export type ContaBancaria =
+- [X] T003 Em `front/src/api/cliente.ts`, exportar `export type ContaBancaria =
   Esquemas['ContaBancariaResposta'];` junto de `MinhaCarteira` (R1)
-- [ ] T004 [P] Em `front/src/testes/handlers.ts`, criar `contaBancaria(alteracoes?)` com o exemplo do
+- [X] T004 [P] Em `front/src/testes/handlers.ts`, criar `contaBancaria(alteracoes?)` com o exemplo do
   contrato (`{ banco: { codigo: '001', nome: 'One Bank' }, agencia: '0001', numero: '00000042',
   digito: '0', tipo: 'ContaCorrente' }`) e incluir `contaBancaria: contaBancaria()` em
   `carteira(tipoConta)`
-- [ ] T005 [P] Escrever `front/src/formatacao/contaBancaria.test.ts` (deve falhar): `nomeTipoContaBancaria`
+- [X] T005 [P] Escrever `front/src/formatacao/contaBancaria.test.ts` (deve falhar): `nomeTipoContaBancaria`
   (`ContaCorrente` → "Conta corrente", `ContaPoupanca` → "Conta poupança", qualquer outro → "Conta");
   `nomeBanco` → "001 – One Bank"; `contaComDigito` → "00000042-0", preservando zeros e dígito `0`;
   `lerDigitos('0001')` → "0 0 0 1"; `lerConta` → "0 0 0 0 0 0 4 2, dígito 0"; `textoDadosDaConta` →
   exatamente `Banco 001 – One Bank\nAgência 0001\nConta corrente 00000042-0`, sem linha final; com
   poupança, `Conta poupança …`; com tipo desconhecido, `Conta …` (FR-003 a FR-006)
-- [ ] T006 Criar `front/src/formatacao/contaBancaria.ts` com as funções de T005, puras e só com texto
+- [X] T006 Criar `front/src/formatacao/contaBancaria.ts` com as funções de T005, puras e só com texto
   (sem `Number`, `parseInt` nem `+` unário), até T005 passar (R2)
-- [ ] T007 [P] Criar `front/src/marca.ts` com `export const NOME_BANCO = 'One Bank';` e comentário
+- [X] T007 [P] Criar `front/src/marca.ts` com `export const NOME_BANCO = 'One Bank';` e comentário
   citando a spec 013 e que o nome exibido com o código do banco vem da API (R6, FR-002)
 
 **Checkpoint**: `npm run typecheck` e `npm test` verdes; nenhuma tela mudou

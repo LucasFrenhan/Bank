@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import type { TipoConta } from '../sessao/claims';
+import type { ContaBancaria } from '../api/cliente';
 
 /** Respostas simuladas da API (specs 003, 005 e 006) para testes de componentes (research R3). */
 
@@ -28,6 +29,18 @@ export function tokenFalso(tipoConta: TipoConta = 'PessoaFisica', email = 'lucas
   ].join('.');
 }
 
+/** Dados bancários do exemplo do contrato 1.1.0 (specs/012 e specs/013). */
+export function contaBancaria(alteracoes: Partial<ContaBancaria> = {}): ContaBancaria {
+  return {
+    banco: { codigo: '001', nome: 'One Bank' },
+    agencia: '0001',
+    numero: '00000042',
+    digito: '0',
+    tipo: 'ContaCorrente',
+    ...alteracoes,
+  };
+}
+
 export function carteira(tipoConta: TipoConta = 'PessoaFisica') {
   return {
     carteiraId: 'carteira-1',
@@ -37,6 +50,7 @@ export function carteira(tipoConta: TipoConta = 'PessoaFisica') {
     saldo: tipoConta === 'PessoaFisica' ? 10.0 : 0.0,
     moeda: 'BRL',
     atualizadoEm: '2026-11-17T17:32:00Z',
+    contaBancaria: contaBancaria(),
   };
 }
 
