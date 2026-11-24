@@ -239,7 +239,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Testes
 
-- [ ] T042 [P] [US4] `src/paginas/faturas/Faturas.test.tsx`: lista e detalhe de cada situação (cenários 1 a 6),
+- [X] T042 [P] [US4] `src/paginas/faturas/Faturas.test.tsx`: lista e detalhe de cada situação (cenários 1 a 6),
   datas sem conversão de fuso, sem cartão, erro; ampliar `src/paginas/Inicio.test.tsx` com o aviso (disponível,
   vencida, mais antiga, sem cartão, erro e PJ)
 - [ ] T043 [US4] Acrescentar em `e2e/apoio.ts` a emissão, o cartão e o pagamento pela API e a preparação de
@@ -248,9 +248,9 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Implementação
 
-- [ ] T044 [US4] Criar `src/paginas/faturas/Faturas.tsx`, `Fatura.tsx` e `Faturas.module.css` (FR-019), com as
+- [X] T044 [US4] Criar `src/paginas/faturas/Faturas.tsx`, `Fatura.tsx` e `Faturas.module.css` (FR-019), com as
   rotas `/cartao/faturas` e `/cartao/faturas/:competencia`
-- [ ] T045 [US4] Criar `src/paginas/faturas/AvisoFatura.tsx` (R11; FR-019a) e exibi-lo em `src/paginas/Inicio.tsx`
+- [X] T045 [US4] Criar `src/paginas/faturas/AvisoFatura.tsx` (R11; FR-019a) e exibi-lo em `src/paginas/Inicio.tsx`
   só para PF
 
 ---
@@ -263,14 +263,14 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Testes
 
-- [ ] T046 [P] [US5] `src/paginas/faturas/PagarFatura.test.tsx`: confirmação com valor, juros, saldo e saldo
+- [X] T046 [P] [US5] `src/paginas/faturas/PagarFatura.test.tsx`: confirmação com valor, juros, saldo e saldo
   depois; saldo menor bloqueia; recusa da API por saldo; falha e reenvio com a mesma chave; duplo clique; paga em
   outra aba; valor pago devolvido diferente do mostrado
 - [ ] T047 [US5] Ampliar `e2e/faturas.spec.ts`: pagar disponível e vencida; saldo, extrato e limite atualizados
 
 ### Implementação
 
-- [ ] T048 [US5] Criar `src/paginas/faturas/PagarFatura.tsx` (FR-020) e ligá-lo em `Fatura.tsx`
+- [X] T048 [US5] Criar `src/paginas/faturas/PagarFatura.tsx` (FR-020) e ligá-lo em `Fatura.tsx`
 
 ---
 
@@ -282,7 +282,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Testes
 
-- [ ] T049 [P] [US6] `src/paginas/recebiveis/Recebiveis.test.tsx`: lista, filtros, páginas, vazio, erro, PF;
+- [X] T049 [P] [US6] `src/paginas/recebiveis/Recebiveis.test.tsx`: lista, filtros, páginas, vazio, erro, PF;
   confirmação com taxa, líquido, data e aviso; sucesso com os valores da API; sem ação se liquidado, antecipado ou
   previsto para hoje; `recebivel-nao-antecipavel` atualiza a situação; falha e duplo clique
 - [ ] T050 [P] [US6] `e2e/recebiveis.spec.ts`: cobrança de R$ 299,90 paga pela API, antecipar e conferir saldo e
@@ -290,7 +290,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Implementação
 
-- [ ] T051 [US6] Criar `src/paginas/recebiveis/Recebiveis.tsx` e `Recebiveis.module.css` (FR-021, FR-022), com a
+- [X] T051 [US6] Criar `src/paginas/recebiveis/Recebiveis.tsx` e `Recebiveis.module.css` (FR-021, FR-022), com a
   rota `/cobrancas/recebiveis`
 
 ---
@@ -303,7 +303,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Testes
 
-- [ ] T052 [P] [US7] Ampliar `src/App.test.tsx` e `src/paginas/Perfil.test.tsx`: menu e barra por perfil (4 itens),
+- [X] T052 [P] [US7] Ampliar `src/App.test.tsx` e `src/paginas/Perfil.test.tsx`: menu e barra por perfil (4 itens),
   item ativo nas rotas filhas, permissões novas; em `src/paginas/Inicio.test.tsx`, trocar só a verificação de
   "Cobranças" como "Em breve" (FR-001, SC-008)
 - [ ] T053 [US7] Ampliar `e2e/responsividade.spec.ts` (6 larguras), `e2e/teclado.spec.ts` (solicitar, pagar,
@@ -312,7 +312,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Implementação
 
-- [ ] T054 [US7] Atualizar `comp/Layout.tsx` (menu e barra; FR-001) e `src/sessao/permissoes.ts` (FR-004)
+- [X] T054 [US7] Atualizar `comp/Layout.tsx` (menu e barra; FR-001) e `src/sessao/permissoes.ts` (FR-004)
 - [ ] T055 [US7] Corrigir o que T053 apontar nas telas novas
 
 ---

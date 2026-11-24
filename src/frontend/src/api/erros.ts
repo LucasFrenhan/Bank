@@ -214,7 +214,9 @@ export function traduzirErro(status: number | null, corpo: unknown, contexto?: C
 
   const recusa = RECUSAS[tipo];
   if (recusa) {
-    return { ...base, ...recusa };
+    return tipo === 'cartao-nao-encontrado' && contexto === 'fatura'
+      ? { ...base, ...recusa, detalhe: 'As faturas aparecem depois que você pedir o seu.' }
+      : { ...base, ...recusa };
   }
 
   const area = contexto ? AREAS[contexto] : undefined;

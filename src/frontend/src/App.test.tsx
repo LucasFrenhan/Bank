@@ -31,6 +31,41 @@ describe('rotas (contracts/frontend.md; FR-010)', () => {
     expect(within(marca).getByText('1B')).toHaveAttribute('aria-hidden', 'true');
   });
 
+  it.each(['/cartao', '/cartao/faturas', '/cartao/faturas/2026-12', '/cobrancas', '/cobrancas/nova', '/cobrancas/recebiveis', '/c/7K3F-9QXM'])(
+    'sem sessão, %s leva ao login (specs/015)',
+    async (rota) => {
+      renderizarApp(rota);
+      expect(await screen.findByRole('heading', { name: 'Entrar' })).toBeInTheDocument();
+    },
+  );
+
+  it.each([
+    ['PessoaFisica', ['Início', 'Transferir', 'Extrato', 'Cartão', 'Perfil'], ['Início', 'Extrato', 'Cartão', 'Perfil']],
+    ['PessoaJuridica', ['Início', 'Recebimentos', 'Cobranças', 'Perfil'], ['Início', 'Recebimentos', 'Cobranças', 'Perfil']],
+  ] as const)('menu de %s, com 4 itens na barra do celular (specs/015, FR-001)', async (perfil, menu, barra) => {
+    renderizarApp('/perfil', { sessao: perfil });
+    const nomes = (nome: string) => within(screen.getByRole('navigation', { name: nome })).getAllByRole('link').map((l) => l.textContent);
+
+    await screen.findByRole('navigation', { name: 'Menu principal' });
+    expect(nomes('Menu principal').slice(1)).toEqual(menu);
+    expect(nomes('Menu principal (celular)')).toEqual(barra);
+  });
+
+  it.each([
+    ['PessoaFisica', '/cartao', 'Cartão'],
+    ['PessoaFisica', '/cartao/faturas', 'Cartão'],
+    ['PessoaFisica', '/cartao/faturas/2026-12', 'Cartão'],
+    ['PessoaJuridica', '/cobrancas', 'Cobranças'],
+    ['PessoaJuridica', '/cobrancas/recebiveis', 'Cobranças'],
+    ['PessoaJuridica', '/c/7K3F-9QXM', 'Cobranças'],
+    ['PessoaFisica', '/extrato', 'Extrato'],
+  ] as const)('%s em %s: item "%s" ativo', async (perfil, rota, item) => {
+    renderizarApp(rota, { sessao: perfil });
+    const menu = await screen.findByRole('navigation', { name: 'Menu principal' });
+    const ativos = within(menu).getAllByRole('link').filter((l) => l.getAttribute('aria-current') === 'page');
+    expect(ativos.map((l) => l.textContent)).toEqual([item]);
+  });
+
   it('define o título da página por rota', async () => {
     renderizarApp('/criar-conta');
 

@@ -11,9 +11,12 @@ import { CriarConta } from './paginas/CriarConta';
 import { Transferir } from './paginas/Transferir';
 import { Entrar } from './paginas/Entrar';
 import { Extrato } from './paginas/Extrato';
+import { Fatura } from './paginas/faturas/Fatura';
+import { Faturas } from './paginas/faturas/Faturas';
 import { Inicio } from './paginas/Inicio';
 import { NaoEncontrada } from './paginas/NaoEncontrada';
 import { Perfil } from './paginas/Perfil';
+import { Recebiveis } from './paginas/recebiveis/Recebiveis';
 import { ProvedorSessao } from './sessao/ContextoSessao';
 import { RotaProtegida, RotaPublica } from './sessao/Rotas';
 import { registrarNavegacao } from './telemetria/ponte';
@@ -34,6 +37,9 @@ export function Rotas() {
       <Route path="/perfil" element={<RotaProtegida><Layout><Perfil /></Layout></RotaProtegida>} />
       <Route path="/extrato" element={<RotaProtegida><Layout><Extrato /></Layout></RotaProtegida>} />
       <Route path="/cartao" element={<RotaProtegida><Layout><Cartao /></Layout></RotaProtegida>} />
+      <Route path="/cartao/faturas" element={<RotaProtegida><Layout><Faturas /></Layout></RotaProtegida>} />
+      <Route path="/cartao/faturas/:competencia" element={<RotaProtegida><Layout><Fatura /></Layout></RotaProtegida>} />
+      <Route path="/cobrancas/recebiveis" element={<RotaProtegida><Layout><Recebiveis /></Layout></RotaProtegida>} />
       <Route path="/cobrancas" element={<RotaProtegida><Layout><Cobrancas /></Layout></RotaProtegida>} />
       <Route path="/cobrancas/nova" element={<RotaProtegida><NovaCobranca /></RotaProtegida>} />
       <Route path="/c/:codigo" element={<RotaProtegida><Cobranca /></RotaProtegida>} />

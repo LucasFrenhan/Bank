@@ -16,7 +16,7 @@ describe('Perfil (US4; FR-017 — dados do titular via GET /api/v1/usuarios/me)'
     expect(screen.getByText('Cliente desde')).toBeInTheDocument();
     expect(screen.getByText('9 nov 2026')).toBeInTheDocument();
     expect(screen.getByText('Pessoa Física · não pode ser alterado')).toBeInTheDocument();
-    for (const permissao of ['Enviar transferências para PF e PJ', 'Receber transferências', 'Pagar cobranças de cartão de crédito']) {
+    for (const permissao of ['Enviar transferências para PF e PJ', 'Receber transferências', 'Pagar cobranças de cartão de crédito', 'Usar cartão de crédito e pagar faturas']) {
       expect(screen.getByText(permissao)).toBeInTheDocument();
     }
   });
@@ -28,6 +28,7 @@ describe('Perfil (US4; FR-017 — dados do titular via GET /api/v1/usuarios/me)'
     expect(await screen.findByText('••.•••.345/01DE-••')).toBeInTheDocument();
     expect(screen.getByText('CNPJ')).toBeInTheDocument();
     expect(screen.getByText('Gerar cobranças de cartão de crédito')).toBeInTheDocument();
+    expect(screen.getByText('Receber e antecipar recebíveis')).toBeInTheDocument();
     expect(screen.queryByText('Enviar transferências para PF e PJ')).not.toBeInTheDocument();
   });
 

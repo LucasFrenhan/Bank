@@ -68,15 +68,6 @@
   color: var(--cor-primaria);
 }
 
-.itemInferior[aria-disabled='true'] {
-  color: #64748b;
-}
-
-.emBreve {
-  font-size: 10px;
-  line-height: 12px;
-}
-
 @media (min-width: 1024px) {
   .estrutura {
     display: grid;
@@ -133,11 +124,6 @@
   .itemLateral[aria-current='page'] {
     background: var(--cor-primaria-suave);
     color: var(--cor-primaria);
-  }
-
-  .itemLateral[aria-disabled='true'] {
-    color: var(--cor-texto-suave);
-    cursor: default;
   }
 
   .sairLateral {

@@ -5,8 +5,8 @@ import type { TipoConta } from './claims';
  * API). Mantido num único mapa.
  */
 export const PERMISSOES_POR_PERFIL: Record<TipoConta, string[]> = {
-  PessoaFisica: ['Enviar transferências para PF e PJ', 'Receber transferências', 'Pagar cobranças de cartão de crédito'],
-  PessoaJuridica: ['Receber transferências', 'Gerar cobranças de cartão de crédito'],
+  PessoaFisica: ['Enviar transferências para PF e PJ', 'Receber transferências', 'Pagar cobranças de cartão de crédito', 'Usar cartão de crédito e pagar faturas'],
+  PessoaJuridica: ['Receber transferências', 'Gerar cobranças de cartão de crédito', 'Receber e antecipar recebíveis'],
 };
 
 export const NOME_TIPO_CONTA: Record<TipoConta, string> = {
