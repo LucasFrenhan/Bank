@@ -7,14 +7,28 @@ import { saldoEmCentavos, formatarCentavos } from '../formatacao/valor';
  */
 
 export const NOME_ABERTURA = 'Saldo inicial';
+export const NOME_GENERICO = 'Lançamento';
 export const SEM_DESCRICAO = 'Sem descrição';
 
 export function ehEntrada(item: ItemExtrato): boolean {
   return item.direcao === 'Entrada';
 }
 
+/** Lançamentos sem contraparte (extrato 1.3.0; specs/014-cartao-credito-cobrancas, FR-038). */
+const NOMES_SEM_CONTRAPARTE = new Map([
+  ['Abertura', NOME_ABERTURA],
+  ['PagamentoFatura', 'Pagamento de fatura'],
+  ['LiquidacaoRecebivel', 'Recebimento de cobrança'],
+  ['AntecipacaoRecebivel', 'Antecipação de recebível'],
+]);
+
 export function nomeContraparte(item: ItemExtrato): string {
-  return item.tipo === 'Abertura' || !item.contraparte ? NOME_ABERTURA : item.contraparte.nome;
+  return NOMES_SEM_CONTRAPARTE.get(item.tipo) ?? item.contraparte?.nome ?? NOME_GENERICO;
+}
+
+/** Só transferências têm direção no texto de apoio; os demais tipos mostram a descrição. */
+export function ehTransferencia(item: ItemExtrato): boolean {
+  return item.tipo === 'Transferencia';
 }
 
 export function descricaoItem(item: ItemExtrato): string {

@@ -60,6 +60,25 @@ describe('Extrato — desktop (US4)', () => {
     expect(within(linhas[2]!).queryByRole('link')).not.toBeInTheDocument();
   });
 
+  it('lançamentos de cartão têm rótulo próprio e nenhum comprovante (specs/014, FR-038)', async () => {
+    servidor.use(
+      extratoDe([
+        itemExtrato(1, { tipo: 'PagamentoFatura', direcao: 'Saida', transferenciaId: null, contraparte: null, descricao: 'Pagamento da fatura 12/2026' }),
+        itemExtrato(2, { tipo: 'AntecipacaoRecebivel', transferenciaId: null, contraparte: null, descricao: 'Antecipação: Café' }),
+      ]),
+    );
+    renderizarApp('/extrato', { sessao: 'PessoaFisica' });
+
+    const linhas = within(await screen.findByRole('table', { name: 'Lançamentos' })).getAllByRole('row').slice(1);
+    expect(linhas[0]).toHaveTextContent('Pagamento de fatura');
+    expect(linhas[0]).toHaveTextContent('Pagamento da fatura 12/2026');
+    expect(linhas[1]).toHaveTextContent('Antecipação de recebível');
+    for (const linha of linhas) {
+      expect(linha).not.toHaveTextContent('Saldo inicial');
+      expect(within(linha).queryByRole('link')).not.toBeInTheDocument();
+    }
+  });
+
   it('todo lançamento de transferência leva ao comprovante; o saldo inicial não (spec 007 FR-014, spec 008)', async () => {
     const [item1, item3] = [itemExtrato(1), itemExtrato(3)];
     servidor.use(extratoDe([item1, item3, ITEM_ABERTURA]));

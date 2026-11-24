@@ -67,6 +67,10 @@ public class RecebiveisTests(CartoesApiFactory factory) : IClassFixture<CartoesA
         Assert.Equal(293.90m, await SaldoAsync(client, pj));
         var item = Assert.Single((await GetOkAsync(client, pj.Token, "/api/v1/transferencias/extrato")).GetProperty("itens").EnumerateArray());
         Assert.Equal(("AntecipacaoRecebivel", "Antecipação: Café Especial"), (item.GetProperty("tipo").GetString(), item.GetProperty("descricao").GetString()));
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, item.GetProperty("contraparte").ValueKind);
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, item.GetProperty("transferenciaId").ValueKind);
+        Assert.Equal(1, (await GetOkAsync(client, pj.Token, "/api/v1/transferencias/extrato?direcao=Entrada")).GetProperty("totalItens").GetInt32());
+        Assert.Equal(0, (await GetOkAsync(client, pj.Token, "/api/v1/transferencias/extrato?direcao=Saida")).GetProperty("totalItens").GetInt32());
 
         await factory.ProcessarEmAsync(Brasilia(2027, 12, 1, 9));
 

@@ -387,14 +387,14 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T071 [P] Frontend (FR-038, R14): testes e rótulos em `src/frontend/src/paginas/lancamentos.ts`
+- [X] T071 [P] Frontend (FR-038, R14): testes e rótulos em `src/frontend/src/paginas/lancamentos.ts`
   (`nomeContraparte`; `NOME_ABERTURA` só para `Abertura`; desconhecido = "Lançamento"), `Inicio.tsx`
   (`detalhePf`) e `Extrato.tsx` (mobile); conferir desktop e mobile; `npm run lint`, `typecheck` e `test`
-- [ ] T072 [P] `it/ExtratoTests.cs`: novos tipos com `contraparte` e `transferenciaId` nulos e filtro de
+- [X] T072 [P] `it/RecebiveisTests.cs` e `it/PagamentoFaturaTests.cs`: novos tipos com `contraparte` e `transferenciaId` nulos e filtro de
   direção (extrato 1.3.0)
-- [X] T073 [P] `it/TelemetriaCartoesTests.cs`: instrumentos e tags da tabela do plan na API e no Worker, sem
+- [X] T073 [P] `it/DadosSensiveisCartaoTests.cs` (API) e `it/ProcessamentoDiarioTests.cs` (Worker): instrumentos e tags da tabela do plan na API e no Worker, sem
   dados pessoais nem de cartão (FR-037)
-- [ ] T074 [P] Atualizar `docs/desenvolvimento.md` (chave, configuração, endpoints, processamento diário,
+- [X] T074 [P] Atualizar `docs/desenvolvimento.md` (chave, configuração, endpoints, processamento diário,
   métricas) e o histórico de `specs/009-limite-transferencia/contracts/transferencias-api.md`,
   `specs/010-mensageria-rabbitmq/contracts/evento-cobranca-paga.md` e `topologia-e-mensagens.md` e
   `specs/011-notificacoes-auditoria/contracts/notificacoes-auditoria.md`, apontando para a 014

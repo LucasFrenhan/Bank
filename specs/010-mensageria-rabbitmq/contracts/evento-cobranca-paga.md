@@ -2,6 +2,9 @@
 
 **Feature**: [../spec.md](../spec.md) (FR-012) | Transporte: [topologia-e-mensagens.md](topologia-e-mensagens.md)
 
+> **Contrato vigente**: [specs/014](../../014-cartao-credito-cobrancas/contracts/evento-cobranca-paga.md),
+> que acrescentou `lojistaNome` (opcional), o produtor e o consumidor. O texto abaixo é o original.
+
 Reservado para a spec de cobranças: nesta spec **nada publica nem consome** este evento; só a fila
 `notificacoes.cobrancas.fila` e sua DLQ são declaradas. A spec de cobranças pode ajustar este
 contrato antes da primeira publicação sem quebra de compatibilidade (ainda não há produtor).

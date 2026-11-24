@@ -71,6 +71,7 @@ dotnet test --solution src/backend/Bank.slnx
 # rodar a API pelo SDK (com o ambiente local no ar: banco e telemetria)
 docker compose up -d --wait postgres rabbitmq aspire-dashboard
 dotnet user-secrets set "Jwt:ChaveAssinatura" "$(openssl rand -base64 48)" --project src/backend/src/Bank.Api  # uma vez
+dotnet user-secrets set "Cartoes:ChaveDerivacao" "$(openssl rand -base64 48)" --project src/backend/src/Bank.Api  # uma vez
 dotnet run --project src/backend/src/Bank.Api
 ```
 
@@ -183,6 +184,36 @@ Definidos em [`specs/006-transferencias`](../specs/006-transferencias/spec.md) �
   `src/backend/src/Bank.Infrastructure/Persistencia/Sql/`, embutidos no assembly (constituição
   v1.1.0).
 
+### Cartão de crédito, cobranças, faturas e recebíveis
+
+Definidos em [`specs/014-cartao-credito-cobrancas`](../specs/014-cartao-credito-cobrancas/spec.md) —
+[contrato](../specs/014-cartao-credito-cobrancas/contracts/cartoes-cobrancas-api.md),
+[evento](../specs/014-cartao-credito-cobrancas/contracts/evento-cobranca-paga.md) e
+[roteiro de validação](../specs/014-cartao-credito-cobrancas/quickstart.md). Sem telas por enquanto.
+
+- **Cartão** (`/api/v1/cartoes`, só PF): um por CPF, com a bandeira escolhida (001 Visa, 002
+  Mastercard) e limite de `Cartoes:LimitePadrao`. `GET /meu/dados` devolve nome, número, validade e
+  CVV ao titular, com `no-store`.
+- **Chave de derivação** (obrigatória; a API não sobe sem ela, com ≥ 32 bytes): número e CVV nunca são
+  gravados; são derivados de `Cartoes:ChaveDerivacao` (user-secrets no SDK;
+  `CARTOES_CHAVE_DERIVACAO` no Compose). **Trocar a chave muda os dados de todos os cartões**, e os já
+  emitidos passam a falhar com erro 500 ao exibir ou pagar.
+- **Cobranças** (`/api/v1/cobrancas`): a PJ emite, lista e cancela; a PF paga com o próprio cartão
+  (`Idempotency-Key` obrigatório). A bandeira simulada recusa com `422`: `cartao-nao-autorizado`,
+  `cartao-bloqueado-fatura-vencida` ou `limite-cartao-insuficiente`. Pagar não muda saldos.
+- **Faturas** (`/api/v1/faturas/{AAAA-MM}`, só PF): fecham no dia 07, vencem no dia 10 ou no próximo
+  dia útil e são pagas pelo total com o saldo. Atraso: juros simples por dia
+  (`Cartoes:JurosAtrasoMensalPercentual` ÷ 30).
+- **Recebíveis** (`/api/v1/recebiveis`, só PJ): valor integral no 30º dia útil ou antecipado na hora
+  com taxa de 2%.
+- **Processamento diário** (Worker): na partida, à 00:00 de Brasília e a cada
+  `ProcessamentoDiario:IntervaloSegundos` (60), só em dias úteis: lança as compras de dias anteriores,
+  libera as faturas fechadas e credita os recebíveis devidos. Repetir, atrasar ou rodar em várias
+  instâncias não duplica. Desligar: `ProcessamentoDiario:Habilitado=false`.
+- **Dias úteis**: `CalendarioBancario` (Domain), calculado pela Páscoa; sem cadastro de feriados.
+- **Métricas**: `bank.cartoes.*`, `bank.cobrancas.*`, `bank.faturas.*`, `bank.recebiveis.*` (API) e
+  `bank.processamento.*` (Worker).
+
 ### Mensageria (Worker)
 
 Definida em [`specs/010-mensageria-rabbitmq`](../specs/010-mensageria-rabbitmq/spec.md) —
@@ -191,14 +222,15 @@ Definida em [`specs/010-mensageria-rabbitmq`](../specs/010-mensageria-rabbitmq/s
 [roteiro de validação](../specs/010-mensageria-rabbitmq/quickstart.md).
 
 - **Processo**: `src/backend/src/Bank.Worker` (serviço `worker` do Compose) hospeda o
-  despachante do outbox e o consumidor de notificações; a API não fala com o broker. Pelo SDK:
+  despachante do outbox, os consumidores de notificações e o processamento diário; a API não fala com o broker. Pelo SDK:
   `dotnet run --project src/backend/src/Bank.Worker` (porta 5081), com a API já tendo aplicado
   as migrations.
 - **Publicação**: a cada 1 s o despachante reserva até 50 eventos pendentes de `outbox_eventos`
   (`FOR UPDATE SKIP LOCKED`), publica em `banco.eventos.topic` com `mandatory` e confirmação do
   broker e só então preenche `publicado_em`. Com o broker fora do ar, as transferências seguem
   concluindo e os eventos esperam no outbox.
-- **Consumo**: `notificacoes.transferencias.fila`; cada evento é registrado em
+- **Consumo**: `notificacoes.transferencias.fila` e `notificacoes.cobrancas.fila` (spec 014, com as
+  próprias filas de espera e DLQ); cada evento é registrado em
   `eventos_processados` na mesma transação da notificação, então entregas duplicadas são
   descartadas.
 - **Notificações** ([spec 011](../specs/011-notificacoes-auditoria/spec.md),

@@ -27,7 +27,8 @@ canal aberto, de forma idempotente (FR-007). Sistemas externos que quiserem os e
 | `notificacoes.cobrancas.dlq` | `banco.eventos.dlx` / `cobranca.paga.dlq` | — |
 
 Os intervalos vêm de `Mensageria:IntervalosNovaTentativaMs`; o sufixo da fila de espera é o
-intervalo em ms. As filas de espera de cobranças nascem com o consumidor de cobranças (Fase 4).
+intervalo em ms. As filas de espera de cobranças
+nasceram com o consumidor, na spec 014.
 
 ## Publicação
 
@@ -98,6 +99,12 @@ então um evento já processado é descartado como duplicado.
 
 Nenhum sinal carrega nome, descrição, payload, documento, credencial ou identificador de usuário
 em tag de métrica (FR-023).
+
+## Histórico
+
+- **1.1.0** (2026-11-24): filas de espera de cobranças, com o consumidor — ver
+  [specs/014](../../014-cartao-credito-cobrancas/contracts/evento-cobranca-paga.md) (issue #22).
+- **1.0.0** (2026-11-21): versão inicial.
 
 ## Compatibilidade
 
