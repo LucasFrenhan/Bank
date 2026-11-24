@@ -158,10 +158,12 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
   meters em `api/Observability/` e `worker/Observability/TelemetriaWorker.cs`
 - [ ] T028 [P] Extrair para `app/Comum/` a leitura comum de `pagina`/`tamanhoPagina` (padrão 20, máximo 100) e
   de `Idempotency-Key`, usando-a nos casos novos sem mudar mensagens nem comportamento dos atuais; em
-  `api/Endpoints/`, compartilhar a marcação OpenAPI do cabeçalho; títulos dos 10 novos códigos de erro em
-  `api/ErrorHandling/ResultadoHttpExtensions.cs`
+  `api/Endpoints/`, compartilhar a marcação OpenAPI do cabeçalho; títulos dos 11 novos códigos de erro
+  (T014–T017, exceto `saldo-insuficiente`, que já existe) em `api/ErrorHandling/ResultadoHttpExtensions.cs`
 - [ ] T029 [P] Criar `it/ApiCartoes.cs` (ajudantes: criar PF com cartão, PJ, cobrança, pagar, ler fatura,
-  antecipar) e `it/CartoesApiFactory.cs` (relógio ajustável, saldo inicial PF de R$ 5.000,00)
+  antecipar) e `it/CartoesApiFactory.cs` (relógio ajustável, saldo inicial PF de
+  R$ 5.000,00 e, a partir da US4, `AddProcessamento`, para chamar `ProcessarDia` sem o Worker; o Worker fica
+  só no teste do serviço hospedado)
 - [ ] T030 Rodar `dotnet build` e toda a suíte anterior; ajustar só o que a mudança de `Lancamento` exigir
 
 **Checkpoint**: Domain completo, banco migrado, suíte anterior verde

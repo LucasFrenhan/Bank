@@ -161,7 +161,8 @@ Ordem das verificações: permissão; 400 (chave e campos); repetição da chave
 | 422 | `cartao-bloqueado-fatura-vencida` | há fatura vencida não paga |
 | 422 | `limite-cartao-insuficiente` | valor maior que o disponível |
 
-As respostas nunca repetem número ou CVV.
+A repetição da chave exige a mesma cobrança e os dados válidos do mesmo cartão. Uma recusa (422) não
+consome a chave. As respostas nunca repetem número ou CVV.
 
 ## Faturas
 
@@ -201,6 +202,7 @@ sem cartão: 404 `cartao-nao-encontrado`.
 - `situacao`: `Aberta`, `Fechada`, `Disponivel`, `Vencida`, `Paga`.
 - `valorAPagar`: total + juros de hoje em `Disponivel`/`Vencida`; nulo nas demais. Em `Paga`,
   `diasAtraso`, `juros` e `valorPago` são os do pagamento.
+- Mês sem compras, fora o ciclo atual, não aparece na lista e responde 404 `fatura-nao-encontrada`.
 - Lançamentos por data da compra, do mais novo para o mais antigo.
 
 **Erros**: 400 (`competencia`), 404 `cartao-nao-encontrado` ou `fatura-nao-encontrada`.

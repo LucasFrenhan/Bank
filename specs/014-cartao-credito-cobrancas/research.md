@@ -196,6 +196,6 @@
 - **Decision**: unitários para Domain e casos de uso; integração com PostgreSQL e RabbitMQ em
   contêiner e relógio ajustável (padrão de `LimiteDiarioTests`: token no horário real, regra no
   horário controlado). No ambiente `Testing` o serviço hospedado fica desligado
-  (`ProcessamentoDiario:Habilitado=false`) e os testes chamam `ProcessarDia` por escopo do Worker; um
+  (`ProcessamentoDiario:Habilitado=false`) e os testes chamam `ProcessarDia` registrado na fábrica da API; um
   teste liga o serviço para conferir o agendamento. SC-007 é conferido com 10.000 compras em 1.000
   cartões. Concorrência com 50 requisições (SC-003).

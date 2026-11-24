@@ -380,7 +380,7 @@ acumulariam.
 - **FR-010**: A cobrança MUST ter os status `Pendente`, `Paga` e `Cancelada`. `Paga` e `Cancelada`
   são terminais. Uma recusa mantém `Pendente` e registra o motivo e o instante da última recusa.
 - **FR-011**: Qualquer usuário autenticado MUST poder consultar uma cobrança pelo identificador,
-  vendo lojista (nome e CNPJ), valor, descrição, status e instantes de emissão e pagamento. Só o
+  vendo lojista (nome e CNPJ), valor, descrição, status e instantes de emissão, pagamento e cancelamento. Só o
   emissor e o pagador veem os 4 últimos dígitos, a bandeira e o código de autorização; só o emissor
   vê a última recusa, sem identificação de quem tentou. A identidade do pagador não é exposta.
 - **FR-012**: A PJ MUST listar as cobranças que emitiu, das mais novas para as mais antigas, com
@@ -410,14 +410,15 @@ acumulariam.
   aprovações; uma recusa não a consome.
 - **FR-020**: Pagamentos simultâneos MUST NOT permitir que uma cobrança seja paga duas vezes nem que
   o limite disponível fique negativo.
-- **FR-021**: O evento `cobranca.paga` MUST seguir o contrato v1 da spec 010, publicado pelo
-  mecanismo já existente, exatamente um por cobrança paga.
+- **FR-021**: O evento `cobranca.paga` MUST seguir o contrato v1 da spec 010 com o campo opcional
+  `lojistaNome` acrescentado por esta spec, publicado pelo mecanismo já existente, exatamente um por
+  cobrança paga.
 
 **Processamento diário e faturas**
 
 - **FR-022**: Um processamento MUST iniciar às 00:00 de Brasília de todo dia útil e, nesta ordem,
   lançar as compras feitas até o dia anterior, liberar as faturas fechadas e liquidar os recebíveis
-  devidos. Em dia não útil nada é lançado, liberado nem liquidado; fica para o próximo dia útil.
+  devidos. Lançar vem antes de liberar em cada cartão, e os recebíveis vêm depois dos cartões. Em dia não útil nada é lançado, liberado nem liquidado; fica para o próximo dia útil.
 - **FR-022a**: Dia útil é de segunda a sexta, exceto os feriados nacionais fixos (01/01, 21/04, 01/05,
   07/09, 12/10, 02/11, 15/11, 20/11 e 25/12) e, calculados a partir da Páscoa, Carnaval (segunda e terça),
   Sexta-feira Santa e Corpus Christi. Vale para qualquer ano, sem cadastro manual.
@@ -425,7 +426,10 @@ acumulariam.
   instâncias e recuperar dias perdidos quando o sistema esteve parado.
 - **FR-024**: A fatura do mês M vence no dia 10 ou, se não for dia útil, no próximo dia útil. Ela MUST
   reunir as compras feitas de 00:00 do dia 08 do mês anterior até o fim do dia 07 do mês M, pela data da
-  autorização, mesmo que lançadas depois. O fechamento é sempre no dia 07.
+  autorização, mesmo que lançadas depois. O fechamento é sempre no dia 07. Duas exceções técnicas: fatura
+  liberada depois do vencimento passa a vencer no dia da liberação; e compra autorizada por um relógio
+  atrasado, com a fatura do ciclo já liberada, recebe a data do primeiro dia do ciclo seguinte, que vale
+  também para os 30 dias úteis do lojista.
 - **FR-025**: A fatura MUST ter a situação `Aberta` (até o fim do dia 07), `Fechada` (do fim do dia
   07 até todas as compras do ciclo serem lançadas), `Disponivel` (pode ser paga), `Vencida`
   (disponível e não paga após o fim do dia do vencimento) ou `Paga`.
@@ -436,7 +440,8 @@ acumulariam.
   de outra pessoa são tratadas como inexistentes.
 - **FR-028**: A PF MUST pagar uma fatura `Disponivel` ou `Vencida` pelo valor total, com o saldo da
   carteira e chave de idempotência. O pagamento é atômico: debita o saldo, registra a saída no
-  extrato, marca a fatura `Paga` e libera o limite. Não há pagamento parcial.
+  extrato, marca a fatura `Paga` e libera o limite. Não há pagamento parcial. É permitido em qualquer
+  dia, inclusive não útil.
 - **FR-028a**: A fatura paga depois do vencimento MUST ter juros simples por atraso, com taxa mensal
   configurável por ambiente e padrão de 15%: total × (taxa ÷ 30) × dias corridos de atraso, contados do
   dia seguinte ao vencimento até o dia do pagamento, inclusive, e arredondado para 2 casas (meio centavo
@@ -455,7 +460,7 @@ acumulariam.
   vez, com chave de idempotência. A taxa é de 2% do valor, arredondada para 2 casas (meio centavo para
   cima), qualquer que seja o prazo restante. O líquido é creditado na hora, com entrada no extrato, e
   o recebível fica `Antecipado`, com bruto, taxa e líquido registrados. A operação não pode ser
-  desfeita.
+  desfeita e é permitida em qualquer dia, inclusive não útil.
 - **FR-033**: O lojista MUST listar os seus recebíveis com valor bruto, taxa, líquido, data prevista,
   situação e cobrança de origem, com filtro opcional de situação e paginação.
 - **FR-034**: Crédito e débito em carteira MUST seguir as regras já existentes de atomicidade,
@@ -469,8 +474,7 @@ acumulariam.
 - **FR-036**: Erros MUST seguir o formato padrão, com `type` estável para: cartão já existente,
   cartão não encontrado, cobrança não encontrada, cobrança não pendente, cartão não autorizado, cartão
   bloqueado por fatura vencida, limite do cartão insuficiente, fatura não encontrada, fatura não
-  disponível, recebível não encontrado e
-  recebível não antecipável.
+  disponível, recebível não encontrado e recebível não antecipável.
 - **FR-037**: O sistema MUST emitir métricas de autorizações por resultado e bandeira, e do
   processamento diário (execuções, compras lançadas, recebíveis liquidados, falhas e duração), sem
   dados pessoais nem de cartão.

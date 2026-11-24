@@ -77,12 +77,12 @@ consumidor; 1 serviço hospedado; 7 histórias
 | `bank.cobrancas.autorizacoes` | `resultado` (`aprovada` ou o motivo), `bandeira` (`001`, `002`, `nenhuma`) | API |
 | `bank.faturas.pagamentos` | `vencida` | API |
 | `bank.recebiveis.antecipados` | — | API |
-| `Bank.Processamento` `bank.processamento.execucoes` | `resultado` (`concluida`, `com-falhas`, `dia-nao-util`) | Worker |
+| `Bank.Processamento` `bank.processamento.execucoes` | `resultado` (`concluida`, `com-falhas`); só rodadas com trabalho | Worker |
 | `bank.processamento.compras_lancadas`, `.faturas_liberadas`, `.recebiveis_liquidados` | — | Worker |
 | `bank.processamento.falhas` | `etapa` (`lancamento`, `liquidacao`) | Worker |
 | `bank.processamento.duracao` (s) | — | Worker |
 
-Rodadas sem trabalho não geram span nem log. Span `processamento diario` (`Bank.Processamento`) nas
+Rodadas sem trabalho (ou em dia não útil) não geram métrica, span nem log. Span `processamento diario` (`Bank.Processamento`) nas
 demais. Logs estruturados só com identificadores, valores e contagens.
 
 ## Configuração nova
