@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Faturas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: {{dir}}; min-height: {{minH}}; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; box-sizing: border-box">
+<dc-import name="Menu" perfil="PF" ativo="Cartão" mobile="{{mobile}}" hint-size="240px,900px"></dc-import>
+<main style="flex: 1 1 auto; min-width: 0; padding: {{pad}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; max-width: 1200px">
+<div><a href="{{lk.cartao}}" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; font-weight: 600; text-decoration: none">Voltar ao cartão</a>
+<h1 style="margin: 0; font-size: {{h1}}; line-height: 1.25; font-weight: 600">Faturas</h1></div>
+<section aria-label="Lista de faturas" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden">
+<sc-for list="{{faturas}}" as="f" hint-placeholder-count="5">
+<a href="{{f.href}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-height: 72px; padding: 12px 24px; box-sizing: border-box; border-top: {{f.borda}}; color: #0F172A; text-decoration: none">
+<span style="flex: 1 1 180px; min-width: 0"><span style="display: block; font-size: 16px; font-weight: 500">{{f.mes}}</span><span style="display: block; font-size: 12px; line-height: 16px; color: #475569">{{f.detalhe}}</span></span>
+<span style="padding: 2px 8px; border-radius: 999px; background: {{f.fundo}}; color: {{f.cor}}; font-size: 12px; line-height: 16px; font-weight: 600">{{f.situacao}}</span>
+<span style="min-width: 110px; text-align: right; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums">{{f.total}}</span>
+</a>
+</sc-for>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mobile":{"editor":null,"default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const m = this.props.mobile === true;
+    const c = { Aberta: ['#EFF4FF', '#1D4ED8'], Disponível: ['#EFF4FF', '#1D4ED8'], Vencida: ['#FEF3F2', '#B42318'], Paga: ['#ECFDF5', '#047857'] };
+    const l = [['Janeiro de 2027', 'Vence em 11 jan', 'Aberta', 'R$ 0,00'], ['Dezembro de 2026', 'Venceu em 10 dez · 10 dias de atraso', 'Vencida', 'R$ 1.050,00'], ['Novembro de 2026', 'Paga em 9 nov', 'Paga', 'R$ 742,30'], ['Outubro de 2026', 'Paga em 13 out', 'Paga', 'R$ 188,90'], ['Setembro de 2026', 'Paga em 10 set', 'Paga', 'R$ 512,00']];
+    return {
+      mobile: m, dir: m ? 'column-reverse' : 'row', minH: m ? '1180px' : '900px', pad: m ? '16px' : '32px 48px', h1: m ? '24px' : '32px',
+      faturas: l.map(([mes, detalhe, situacao, total], i) => ({ mes, detalhe, situacao, total, fundo: c[situacao][0], cor: c[situacao][1], borda: i ? '1px solid #E2E8F0' : '0', href: m ? 'M-Fatura.dc.html' : 'Fatura.dc.html' })),
+      lk: { cartao: m ? 'M-Cartao.dc.html' : 'Main.dc.html' },
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -33,6 +33,34 @@ Fluxos navegáveis no protótipo: login → início → transferir → confirma�
 início; cadastro com alternância PF/PJ (rótulos, máscara e saldo inicial mudam com o tipo);
 filtros Todas / Entradas / Saídas no extrato.
 
+## Cartão, cobranças, faturas e recebíveis (spec 015)
+
+Protótipo próprio, aprovado para a [spec 015](../../specs/015-frontend-cartao-credito/spec.md) (issue #54):
+
+- **Protótipo navegável:** <https://claude.ai/artifact/9mhoKhZ8E9guBLsVE53oEY> (privado; o acesso é concedido pelo
+  dono do link).
+- **Fontes:** [`fontes/cartao/`](fontes/cartao/), no mesmo formato, com o arranjo das telas em `canvas.json`. As
+  versões de celular (`M-*`) reaproveitam a tela de desktop.
+- **Capturas:** entram com as telas prontas, na implementação da spec 015.
+
+| Tela | Perfil | Desktop | Celular |
+| --- | --- | --- | --- |
+| Cartão | PF | [Main](fontes/cartao/Main.dc.html) | [M-Cartao](fontes/cartao/M-Cartao.dc.html) |
+| Solicitar cartão | PF | [Solicitar](fontes/cartao/Solicitar.dc.html) | [M-Solicitar](fontes/cartao/M-Solicitar.dc.html) |
+| Pagar cobrança | PF | [Pagar](fontes/cartao/Pagar.dc.html) | [M-Pagar](fontes/cartao/M-Pagar.dc.html) |
+| Comprovante | PF | [Comprovante](fontes/cartao/Comprovante.dc.html) | [M-Comprovante](fontes/cartao/M-Comprovante.dc.html) |
+| Faturas | PF | [Faturas](fontes/cartao/Faturas.dc.html) | [M-Faturas](fontes/cartao/M-Faturas.dc.html) |
+| Fatura | PF | [Fatura](fontes/cartao/Fatura.dc.html) | [M-Fatura](fontes/cartao/M-Fatura.dc.html) |
+| Cobranças | PJ | [Cobrancas](fontes/cartao/Cobrancas.dc.html) | [M-Cobrancas](fontes/cartao/M-Cobrancas.dc.html) |
+| Nova cobrança | PJ | [NovaCobranca](fontes/cartao/NovaCobranca.dc.html) | [M-NovaCobranca](fontes/cartao/M-NovaCobranca.dc.html) |
+| Cobrança | PJ | [Cobranca](fontes/cartao/Cobranca.dc.html) | [M-Cobranca](fontes/cartao/M-Cobranca.dc.html) |
+| Recebíveis | PJ | [Recebiveis](fontes/cartao/Recebiveis.dc.html) | [M-Recebiveis](fontes/cartao/M-Recebiveis.dc.html) |
+| Estados e recusas | PF e PJ | [Estados](fontes/cartao/Estados.dc.html) | — |
+| Menu | PF e PJ | [Menu](fontes/cartao/Menu.dc.html) | o mesmo |
+
+O aviso de fatura no início da PF foi decidido depois e não está no protótipo. Número, CVV, nomes e valores são
+fictícios.
+
 ## Design system
 
 Capturas: [tipografia e tokens](telas/design-system-01-tipografia.png) e
@@ -103,7 +131,8 @@ referência para o time.
 - **Saldo inicial:** PF R$ 10,00 e PJ R$ 0,00 (RN-05 da spec 003).
 - **Conta PJ sem "Transferir":** a ação nem aparece para PJ (RN-06); o 403 fica como
   proteção caso a tela seja acessada diretamente.
-- **Cobranças:** aparecem no menu da PJ como "Em breve", pois ainda não há spec.
+- **Cobranças:** aparecem no menu da PJ como "Em breve", pois ainda não há spec. A spec 015 cria a área de
+  Cobranças da PJ.
 - **Transferência em três etapas** (dados → confirmação → comprovante), com o destinatário
   confirmado pelo nome antes do envio e o saldo após a transferência na confirmação.
 - **Documentos mascarados** fora do formulário (ex.: `•••.456.789-••`).

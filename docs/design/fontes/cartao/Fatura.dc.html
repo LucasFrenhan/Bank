@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Fatura</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: {{dir}}; min-height: {{minH}}; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; box-sizing: border-box">
+<dc-import name="Menu" perfil="PF" ativo="Cartão" mobile="{{mobile}}" hint-size="240px,900px"></dc-import>
+<main style="flex: 1 1 auto; min-width: 0; padding: {{pad}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; max-width: 1200px">
+<div><a href="{{lk.faturas}}" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; font-weight: 600; text-decoration: none">Voltar às faturas</a>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px"><h1 style="margin: 0; font-size: {{h1}}; line-height: 1.25; font-weight: 600">Fatura de dezembro de 2026</h1><span style="padding: 2px 8px; border-radius: 999px; background: {{s.fundo}}; color: {{s.cor}}; font-size: 12px; font-weight: 600">{{s.nome}}</span></div></div>
+<sc-if value="{{vencida}}" hint-placeholder-val="{{ true }}"><div role="status" style="display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid #FECDCA; border-radius: 10px; background: #FEF3F2; font-size: 14px; line-height: 20px"><span style="color: #B42318; font-weight: 600">Fatura vencida há 10 dias</span><span style="color: #475569">O cartão está bloqueado para novas compras até o pagamento.</span></div></sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<section aria-label="Resumo" style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<div><div style="font-size: 14px; color: #475569">{{rotuloValor}}</div><div style="font-size: 32px; line-height: 40px; font-weight: 600; font-variant-numeric: tabular-nums">{{valor}}</div></div>
+<sc-for list="{{linhas}}" as="l" hint-placeholder-count="5"><div style="display: flex; justify-content: space-between; gap: 16px; padding-top: 12px; border-top: 1px solid #E2E8F0; font-size: 14px; line-height: 20px"><span style="color: #475569">{{l.rotulo}}</span><span style="font-weight: 500; text-align: right">{{l.valor}}</span></div></sc-for>
+<sc-if value="{{podePagar}}" hint-placeholder-val="{{ true }}"><button onClick="{{abrir}}" style="margin-top: 4px; min-height: 52px; border-radius: 10px; border: 0; background: #1D4ED8; color: #FFFFFF; font: 600 16px Inter, sans-serif; cursor: pointer">Pagar fatura</button></sc-if>
+<sc-if value="{{confirmando}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 10px; background: #F5F7FA; border: 1px solid #E2E8F0">
+<h2 style="margin: 0; font-size: 18px; line-height: 24px; font-weight: 600">Confira antes de pagar</h2>
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #475569">Seu saldo</span><span style="font-weight: 500">R$ 2.500,00</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #475569">Saldo depois</span><span style="font-weight: 500">{{saldoDepois}}</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px"><button onClick="{{pagar}}" style="flex: 1 1 160px; min-height: 48px; border-radius: 10px; border: 0; background: #1D4ED8; color: #FFFFFF; font: 600 16px Inter, sans-serif; cursor: pointer">Pagar {{valor}}</button><button onClick="{{fechar}}" style="flex: 1 1 120px; min-height: 48px; border-radius: 10px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #0F172A; font: 600 16px Inter, sans-serif; cursor: pointer">Voltar</button></div>
+</div></sc-if>
+</section>
+<section aria-label="Lançamentos" style="flex: 2 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden">
+<h2 style="margin: 0; padding: 20px 24px; font-size: 20px; line-height: 28px; font-weight: 600">Lançamentos</h2>
+<sc-if value="{{vazia}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 24px; border-top: 1px solid #E2E8F0; font-size: 14px; line-height: 20px; color: #475569">Nenhum lançamento ainda. As compras aparecem aqui no próximo dia útil.</p></sc-if>
+<sc-for list="{{itens}}" as="i" hint-placeholder-count="4"><div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 24px; border-top: 1px solid #E2E8F0"><span style="min-width: 0"><span style="display: block; font-size: 14px; line-height: 20px; font-weight: 500">{{i.loja}}</span><span style="display: block; font-size: 12px; line-height: 16px; color: #475569">{{i.detalhe}}</span></span><span style="font-size: 14px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums">{{i.valor}}</span></div></sc-for>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"situacao":{"editor":"enum","options":["Vencida","Disponível","Aberta","Fechada","Paga"],"default":"Vencida","section":"Estado"},"mobile":{"editor":null,"default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { c: false, paga: false }; }
+  renderVals() {
+    const m = this.props.mobile === true, s = this.state.paga ? 'Paga' : (this.props.situacao ?? 'Vencida');
+    const cores = { Vencida: ['#FEF3F2', '#B42318'], Disponível: ['#EFF4FF', '#1D4ED8'], Aberta: ['#EFF4FF', '#1D4ED8'], Fechada: ['#F1F5F9', '#475569'], Paga: ['#ECFDF5', '#047857'] };
+    const pagavel = s === 'Vencida' || s === 'Disponível', vencida = s === 'Vencida', vazia = s === 'Aberta';
+    const total = vazia ? 'R$ 0,00' : 'R$ 1.000,00', valor = vencida || this.state.paga ? 'R$ 1.050,00' : total;
+    const linhas = [['Total das compras', total]];
+    if (vencida || this.state.paga) linhas.push(['Juros (10 dias)', 'R$ 50,00']);
+    linhas.push(['Período', '8 nov a 7 dez'], ['Fechamento', '7 dez 2026'], ['Vencimento', '10 dez 2026']);
+    if (s === 'Paga') linhas.push(['Paga em', '20 dez 2026, 10:12']);
+    if (s === 'Fechada') linhas.push(['Pagamento', 'Liberado após o processamento']);
+    const itens = vazia ? [] : [['Cafeteria Grão Especial Ltda', 'Kit 3 Pacotes · 24 nov', 'R$ 299,90'], ['Livraria Central ME', 'Livros técnicos · 21 nov', 'R$ 412,10'], ['Oficina Rápida ME', 'Revisão · 15 nov', 'R$ 241,60'], ['Padaria Boa Massa Ltda', 'Encomenda · 9 nov', 'R$ 46,40']];
+    return {
+      mobile: m, dir: m ? 'column-reverse' : 'row', minH: m ? '1180px' : '900px', pad: m ? '16px' : '32px 48px', h1: m ? '24px' : '32px',
+      s: { nome: s, fundo: cores[s][0], cor: cores[s][1] }, vencida, vazia, valor,
+      rotuloValor: s === 'Paga' ? 'Valor pago' : pagavel ? 'Valor a pagar hoje' : 'Total até agora',
+      saldoDepois: vencida ? 'R$ 1.450,00' : 'R$ 1.500,00',
+      linhas: linhas.map(([rotulo, v]) => ({ rotulo, valor: v })), itens: itens.map(([loja, detalhe, v]) => ({ loja, detalhe, valor: v })),
+      podePagar: pagavel && !this.state.c, confirmando: pagavel && this.state.c,
+      abrir: () => this.setState({ c: true }), fechar: () => this.setState({ c: false }), pagar: () => this.setState({ c: false, paga: true }),
+      lk: { faturas: m ? 'M-Faturas.dc.html' : 'Faturas.dc.html' },
+    };
+  }
+}
+</script>
+</body>
+</html>

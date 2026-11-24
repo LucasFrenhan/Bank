@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Detalhe da cobrança</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: {{dir}}; min-height: {{minH}}; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; box-sizing: border-box">
+<dc-import name="Menu" perfil="PJ" ativo="Cobranças" mobile="{{mobile}}" hint-size="240px,900px"></dc-import>
+<main style="flex: 1 1 auto; min-width: 0; padding: {{pad}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; max-width: 1200px">
+<div><a href="{{lk.lista}}" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; font-weight: 600; text-decoration: none">Voltar às cobranças</a>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px"><h1 style="margin: 0; font-size: {{h1}}; line-height: 1.25; font-weight: 600">R$ 299,90</h1><span style="padding: 2px 8px; border-radius: 999px; background: {{s.fundo}}; color: {{s.cor}}; font-size: 12px; font-weight: 600">{{s.nome}}</span></div>
+<p style="margin: 8px 0 0; font-size: 16px; line-height: 24px; color: #475569">Assinatura Mensal Café Especial - Kit 3 Pacotes</p></div>
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<sc-if value="{{pendente}}" hint-placeholder-val="{{ true }}"><section aria-label="Link de pagamento" style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Link de pagamento</h2>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: #475569">Envie o link ou diga o código para o cliente Pessoa Física que vai pagar.</p>
+<div style="padding: 16px; border-radius: 10px; background: #F5F7FA; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; line-height: 16px; color: #475569">Código da cobrança</span><span style="font: 500 28px/36px 'JetBrains Mono', monospace; letter-spacing: 2px">7K3F-9QXM</span><span style="font: 400 13px/20px 'JetBrains Mono', monospace; color: #475569; overflow-wrap: anywhere">onebank.exemplo/c/7K3F-9QXM</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px"><button onClick="{{copiar}}" style="flex: 1 1 140px; min-height: 48px; border-radius: 10px; border: 0; background: #1D4ED8; color: #FFFFFF; font: 600 16px Inter, sans-serif; cursor: pointer">{{rotuloCopiar}}</button><sc-if value="{{mobile}}" hint-placeholder-val="{{ false }}"><button style="flex: 1 1 140px; min-height: 48px; border-radius: 10px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #0F172A; font: 600 16px Inter, sans-serif; cursor: pointer">Compartilhar</button></sc-if></div>
+</section></sc-if>
+<section aria-label="Detalhes" style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 8px 24px 16px; box-sizing: border-box">
+<sc-for list="{{linhas}}" as="l" hint-placeholder-count="4"><div style="display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: {{l.borda}}; font-size: 14px; line-height: 20px"><span style="color: #475569; flex: none">{{l.rotulo}}</span><span style="font-weight: 500; text-align: right; min-width: 0">{{l.valor}}</span></div></sc-for>
+<sc-if value="{{paga}}" hint-placeholder-val="{{ false }}"><a href="{{lk.recebiveis}}" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; font-weight: 600; text-decoration: none">Ver recebível</a></sc-if>
+<sc-if value="{{pendente}}" hint-placeholder-val="{{ true }}"><div style="border-top: 1px solid #E2E8F0; padding-top: 12px">
+<sc-if value="{{semConfirmar}}" hint-placeholder-val="{{ true }}"><button onClick="{{pedir}}" style="min-height: 44px; padding: 0; border: 0; background: transparent; color: #B42318; font: 600 14px Inter, sans-serif; cursor: pointer">Cancelar cobrança</button></sc-if>
+<sc-if value="{{confirmando}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 12px"><span style="font-size: 14px; line-height: 20px"><b>Cancelar esta cobrança?</b> O link para de funcionar e não dá para desfazer.</span><div style="display: flex; flex-wrap: wrap; gap: 12px"><button onClick="{{cancelar}}" style="flex: 1 1 150px; min-height: 48px; border-radius: 10px; border: 0; background: #B42318; color: #FFFFFF; font: 600 16px Inter, sans-serif; cursor: pointer">Cancelar cobrança</button><button onClick="{{voltar}}" style="flex: 1 1 100px; min-height: 48px; border-radius: 10px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #0F172A; font: 600 16px Inter, sans-serif; cursor: pointer">Voltar</button></div></div></sc-if>
+</div></sc-if>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"situacao":{"editor":"enum","options":["Pendente","Paga","Cancelada"],"default":"Pendente","section":"Estado"},"mobile":{"editor":null,"default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { copiado: false, conf: false, canc: false }; }
+  renderVals() {
+    const m = this.props.mobile === true, st = this.state.canc ? 'Cancelada' : (this.props.situacao ?? 'Pendente');
+    const k = (n) => (m ? 'M-' : '') + n + '.dc.html';
+    const c = { Pendente: ['#FFFAEB', '#B54708'], Paga: ['#ECFDF5', '#047857'], Cancelada: ['#F1F5F9', '#475569'] };
+    const l = [['Emitida em', '24 nov 2026, 13:30']];
+    if (st === 'Pendente') l.push(['Última recusa', 'Limite insuficiente · hoje, 13:33']);
+    if (st === 'Paga') l.push(['Paga em', '24 nov 2026, 13:35'], ['Cartão', 'Visa final 7899'], ['Código de autorização', 'AUT84K']);
+    if (st === 'Cancelada') l.push(['Cancelada em', '24 nov 2026, 14:02']);
+    return {
+      mobile: m, dir: m ? 'column-reverse' : 'row', minH: m ? '1180px' : '900px', pad: m ? '16px' : '32px 48px', h1: m ? '28px' : '40px',
+      s: { nome: st, fundo: c[st][0], cor: c[st][1] }, pendente: st === 'Pendente', paga: st === 'Paga',
+      linhas: l.map(([rotulo, valor], i) => ({ rotulo, valor, borda: i ? '1px solid #E2E8F0' : '0' })),
+      rotuloCopiar: this.state.copiado ? 'Link copiado' : 'Copiar link', copiar: () => this.setState({ copiado: true }),
+      semConfirmar: !this.state.conf, confirmando: this.state.conf, pedir: () => this.setState({ conf: true }), voltar: () => this.setState({ conf: false }), cancelar: () => this.setState({ conf: false, canc: true }),
+      lk: { lista: k('Cobrancas'), recebiveis: k('Recebiveis') },
+    };
+  }
+}
+</script>
+</body>
+</html>

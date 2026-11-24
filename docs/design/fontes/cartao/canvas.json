@@ -1,0 +1,30 @@
+{"v":3,"createdOnFiles":{"v":1,"at":"2026-11-24T21:40:00Z"},"title":"One Bank — Cartão e cobranças","launch":{"view":"canvas"},"pages":[],
+"boards":{
+"Main.dc.html":{"x":0,"y":0,"w":1440,"h":900,"title":"PF · Cartão","expand":"fill","is_interactive":true},
+"Solicitar.dc.html":{"x":1520,"y":0,"w":1440,"h":900,"title":"PF · Solicitar cartão","expand":"fill","is_interactive":true},
+"Pagar.dc.html":{"x":3040,"y":0,"w":1440,"h":900,"title":"PF · Pagar cobrança","expand":"fill","is_interactive":true},
+"Comprovante.dc.html":{"x":4560,"y":0,"w":1440,"h":900,"title":"PF · Comprovante","expand":"fill","is_interactive":true},
+"Faturas.dc.html":{"x":6080,"y":0,"w":1440,"h":900,"title":"PF · Faturas","expand":"fill","is_interactive":true},
+"Fatura.dc.html":{"x":7600,"y":0,"w":1440,"h":900,"title":"PF · Fatura","expand":"fill","is_interactive":true},
+"M-Cartao.dc.html":{"x":0,"y":1020,"w":390,"h":1180,"title":"PF · Cartão (celular)","is_interactive":true},
+"M-Solicitar.dc.html":{"x":1520,"y":1020,"w":390,"h":1180,"title":"PF · Solicitar (celular)","is_interactive":true},
+"M-Pagar.dc.html":{"x":3040,"y":1020,"w":390,"h":1180,"title":"PF · Pagar (celular)","is_interactive":true},
+"M-Comprovante.dc.html":{"x":4560,"y":1020,"w":390,"h":1180,"title":"PF · Comprovante (celular)","is_interactive":true},
+"M-Faturas.dc.html":{"x":6080,"y":1020,"w":390,"h":1180,"title":"PF · Faturas (celular)","is_interactive":true},
+"M-Fatura.dc.html":{"x":7600,"y":1020,"w":390,"h":1180,"title":"PF · Fatura (celular)","is_interactive":true},
+"Cobrancas.dc.html":{"x":0,"y":2640,"w":1440,"h":900,"title":"PJ · Cobranças","expand":"fill","is_interactive":true},
+"NovaCobranca.dc.html":{"x":1520,"y":2640,"w":1440,"h":900,"title":"PJ · Nova cobrança","expand":"fill","is_interactive":true},
+"Cobranca.dc.html":{"x":3040,"y":2640,"w":1440,"h":900,"title":"PJ · Detalhe da cobrança","expand":"fill","is_interactive":true},
+"Recebiveis.dc.html":{"x":4560,"y":2640,"w":1440,"h":900,"title":"PJ · Recebíveis","expand":"fill","is_interactive":true},
+"Estados.dc.html":{"x":6080,"y":2640,"w":1440,"h":900,"title":"Recusas e estados"},
+"Menu.dc.html":{"x":7600,"y":2640,"w":240,"h":900,"title":"Componente: menu"},
+"M-Cobrancas.dc.html":{"x":0,"y":3660,"w":390,"h":1180,"title":"PJ · Cobranças (celular)","is_interactive":true},
+"M-NovaCobranca.dc.html":{"x":1520,"y":3660,"w":390,"h":1180,"title":"PJ · Nova cobrança (celular)","is_interactive":true},
+"M-Cobranca.dc.html":{"x":3040,"y":3660,"w":390,"h":1180,"title":"PJ · Detalhe (celular)","is_interactive":true},
+"M-Recebiveis.dc.html":{"x":4560,"y":3660,"w":390,"h":1180,"title":"PJ · Recebíveis (celular)","is_interactive":true}
+},
+"order":["Main.dc.html","Solicitar.dc.html","Pagar.dc.html","Comprovante.dc.html","Faturas.dc.html","Fatura.dc.html","M-Cartao.dc.html","M-Solicitar.dc.html","M-Pagar.dc.html","M-Comprovante.dc.html","M-Faturas.dc.html","M-Fatura.dc.html","Cobrancas.dc.html","NovaCobranca.dc.html","Cobranca.dc.html","Recebiveis.dc.html","Estados.dc.html","Menu.dc.html","M-Cobrancas.dc.html","M-NovaCobranca.dc.html","M-Cobranca.dc.html","M-Recebiveis.dc.html"],
+"notes":{
+"t1":{"x":0,"y":-320,"text":"Pessoa Física — protótipo da spec 015, dados fictícios","kind":"title1","maxW":6000},
+"t2":{"x":0,"y":2320,"text":"Pessoa Jurídica — protótipo da spec 015, dados fictícios","kind":"title1","maxW":6000}
+},"designSystems":[]}

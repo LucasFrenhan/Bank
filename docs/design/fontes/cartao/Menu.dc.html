@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Menu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #0F172A; flex: none">
+<sc-if value="{{desktop}}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Menu principal" style="width: 240px; min-height: 900px; height: 100%; box-sizing: border-box; background: #FFFFFF; border-right: 1px solid #E2E8F0; padding: 24px 16px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: #1D4ED8; color: #FFFFFF; font-size: 14px; font-weight: 700">1B</span><span style="font-size: 18px; font-weight: 700">One Bank</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{itens}}" as="i" hint-placeholder-count="5"><a href="{{i.href}}" style="display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; background: {{i.fundo}}; color: {{i.cor}}; font-size: 14px; font-weight: {{i.peso}}; text-decoration: none">{{i.nome}}</a></sc-for>
+</div>
+</nav>
+</sc-if>
+<sc-if value="{{mobile}}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Menu principal (celular)" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); min-height: 72px; background: #FFFFFF; border-top: 1px solid #E2E8F0">
+<sc-for list="{{inferiores}}" as="i" hint-placeholder-count="4"><a href="{{i.href}}" style="display: flex; align-items: center; justify-content: center; min-height: 72px; color: {{i.cor}}; font-size: 12px; font-weight: {{i.peso}}; text-decoration: none">{{i.nome}}</a></sc-for>
+</nav>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"perfil":{"editor":"enum","options":["PF","PJ"],"default":"PF"},"ativo":{"editor":null,"default":"Cartão"},"mobile":{"editor":null,"default":false},"$preview":{"width":240,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const m = this.props.mobile === true, a = this.props.ativo ?? 'Cartão', pj = this.props.perfil === 'PJ';
+    const k = (n) => (m ? 'M-' : '') + n + '.dc.html';
+    const casa = pj ? k('Cobrancas') : m ? 'M-Cartao.dc.html' : 'Main.dc.html';
+    const nomes = pj ? ['Início', 'Recebimentos', 'Cobranças', 'Perfil'] : ['Início', 'Transferir', 'Extrato', 'Cartão', 'Perfil'];
+    const itens = nomes.map((n) => ({ nome: n, href: n === 'Cartão' || n === 'Cobranças' ? casa : '#' + n, fundo: n === a ? '#EFF4FF' : 'transparent', cor: n === a ? '#1D4ED8' : '#475569', peso: n === a ? 600 : 500 }));
+    return { desktop: !m, mobile: m, itens, inferiores: itens.filter((i) => i.nome !== 'Transferir') };
+  }
+}
+</script>
+</body>
+</html>
