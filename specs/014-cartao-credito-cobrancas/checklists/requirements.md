@@ -35,5 +35,4 @@
   em Clarifications.
 - Termos técnicos (`Idempotency-Key`, `cobranca.paga`, DLQ, `type` de erro) aparecem só como
   referência a contratos já publicados e à constituição.
-- Para o clarify: acesso aos dados do cartão, atraso da fatura, feriados, notificações e
-  antecipação em lote (hoje com padrão em Requirements/Assumptions).
+- Acesso aos dados do cartão, atraso, feriados, ciclo e antecipação foram decididos no clarify.

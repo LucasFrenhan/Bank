@@ -272,7 +272,7 @@ recebível e recebe na hora o valor menos 2%.
 **Why this priority**: completa o ciclo do lojista; substitui a liquidação imediata da issue.
 
 **Independent Test**: com uma cobrança paga de R$ 299,90, conferir a data prevista; antecipar e
-conferir o crédito de R$ 293,92 e a taxa de R$ 5,98; em outra cobrança, avançar o relógio até a data
+conferir o crédito de R$ 293,90 e a taxa de R$ 6,00; em outra cobrança, avançar o relógio até a data
 prevista e conferir o crédito integral.
 
 **Acceptance Scenarios**:
@@ -282,7 +282,7 @@ prevista e conferir o crédito integral.
 2. **Given** um recebível previsto para hoje, **When** o processamento diário roda, **Then** o valor
    integral entra na carteira do lojista, com entrada no extrato, e o recebível fica `Liquidado`.
 3. **Given** um recebível pendente de R$ 299,90, **When** o lojista o antecipa, **Then** a carteira
-   recebe R$ 293,92 na hora, a taxa de R$ 5,98 fica registrada e o recebível fica `Antecipado`.
+   recebe R$ 293,90 na hora, a taxa de R$ 6,00 fica registrada e o recebível fica `Antecipado`.
 4. **Given** um recebível antecipado, **When** chega a data prevista, **Then** nada mais é creditado.
 5. **Given** um recebível já liquidado ou antecipado, **When** o lojista tenta antecipá-lo, **Then**
    é recusado por conflito e nada muda.
@@ -476,7 +476,7 @@ acumulariam.
   dados pessoais nem de cartão.
 - **FR-038**: As funcionalidades existentes MUST continuar sem mudança de comportamento; o extrato da
   carteira passa a ter novos tipos de lançamento, sem alterar os campos atuais, e a tela de extrato
-  atual MUST exibi-los sem erro.
+  atual e as movimentações do início MUST exibi-los com rótulo próprio.
 
 ### Key Entities
 
@@ -517,7 +517,7 @@ acumulariam.
 ## Assumptions
 
 - **Frontend fora do escopo**: as telas de cartão, cobranças, checkout, faturas e recebíveis ficam
-  para outra issue; a única exigência é que a tela de extrato continue funcionando (FR-038).
+  para outra issue; a única exceção é o rótulo dos novos lançamentos (FR-038).
 - **Só compras à vista**: sem parcelamento, estorno, contestação ou cancelamento de cobrança paga.
 - **Ciclo do cartão**: bloqueio pelo titular, cancelamento, segunda via, renovação, alteração de limite
   e troca de bandeira ficam fora do escopo.
