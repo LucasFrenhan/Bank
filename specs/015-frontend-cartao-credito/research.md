@@ -9,7 +9,8 @@
   `RandomNumberGenerator.GetString`. `Criar(texto)` remove hífens e espaços e passa a maiúsculas;
   `ToString()` dá `XXXX-XXXX`. Gravado sem hífen em `cobrancas.codigo char(8)`, com
   `ux_cobrancas_codigo` e `ck_cobrancas_codigo`. `EmitirCobranca` tenta até 5 códigos se o índice acusar
-  colisão (`ResultadoGravacao.CodigoDeCobrancaDuplicado`).
+  colisão (`ResultadoGravacao.CodigoDeCobrancaDuplicado`); esgotadas, lança exceção como `SolicitarCartao` (500
+  sem detalhes), nada fica gravado, e métrica e log só são registrados no sucesso.
 - **Rationale**: 30⁸ ≈ 6,6 × 10¹¹ combinações; colisão e adivinhação são improváveis, e a consulta exige
   autenticação. Alfabeto fácil de ditar; sem vogal U, evita parte das palavras.
 - **Alternatives considered**: sequencial em base 30 (adivinhável e revela volume); derivar do UUID (continua
@@ -30,6 +31,7 @@
   `GET /cobrancas/{cobrancaId}`. Código malformado ou inexistente: 404 `cobranca-nao-encontrada`.
   `CobrancaResposta` ganha `codigo` (`XXXX-XXXX`). As demais rotas não mudam: a tela consulta pelo código e
   usa o `cobrancaId` para pagar e cancelar. Contrato 1.1.0, aditivo.
+- **404 para malformado**: justificado no plano, "Complexity Tracking".
 - **Alternatives considered**: aceitar código em `/{cobrancaId}` (mistura dois formatos e muda o 400 atual);
   pagar pelo código (duplicaria rotas de escrita).
 
@@ -39,7 +41,8 @@
   `/cobrancas/nova`, `/cobrancas/recebiveis` (PJ); `/c/:codigo` (todos). `/cartao` mostra a solicitação
   quando não há cartão. `SomentePerfil` mostra "Área indisponível para o seu tipo de conta". Os itens "Cartão"
   e "Cobranças" ficam ativos também nas rotas filhas. Em `/c/:codigo`, o tipo de conta e o emissor decidem a
-  tela: detalhe (emissora), pagamento ou comprovante (PF) ou dados sem ação (outra PJ).
+  tela: detalhe (emissora), pagamento ou comprovante (PF) ou dados sem ação (outra PJ). A emissora é quem tem
+  `lojista.usuarioId` igual ao da sessão. Até a US3, a PF vê só os dados.
 - **Rationale**: endereço único da cobrança (FR-003); `RotaProtegida` já devolve à rota pedida após o login.
 
 ## R5 — Dados do cartão só em memória
@@ -48,7 +51,8 @@
   estado do componente. Oculta por clique, desmontagem, `visibilitychange` para oculto, `pagehide` (cache de
   volta do navegador) e temporizador de 60 s; resposta que chega depois de ocultar é descartada. "Usar meu
   cartão" lê nome, número e validade e descarta o CVV na hora. Nada vai para `sessionStorage`, endereço,
-  título, log ou telemetria; o formulário vive no estado do componente.
+  título, log ou telemetria; o formulário vive no estado do componente e é limpo em `pagehide`, para não
+  reaparecer pelo cache de volta do navegador.
 - **Campos**: `cc-name`, `cc-number`, `cc-exp` e `cc-csc` em `autocomplete`, como exige o WCAG 1.3.5. Guardar
   o cartão no navegador é escolha da pessoa e nunca é feito pelo One Bank; navegadores não guardam o
   `cc-csc`.
@@ -62,8 +66,9 @@
   `idempotencia-divergente` e quando a operação não é mais possível; some com a sessão. `useOperacao` bloqueia
   o segundo clique com uma referência síncrona.
 - **Rationale**: a API não consome a chave em recusas (spec 014, FR-019) e, com a mesma chave e outros dados,
-  só responde `idempotencia-divergente` se o primeiro pagamento foi aprovado; nesse caso a tela recarrega a
-  cobrança, que já está paga, e mostra o comprovante. Guardar um resumo do cartão para comparar seria guardar
+  só responde `idempotencia-divergente` se o primeiro pagamento foi aprovado; a tela recarrega
+  a cobrança e, se já paga pela pessoa, mostra o comprovante; senão, pede para conferir e usa nova chave.
+  Guardar um resumo do cartão para comparar seria guardar
   dado do cartão (FR-008).
 
 ## R7 — Leitura e listas
@@ -87,7 +92,9 @@
 - **Decision**: `traduzirErro` ganha os 11 códigos da spec 014, com título, orientação, variante e
   `proximaAcao` (`rotulo`, `para`), exibida por `AvisoErro`. `saldo-insuficiente` e `idempotencia-divergente`
   ganham textos por contexto (`fatura`, `operacao`). `acesso-negado` nas rotas novas usa
-  "Área indisponível". Limite insuficiente consulta o limite atual antes de exibir.
+  "Área indisponível" (contexto `area`). Todo erro de negócio novo tem próxima ação: link (`para`) ou ação na própria
+  tela. Emitir cobrança não tem chave na API: em falha de rede, a orientação é conferir a lista antes de
+  reenviar. Limite insuficiente consulta o limite atual antes de exibir.
 
 ## R10 — Telemetria
 
@@ -100,7 +107,9 @@
 ## R11 — Aviso de fatura no início
 
 - **Decision**: `AvisoFatura` consulta `GET /faturas?tamanhoPagina=100` no início da PF e mostra a mais antiga
-  `Vencida` ou `Disponivel`. Carregando, erro, 404 ou nada a pagar: não mostra nada.
+  `Vencida` ou `Disponivel`. Carregando, erro, 404 ou nada a pagar: não mostra nada. A "Fatura atual" da tela do
+  cartão é a primeira da mesma
+  lista (a do ciclo atual é sempre a mais nova).
 
 ## R12 — Componentes visuais
 
@@ -116,6 +125,8 @@
   Frontend — Vitest + MSW para cada estado e recusa; Playwright + axe contra o Compose nas larguras de
   referência. Faturas `Disponivel` e `Vencida` no e2e são preparadas por SQL (`docker compose exec postgres
   psql`, disponível localmente e no CI): a compra é feita pela API, e a fatura é antedatada e liberada por
-  `UPDATE` (a tabela `faturas` é mutável) e um `INSERT` do lançamento. Um e2e percorre os fluxos e procura número
+  `UPDATE` (a tabela `faturas` é mutável) e um `INSERT` do lançamento, numa única transação e já com
+  `liberada_em`: o worker, que roda a cada 60 s, nunca vê a fatura antedatada sem liberação, o que mudaria o
+  vencimento, nem lança a compra de novo. Um e2e percorre os fluxos e procura número
   e CVV em `sessionStorage`, `localStorage`, histórico, endereço e envios OTLP (SC-005).
 - **Alternatives considered**: relógio ajustável na API do Compose (mudança no backend só para teste).

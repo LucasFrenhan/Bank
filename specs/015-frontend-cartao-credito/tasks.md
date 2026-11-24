@@ -58,7 +58,8 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   caracteres 0, 1, I, L, O e U; `Valor` sem hífen; `ToString()` = `XXXX-XXXX`
 - [ ] T004 [P] Ampliar os testes de emissão e de consulta em `ut/Application/` (com `BancoCartoes` de
   `ut/Application/DublesCartoes.cs`): código gravado; `CodigoDeCobrancaDuplicado` gera outro código, até 5
-  tentativas, e depois falha sem gravar; consulta por código com a visibilidade da consulta por id (emissora,
+  tentativas, e depois exceção, sem gravar, sem métrica e sem log de emissão; consulta por código com a
+  visibilidade da consulta por id (emissora,
   outra PJ, PF); malformado e inexistente = `cobranca-nao-encontrada`
 - [ ] T005 [P] Ampliar `it/CobrancasTests.cs`: `codigo` logo após `cobrancaId` na emissão, consulta, lista e
   cancelamento (lista exata de campos); `GET /api/v1/cobrancas/codigo/{codigo}` em maiúsculas, minúsculas, sem
@@ -87,13 +88,15 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   `AdicionarCodigoCobranca` (coluna anulável → script → `NOT NULL`, índice e `CHECK`; `Down` remove tudo);
   ajustar os `INSERT` de cobranças por SQL em `it/RestricoesCartoesTests.cs` e `it/VolumeProcessamentoTests.cs`
 - [ ] T012 Em `api/Endpoints/CobrancasEndpoints.cs`: `codigo` em `CobrancaResposta` e
-  `GET /cobrancas/codigo/{codigo}` (FR-009b), conforme [contracts/cartoes-cobrancas-api.md](contracts/cartoes-cobrancas-api.md);
+  `GET /cobrancas/codigo/{codigo}` (FR-009b), conforme
+  [contracts/cartoes-cobrancas-api.md](contracts/cartoes-cobrancas-api.md);
   T003–T007 e os testes anteriores do backend passando
 
 ### Apoio do frontend — testes
 
 - [ ] T013 [P] `src/cobrancas/codigo.test.ts`: `extrairCodigo` (código, minúsculas, sem hífen, espaços, link
-  completo, barra final; inválidos = `null`), `formatarCodigo`, `linkDaCobranca`, `textoDeCompartilhamento`
+  completo, barra final; inválidos = `null`), `formatarCodigo`, `linkDaCobranca` (até 12 caracteres depois da
+  origem; SC-003a), `textoDeCompartilhamento`
 - [ ] T014 [P] `src/operacoes/operacoes.test.tsx`: chave criada no primeiro envio, mantida após falha de rede,
   422 e 5xx e ao recarregar; descartada em sucesso, `idempotencia-divergente` e operação não mais possível;
   `removerSessao()` apaga `bank.operacoes`; nada além de operação e chave é gravado; segundo clique não envia;
@@ -102,7 +105,8 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   fusos diferentes; hoje em Brasília; ampliar `src/formatacao/valor.test.ts` com a taxa de 2% (R8: 29990 →
   600/29390; 1 → 0/1; 10000 → 200/9800; 25 → 1/24)
 - [ ] T016 [P] Ampliar `src/api/erros.test.ts` com cada linha da tradução de erros do
-  [contrato do frontend](contracts/frontend.md), incluindo `proximaAcao`, e `src/telemetria/telemetria.test.ts`
+  [contrato do frontend](contracts/frontend.md), sempre com `proximaAcao` (SC-006), `acesso-negado` no contexto
+  `area`, e `src/telemetria/telemetria.test.ts`
   com `/c/:codigo`, `/cartao/faturas/:competencia` e `esperados` sem log de falha (R10)
 - [ ] T017 [P] `comp/apoioCartao.test.tsx`: `Filtros` (`aria-pressed`), `ListaPaginada` (páginas no desktop,
   "Carregar mais" no celular, vazio, erro com tentar de novo, página além da última), `SeloSituacao` (situação
@@ -112,14 +116,18 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 ### Apoio do frontend — implementação
 
 - [ ] T018 Regenerar `src/api/schema.d.ts` (`npm run api:tipos` com `BANK_API_URL`) e acrescentar em
-  `src/api/cliente.ts` as 15 chamadas (contrato 1.1.0), com `Idempotency-Key` nos pagamentos e na antecipação, e
+  `src/api/cliente.ts` as 13 chamadas usadas pelas telas (contrato 1.1.0, sem as consultas por id de cobrança e
+  de recebível), com `Idempotency-Key` nos pagamentos e na antecipação, e
   `esperados` em `chamar`
-- [ ] T019 [P] Acrescentar os códigos, contextos (`fatura`, `operacao`) e `proximaAcao` em `src/api/erros.ts` e
+- [ ] T019 [P] Acrescentar os códigos, contextos (`fatura`, `operacao`, `cancelamento`, `area`) e `proximaAcao`
+  em `src/api/erros.ts` e
   exibir a ação em `AvisoErro` (`comp/Feedback.tsx`)
 - [ ] T020 [P] Criar `src/cobrancas/codigo.ts`, `src/formatacao/dia.ts`, e a taxa em `src/formatacao/valor.ts` (FR-024)
-- [ ] T021 [P] Criar `src/operacoes/chaves.ts` e `src/operacoes/useOperacao.ts` (R6; FR-016) e apagar `bank.operacoes` em
+- [ ] T021 [P] Criar `src/operacoes/chaves.ts` e `src/operacoes/useOperacao.ts` (R6; FR-016) e apagar
+  `bank.operacoes` em
   `removerSessao()` (`src/sessao/armazenamento.ts`)
-- [ ] T022 [P] Criar `src/paginas/useConsulta.ts` (carregando/pronto/erro, recarregar, atualizar em silêncio; R7; FR-023)
+- [ ] T022 [P] Criar `src/paginas/useConsulta.ts` (carregando/pronto/erro, recarregar, atualizar em silêncio;
+  R7; FR-023)
 - [ ] T023 [P] Criar `comp/Filtros.tsx` (extraído de `src/paginas/Extrato.tsx`, que passa a usá-lo, sem mudar
   `Extrato.test.tsx`), `comp/ListaPaginada.tsx`, `comp/SeloSituacao.tsx`, `comp/Confirmacao.tsx` e os ícones de
   olho aberto, olho riscado e cartão em `comp/Icones.tsx`
@@ -141,7 +149,8 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [ ] T025 [P] [US1] `src/cartao/useDadosCartao.test.tsx`: oculta por clique, desmontagem, `visibilitychange`,
   `pagehide` e 60 s; resposta que chega depois de ocultar é descartada; erro mantém oculto; storage vazio
 - [ ] T026 [P] [US1] `src/paginas/cartao/Cartao.test.tsx`: solicitação (cenários 1 a 3 e 8), cartão e limites
-  (4), olho com nome acessível e anúncio (5), copiar só o número (7), nome de 150 caracteres, carregando, erro com
+  (4), fatura atual com links e erro isolado, olho com nome acessível e anúncio (5), copiar só o número (7),
+  nome de 150 caracteres, carregando, erro com
   `traceId` e tentar de novo, PJ (9); campo "Link ou código da cobrança" válido e inválido (FR-009)
 - [ ] T027 [P] [US1] `e2e/cartao.spec.ts`: solicitar, exibir, ocultar, trocar de aba e recarregar, contra a API
 
@@ -150,7 +159,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [ ] T028 [P] [US1] Criar `src/cartao/useDadosCartao.ts` (R5) e `src/cartao/CartaoDesenhado.tsx` com
   `src/cartao/Cartao.module.css` (R12; leitura dígito a dígito)
 - [ ] T029 [US1] Criar `src/paginas/cartao/SolicitarCartao.tsx` (FR-005), `src/paginas/cartao/Cartao.tsx`
-  (FR-006, FR-007, FR-009) e a rota `/cartao` em `src/App.tsx`
+  (FR-006 com a região "Fatura atual" e "Ver faturas", FR-007, FR-009) e a rota `/cartao` em `src/App.tsx`
 
 **Checkpoint**: US1 funciona pelo endereço `/cartao`
 
@@ -166,10 +175,12 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 - [ ] T030 [P] [US2] `src/paginas/cobrancas/Cobrancas.test.tsx`: vazio, filtros no endereço, páginas e "Carregar
   mais", erro, PF vê área indisponível; `NovaCobranca.test.tsx`: valor e descrição (contador de 200), erros por
-  campo da API mantendo o digitado, duplo clique emite uma só
+  campo da API mantendo o digitado, duplo clique emite uma só, falha de rede orienta a conferir a lista sem reenviar
 - [ ] T031 [P] [US2] `src/paginas/cobrancas/DetalheCobranca.test.tsx`: código, link, copiar e compartilhar (com e
-  sem suporte), paga (sem pagador), última recusa, cancelar com confirmação, cancelamento de cobrança já paga
-  (10), atualização a cada 5 s só se pendente e visível, anúncio, falha silenciosa e confirmação substituída pelo
+  sem suporte), paga (sem pagador, link "Ver recebíveis"), última recusa, cancelar com confirmação, cancelamento
+  de cobrança já paga
+  (10) e já cancelada, atualização a cada 5 s só se pendente e visível, anúncio, falha silenciosa e confirmação
+  substituída pelo
   pagamento
 - [ ] T032 [P] [US2] `e2e/cobrancas.spec.ts`: emitir, copiar o link, filtrar, abrir e cancelar; outra janela paga
   pela API e o detalhe muda para "Paga" em até 10 s
@@ -180,7 +191,8 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [ ] T034 [US2] Criar em `src/paginas/cobrancas/` `SecoesCobrancas.tsx` (navegação "Seções de cobranças"),
   `Cobrancas.tsx` (FR-011) e `NovaCobranca.tsx` (FR-010), com `Cobrancas.module.css` e as rotas `/cobrancas` e
   `/cobrancas/nova`
-- [ ] T035 [US2] Criar `src/paginas/cobrancas/Cobranca.tsx` (rota `/c/:codigo`, escolhe a visão; FR-003) e
+- [ ] T035 [US2] Criar `src/paginas/cobrancas/Cobranca.tsx` (rota `/c/:codigo`, escolhe a visão; FR-003; a PF vê
+  só os dados até a US3) e
   `DetalheCobranca.tsx` (FR-012)
 
 **Checkpoint**: PJ completa o ciclo da cobrança sem pagamento pela tela
@@ -199,7 +211,8 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   no fim do mês de Brasília), CVV; máscaras
 - [ ] T037 [P] [US3] `src/paginas/cobrancas/PagarCobranca.test.tsx`: cenários 1, 3 a 8 e 10 a 13; CVV limpo e
   focado após recusa; limite atual na recusa; falha de rede e reenvio com a mesma chave; duplo clique;
-  `idempotencia-divergente` com cobrança já paga mostra o comprovante; CVV de "Usar meu cartão" nunca preenchido;
+  `idempotencia-divergente` com cobrança já paga mostra o comprovante e, pendente, pede para conferir com nova chave;
+  `pagehide` limpa o formulário; CVV de "Usar meu cartão" nunca preenchido;
   formulário com `cc-name`, `cc-number`, `cc-exp` e `cc-csc`; sessão expirada descarta os dados
 - [ ] T038 [P] [US3] `e2e/pagamento.spec.ts`: link sem sessão → login → cobrança → "Usar meu cartão" → comprovante
   reaberto; CVV errado; limite insuficiente; resposta perdida (interceptada) e novo envio = uma compra; código em
@@ -228,9 +241,10 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 - [ ] T042 [P] [US4] `src/paginas/faturas/Faturas.test.tsx`: lista e detalhe de cada situação (cenários 1 a 6),
   datas sem conversão de fuso, sem cartão, erro; ampliar `src/paginas/Inicio.test.tsx` com o aviso (disponível,
-  vencida, mais antiga, sem cartão, erro e PJ) sem mudar os testes atuais
+  vencida, mais antiga, sem cartão, erro e PJ)
 - [ ] T043 [US4] Acrescentar em `e2e/apoio.ts` a emissão, o cartão e o pagamento pela API e a preparação de
-  faturas disponível e vencida por SQL (R13); `e2e/faturas.spec.ts`: lista, detalhe com juros e aviso do início
+  faturas disponível e vencida por SQL, numa única transação já com `liberada_em` (R13); `e2e/faturas.spec.ts`:
+  lista, detalhe com juros e aviso do início
 
 ### Implementação
 
@@ -290,7 +304,8 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 ### Testes
 
 - [ ] T052 [P] [US7] Ampliar `src/App.test.tsx` e `src/paginas/Perfil.test.tsx`: menu e barra por perfil (4 itens),
-  item ativo nas rotas filhas, "Em breve" removido, permissões novas
+  item ativo nas rotas filhas, permissões novas; em `src/paginas/Inicio.test.tsx`, trocar só a verificação de
+  "Cobranças" como "Em breve" (FR-001, SC-008)
 - [ ] T053 [US7] Ampliar `e2e/responsividade.spec.ts` (6 larguras), `e2e/teclado.spec.ts` (solicitar, pagar,
   antecipar, cancelar e pagar fatura) e o axe com todas as telas novas, inclusive os dados exibidos e as
   confirmações abertas (FR-025, SC-007)

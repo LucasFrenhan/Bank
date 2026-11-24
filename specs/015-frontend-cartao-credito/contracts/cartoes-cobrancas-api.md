@@ -17,7 +17,7 @@ Lista só o que muda em relação à v1.0.0. A mudança é aditiva (MINOR).
 
 **Permissão**: autenticado. `codigo` aceita maiúsculas ou minúsculas, com ou sem hífen e espaços. **200**: a
 mesma resposta e as mesmas regras de visibilidade de `GET /cobrancas/{cobrancaId}`. **Erros**: 401, 403, 404
-`cobranca-nao-encontrada` (malformado ou inexistente).
+`cobranca-nao-encontrada` (malformado ou inexistente; sem 400, ver [plano](../plan.md#complexity-tracking)).
 
 Pagar e cancelar continuam pelo `cobrancaId`.
 

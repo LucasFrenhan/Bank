@@ -32,7 +32,7 @@ cobrança, o preenchimento das existentes e a consulta por ele (contrato 1.1.0).
 **Constraints**: número e CVV só em memória; WCAG 2.2 AA; 320 a 1920 px sem rolagem horizontal; centavos inteiros;
 sem mudança nas telas atuais além de menu, aviso no início e permissões
 
-**Scale/Scope**: 7 rotas e 10 telas; 15 chamadas à API; 1 migration; 1 endpoint novo
+**Scale/Scope**: 7 rotas e 10 telas; 13 chamadas à API; 1 migration; 1 endpoint novo
 
 ## Constitution Check
 
@@ -42,7 +42,7 @@ sem mudança nas telas atuais além de menu, aviso no início e permissões
 | --- | --- | --- |
 | I. Specification-First | Spec com 8 clarificações e protótipo aprovado; issue #54; branch = pasta | ✅ |
 | II. Isolamento de camadas | `CodigoCobranca` no Domain; consulta na Application; SQL na Infrastructure; endpoint só transporte. No frontend, só `src/api/` acessa a rede | ✅ |
-| III. Erros padronizados | Decisão pelo `type`; `traceId` exibido em inesperados; nenhum erro novo na API | ✅ |
+| III. Erros padronizados | Decisão pelo `type`; `traceId` exibido em inesperados; nenhum erro novo na API. Código malformado responde 404 em vez de 400 | ⚠️ justificado |
 | IV. Integridade financeira | Chave reaproveitada até o sucesso (R6); centavos inteiros; o valor final é o da API | ✅ |
 | IV. Concorrência | Unicidade do código pelo índice, com nova tentativa (R1) | ✅ |
 | V. Contratos versionados | API 1.1.0 e frontend 1.4.0, aditivos; tipos regenerados do OpenAPI | ✅ |
@@ -54,7 +54,8 @@ sem mudança nas telas atuais além de menu, aviso no início e permissões
 | Restrições: dependência nova justificada | Nenhuma | ✅ |
 | Convenções: português | `Cartao`, `Cobranca`, `Fatura`, `Recebivel`, `extrairCodigo` | ✅ |
 
-**Resultado pré-pesquisa**: aprovado. **Re-check pós-design**: aprovado, sem itens em Complexity Tracking.
+**Resultado pré-pesquisa**: aprovado. **Re-check pós-design**: aprovado, com um item em
+Complexity Tracking.
 
 ## Project Structure
 
@@ -106,4 +107,6 @@ sem componente; cada área ganha uma pasta em `paginas/`. Os hooks e telas atuai
 
 ## Complexity Tracking
 
-Sem violações a justificar.
+| Violação | Por que é necessária | Alternativa mais simples rejeitada |
+| --- | --- | --- |
+| `GET /cobrancas/codigo/{codigo}` responde 404, e não 400, para código malformado (Princípio III) | O código é ditado e digitado por pessoas; para elas, código errado e inexistente são o mesmo caso (FR-009b), e a resposta única não revela o formato a quem tenta adivinhar. O corpo continua `ProblemDetails` com `type` e `traceId` | 400 com erro no campo: dois tratamentos para a mesma situação, distinguindo códigos bem formados. O 400 de `/{cobrancaId}` não muda |

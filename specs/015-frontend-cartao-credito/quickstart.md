@@ -25,10 +25,11 @@ Antes de subir esta versão, tenha cobranças emitidas. Depois:
 
 ## Cenário 3 — Cartão (US1)
 
-1. PF nova → "Cartão": sem escolher bandeira, erro; com Visa, cartão emitido com R$ 5.000,00.
+1. PF nova → "Cartão": nenhuma bandeira marcada; sem escolher, erro; com Visa, cartão emitido com R$ 5.000,00.
 2. Olho: riscado → aberto, dados visíveis; troque de aba e volte → ocultos. Espere 1 minuto com os dados
    visíveis → ocultos.
-3. DevTools → Application: nenhum número ou CVV em `sessionStorage` e `localStorage`.
+3. A região "Fatura atual" mostra o ciclo e leva à fatura; "Ver faturas" leva à lista.
+4. DevTools → Application: nenhum número ou CVV em `sessionStorage` e `localStorage`.
 
 ## Cenário 4 — Cobrança e pagamento (US2, US3)
 

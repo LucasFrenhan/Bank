@@ -58,7 +58,8 @@ Protótipo próprio, aprovado para a [spec 015](../../specs/015-frontend-cartao-
 | Estados e recusas | PF e PJ | [Estados](fontes/cartao/Estados.dc.html) | — |
 | Menu | PF e PJ | [Menu](fontes/cartao/Menu.dc.html) | o mesmo |
 
-O aviso de fatura no início da PF foi decidido depois e não está no protótipo. Número, CVV, nomes e valores são
+Onde diferem, vale a spec: nenhuma bandeira vem marcada e o limite não aparece antes da emissão. O aviso de
+fatura no início da PF foi decidido depois e não está no protótipo. Número, CVV, nomes e valores são
 fictícios.
 
 ## Design system

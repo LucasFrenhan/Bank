@@ -16,7 +16,10 @@ Lista só o que muda em relação à v1.3.0.
 | `/cobrancas/recebiveis?situacao=&pagina=` | PJ | Recebíveis e antecipação | Recebíveis |
 | `/c/:codigo` | todos | Detalhe (emissora), pagamento ou comprovante (PF), só dados (outra PJ) | Cobrança / Pagar cobrança / Pagamento aprovado |
 
-Perfil errado: "Área indisponível para o seu tipo de conta", com link para o início. `situacao` no endereço:
+Perfil errado (e 403 `acesso-negado` nas rotas novas): "Área indisponível para o seu tipo de conta", com "O cartão é
+para contas Pessoa Física." ou "Cobranças e recebíveis são para contas Pessoa Jurídica." e "Ir para o início". Outra
+PJ em `/c/:codigo`: "Só contas Pessoa Física pagam cobranças", "Entre com a sua conta Pessoa Física para pagar." e
+"Ir para o início". `situacao` no endereço:
 `pendentes`, `pagas`, `canceladas` (cobranças); `pendentes`, `antecipados`, `liquidados` (recebíveis).
 
 ## Navegação por perfil
@@ -41,6 +44,8 @@ Perfil errado: "Área indisponível para o seu tipo de conta", com link para o i
 | --- | --- |
 | Olho | botão no cartão; nome "Exibir dados do cartão" (olho riscado) / "Ocultar dados do cartão" (olho aberto) |
 | Anúncio | "Dados do cartão exibidos" / "Dados do cartão ocultos" (`role="status"`) |
+| Fatura atual | região "Fatura atual": mês, situação, total, "Fecha em … · Vence em …", link "Abrir fatura"; erro só nessa região |
+| Faturas | link "Ver faturas" → `/cartao/faturas` |
 | Copiar | "Copiar número", só com os dados exibidos; "Número copiado" |
 | Campo | "Link ou código da cobrança" + "Abrir"; erro "Confira o link ou o código" |
 
@@ -64,15 +69,18 @@ Campos "Nome impresso no cartão" (`cc-name`), "Número do cartão" (`cc-number`
 | `cartao-bloqueado-fatura-vencida` | Cartão bloqueado por fatura vencida | Pague a fatura para voltar a usar o cartão. | Ver faturas → `/cartao/faturas` |
 | `limite-cartao-insuficiente` | Limite insuficiente | Você tem R$ {disponível} de limite disponível. | Ver limite → `/cartao` |
 | `cobranca-nao-encontrada` | Cobrança não encontrada | Confira o link com quem enviou. | Ir para o início → `/` |
-| `cobranca-nao-pendente` | Esta cobrança não está mais disponível | Ela já foi paga ou cancelada. | — |
+| `cobranca-nao-pendente` | Esta cobrança não está mais disponível | Ela já foi paga ou cancelada. | Ir para o cartão → `/cartao` |
+| `cobranca-nao-pendente` (cancelar, paga) | Esta cobrança acabou de ser paga | Não é mais possível cancelar. | Ver pagamento → detalhe atualizado |
+| `cobranca-nao-pendente` (cancelar, cancelada) | Esta cobrança já foi cancelada | Veja a situação atualizada abaixo. | Ver cobranças → `/cobrancas` |
+| `rede` (emitir cobrança) | Não foi possível confirmar a emissão | Confira na lista se a cobrança foi criada antes de enviar de novo. | Ver cobranças → `/cobrancas` |
 | `cartao-nao-encontrado` | Você ainda não tem um cartão | Peça o seu para pagar esta cobrança. | Solicitar cartão → `/cartao` |
-| `cartao-ja-existente` | Você já tem um cartão | Mostramos o seu cartão abaixo. | — |
+| `cartao-ja-existente` | Você já tem um cartão | Mostramos o seu cartão abaixo. | Ver cartão → o cartão na mesma tela |
 | `fatura-nao-encontrada` | Fatura não encontrada | Confira o mês na lista de faturas. | Ver faturas → `/cartao/faturas` |
-| `fatura-nao-disponivel` | Esta fatura não está disponível para pagamento | Veja a situação atualizada abaixo. | — |
-| `saldo-insuficiente` (fatura) | Saldo insuficiente | Você tem R$ {saldo} e a fatura é de R$ {valor}. | — |
-| `recebivel-nao-encontrado` | Recebível não encontrado | Veja a lista atualizada. | — |
-| `recebivel-nao-antecipavel` | Este recebível não pode mais ser antecipado | Veja a situação atualizada abaixo. | — |
-| `idempotencia-divergente` (operação) | Confira antes de tentar de novo | Os dados não batem com o envio anterior. | — |
+| `fatura-nao-disponivel` | Esta fatura não está disponível para pagamento | Veja a situação atualizada abaixo. | Ver faturas → `/cartao/faturas` |
+| `saldo-insuficiente` (fatura) | Saldo insuficiente | Você tem R$ {saldo} e a fatura é de R$ {valor}. | Voltar à fatura → fecha a confirmação |
+| `recebivel-nao-encontrado` | Recebível não encontrado | Veja a lista atualizada. | Ver recebíveis → lista recarregada |
+| `recebivel-nao-antecipavel` | Este recebível não pode mais ser antecipado | Veja a situação atualizada abaixo. Previsto para hoje: O valor integral já está previsto para hoje. | Ver recebíveis → lista recarregada |
+| `idempotencia-divergente` (operação) | Confira antes de tentar de novo | Os dados não batem com o envio anterior. | Conferir → recarrega a tela da operação |
 
 ## Armazenamento
 

@@ -57,11 +57,11 @@ dados e verificar que nada ficou guardado no navegador.
    Mastercard e o aviso de que a bandeira não pode ser trocada e de que há um cartão por CPF.
 2. **Given** a bandeira escolhida, **When** a PF confirma a solicitação, **Then** vê o cartão emitido,
    com limite total e disponível de R$ 5.000,00.
-3. **Given** nenhuma bandeira escolhida, **When** a PF tenta solicitar, **Then** vê o erro no campo e
+3. **Given** nenhuma bandeira escolhida (nenhuma vem marcada), **When** a PF tenta solicitar, **Then** vê o erro no campo e
    nada é enviado.
 4. **Given** uma PF com cartão, **When** abre "Cartão", **Then** vê o cartão com os dados ocultos
-   (bandeira, nome, 4 últimos dígitos e validade), limite total, limite disponível, limite usado e o
-   total de compras que ainda não entraram na fatura.
+   (bandeira, nome, 4 últimos dígitos e validade), limite total, limite disponível, limite usado, o
+   total de compras que ainda não entraram na fatura e a fatura atual, com o caminho para as faturas.
 5. **Given** os dados ocultos (olho riscado), **When** a PF aciona o ícone de olho, **Then** o cartão na
    tela mostra nome, número completo, validade e CVV, sem pedir senha, e o ícone vira o olho aberto;
    acioná-lo de novo oculta os dados.
@@ -257,7 +257,11 @@ verificação automática de acessibilidade.
 - **Recusa**: o número e a validade digitados são mantidos na tela; o CVV é sempre limpo.
 - **Cobrança paga ou cancelada enquanto a PF preenchia**: o pagamento é recusado e a tela mostra a situação.
 - **Dados alterados após uma tentativa sem resposta**: se o Bank responder que a chave foi usada com outros
-  dados, a tela pede para conferir e o próximo envio usa uma nova chave.
+  dados, a tela recarrega a cobrança: se já paga pela pessoa, mostra o comprovante; senão, pede para conferir e
+  o próximo envio usa uma nova chave.
+- **Falha de conexão ao emitir cobrança**: a emissão não tem chave de idempotência; a tela mantém o que foi
+  digitado e orienta a conferir a lista, com link, antes de enviar de novo.
+- **Voltar pelo navegador à tela de pagamento**: os dados do cartão digitados não reaparecem.
 - **Virada do dia com a confirmação da fatura aberta**: o valor cobrado é o do Bank no momento; a tela
   mostra o valor pago de fato.
 - **Sessão expirada**: vai ao login e volta à tela; os dados do cartão digitados são descartados.
@@ -297,7 +301,9 @@ verificação automática de acessibilidade.
 - **FR-005**: A solicitação MUST exigir a escolha da bandeira e avisar, antes de confirmar, que ela é
   definitiva e que há um cartão por CPF.
 - **FR-006**: A tela do cartão MUST mostrar bandeira, nome impresso, 4 últimos dígitos, validade, limite
-  total, disponível e usado, e compras ainda não lançadas.
+  total, disponível e usado, compras ainda não lançadas e a fatura do ciclo atual (mês, situação, total,
+  fechamento e vencimento), com links para ela e para a lista. Se a fatura não carregar, só essa parte mostra
+  o erro.
 - **FR-007**: O ícone de olho no cartão MUST indicar o estado (aberto = visíveis, riscado = ocultos), ter
   nome acessível com a ação ("Exibir dados do cartão" / "Ocultar dados do cartão") e, ao exibir, buscar os dados
   no momento do pedido e mostrá-los no cartão desenhado na tela, sem confirmar a senha. Eles MUST sumir ao
@@ -391,7 +397,8 @@ verificação automática de acessibilidade.
   histórico e na telemetria, após percorrer todos os fluxos.
 - **SC-006**: 100% das recusas do contrato têm mensagem e próxima ação próprias.
 - **SC-007**: Nenhuma violação A/AA na verificação automática, em todas as telas e larguras.
-- **SC-008**: Todos os testes automatizados anteriores continuam passando.
+- **SC-008**: Todos os testes automatizados anteriores continuam passando; só mudam as verificações do que esta
+  spec altera ("Cobranças" como "Em breve" e a lista exata de campos da cobrança).
 
 ## Assumptions
 
@@ -402,6 +409,8 @@ verificação automática de acessibilidade.
 - **Link da cobrança**: gerado pelo próprio One Bank, sem encurtador externo, para não expor os links a
   terceiros; não há envio por e-mail, QR Code nem prazo.
 - **Contrato**: o da spec 014 passa a 1.1.0, aditivo.
+- **Protótipo da solicitação**: mostra Visa já marcada e o limite fixo de R$ 5.000,00; vale esta spec: nenhuma
+  bandeira marcada e nenhum limite antes da emissão, porque ele é configurável.
 - **Início**: só ganha o aviso de fatura da PF; o acesso às telas novas é pelo menu.
 - **Notificações e recibo em PDF**: fora do escopo.
 - **Perfil da empresa**: a PJ não vê quem pagou, como define a spec 014.

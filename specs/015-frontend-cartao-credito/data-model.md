@@ -11,7 +11,8 @@ hífen), `Valor` (sem hífen), `ToString()` (`XXXX-XXXX`).
 
 ### `Cobranca`
 
-Ganha `Codigo` (imutável), recebido em `Emitir`. `ResultadoGravacao` ganha `CodigoDeCobrancaDuplicado`.
+Ganha `Codigo` (imutável), recebido em `Emitir`; até 5 tentativas em colisão, depois exceção.
+`ResultadoGravacao` ganha `CodigoDeCobrancaDuplicado`.
 
 ### PostgreSQL — migration `AdicionarCodigoCobranca`
 
@@ -43,7 +44,7 @@ Ganha `Codigo` (imutável), recebido em `Emitir`. `ResultadoGravacao` ganha `Cod
 - `useDadosCartao`: `oculto` \| `buscando` \| `exibido(nome, numero, validade, cvv)` \| `erro`; regras de R5.
 - Formulário de pagamento: `nome`, `numero` (máscara em grupos de 4), `validade` (`MM/AA`), `cvv` (3 dígitos);
   só no estado do componente. Validação: titular preenchido; 16 dígitos e Luhn; formato e não vencida
-  (Brasília); 3 dígitos. Após recusa, o CVV é limpo e o foco vai para ele.
+  (Brasília); 3 dígitos. Após recusa, o CVV é limpo e o foco vai para ele; em `pagehide`, tudo é limpo.
 
 ### Operação (`src/operacoes/`)
 
