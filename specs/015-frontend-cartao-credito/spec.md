@@ -101,7 +101,7 @@ detalhe e cancelá-la.
    **Then** vê só as da situação, das mais novas para as mais antigas, em páginas (desktop) ou com
    "Carregar mais" (mobile).
 6. **Given** uma cobrança paga, **When** a PJ abre o detalhe, **Then** vê bandeira, final do cartão,
-   código de autorização, data do pagamento e o link para o recebível; nunca a identidade do pagador.
+   código de autorização, data do pagamento e o link para os recebíveis; nunca a identidade do pagador.
 7. **Given** uma cobrança com recusa, **When** a PJ abre o detalhe, **Then** vê o motivo e o momento da
    última recusa.
 8. **Given** uma cobrança pendente, **When** a PJ escolhe "Cancelar cobrança" e confirma, **Then** ela
@@ -396,8 +396,8 @@ verificação automática de acessibilidade.
 ## Assumptions
 
 - **Protótipo**: aprovado pelo responsável em 2026-11-24
-  (<https://claude.ai/artifact/9mhoKhZ8E9guBLsVE53oEY>, privado); as fontes e capturas entram em
-  `docs/design`.
+  (<https://claude.ai/artifact/9mhoKhZ8E9guBLsVE53oEY>, privado); as fontes do protótipo e as
+  capturas das telas prontas entram em `docs/design`.
 - **Bandeiras**: nomes em texto ("Visa", "Mastercard"), sem os logotipos oficiais.
 - **Link da cobrança**: gerado pelo próprio One Bank, sem encurtador externo, para não expor os links a
   terceiros; não há envio por e-mail, QR Code nem prazo.
