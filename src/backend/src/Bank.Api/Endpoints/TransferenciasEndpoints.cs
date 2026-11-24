@@ -5,7 +5,6 @@ using Bank.Application.Abstracoes;
 using Bank.Application.Transferencias;
 using Bank.Domain.Permissoes;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi;
 
 namespace Bank.Api.Endpoints;
 
@@ -17,7 +16,7 @@ namespace Bank.Api.Endpoints;
 public static class TransferenciasEndpoints
 {
     public const string Grupo = "/api/v1/transferencias";
-    public const string CabecalhoIdempotencia = "Idempotency-Key";
+    public const string CabecalhoIdempotencia = EndpointsComuns.CabecalhoIdempotencia;
 
     public static IEndpointRouteBuilder MapTransferenciasEndpoints(this IEndpointRouteBuilder app)
     {
@@ -29,7 +28,7 @@ public static class TransferenciasEndpoints
             .WithName("Transferir")
             .WithSummary("Transfere da carteira do usuário (PF) para uma conta PF ou PJ, com idempotência.")
             .WithDescription("Reenvios com o mesmo cabeçalho Idempotency-Key devolvem 200 com o comprovante original, sem novo débito. Valor acima do limite por operação ou do limite diário (dia de Brasília) recebe 422 limite-excedido, com tipoLimite, limite e valorDisponivel.")
-            .AddOpenApiOperationTransformer(MarcarCabecalhoObrigatorio)
+            .ComChaveIdempotencia("UUID gerado pelo cliente; reenvios com a mesma chave não debitam de novo.")
             .Produces<ComprovanteResposta>(StatusCodes.Status201Created)
             .Produces<ComprovanteResposta>(StatusCodes.Status200OK)
             .ProducesValidationProblem()
@@ -222,20 +221,6 @@ public static class TransferenciasEndpoints
         return resultado.Valor.Replay
             ? TypedResults.Ok(corpo)
             : TypedResults.Created((string?)null, corpo);
-    }
-
-    private static Task MarcarCabecalhoObrigatorio(OpenApiOperation operacao, Microsoft.AspNetCore.OpenApi.OpenApiOperationTransformerContext contexto, CancellationToken cancellationToken)
-    {
-        foreach (var parametro in operacao.Parameters ?? [])
-        {
-            if (parametro is OpenApiParameter cabecalho && cabecalho.Name == CabecalhoIdempotencia)
-            {
-                cabecalho.Required = true;
-                cabecalho.Description = "UUID gerado pelo cliente; reenvios com a mesma chave não debitam de novo.";
-            }
-        }
-
-        return Task.CompletedTask;
     }
 
     /// <summary>Campos opcionais: ausências e valores inválidos viram erros por campo.</summary>

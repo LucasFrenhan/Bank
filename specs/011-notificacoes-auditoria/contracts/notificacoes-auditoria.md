@@ -49,6 +49,9 @@ Evento `transferencia.concluida` com `valor` = `1234.5`, `pagadorNome` = `"João
 | `comprovante_envio` | `pagadorUsuarioId` | `Você enviou R$ 1.234,50 para Maria Souza.` |
 | `aviso_credito` | `recebedorUsuarioId` | `Você recebeu R$ 1.234,50 de João Silva.` |
 
+Desde a [spec 014](../../014-cartao-credito-cobrancas/contracts/evento-cobranca-paga.md), `cobranca.paga`
+grava `comprovante_cobranca` (pagador) e `cobranca_paga` (lojista), com as mesmas garantias.
+
 ## Garantias
 
 - Exatamente 2 linhas por evento processado com sucesso, gravadas na mesma transação de

@@ -24,6 +24,19 @@ public static class ResultadoHttpExtensions
         ["saldo-insuficiente"] = "Saldo insuficiente",
         ["idempotencia-divergente"] = "Chave de idempotência já usada com outros dados",
         ["limite-excedido"] = "Limite de transferência excedido",
+
+        // Cartão de crédito (specs/014-cartao-credito-cobrancas, FR-036)
+        ["cartao-ja-existente"] = "Cartão já existente",
+        ["cartao-nao-encontrado"] = "Cartão não encontrado",
+        ["cartao-nao-autorizado"] = "Cartão não autorizado",
+        ["cartao-bloqueado-fatura-vencida"] = "Cartão bloqueado por fatura vencida",
+        ["limite-cartao-insuficiente"] = "Limite do cartão insuficiente",
+        ["cobranca-nao-encontrada"] = "Cobrança não encontrada",
+        ["cobranca-nao-pendente"] = "Cobrança já paga ou cancelada",
+        ["fatura-nao-encontrada"] = "Fatura não encontrada",
+        ["fatura-nao-disponivel"] = "Fatura não disponível para pagamento",
+        ["recebivel-nao-encontrado"] = "Recebível não encontrado",
+        ["recebivel-nao-antecipavel"] = "Recebível não pode ser antecipado",
     };
 
     public static string Tipo(string codigo) => PrefixoTipo + codigo;

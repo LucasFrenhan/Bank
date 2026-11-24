@@ -20,6 +20,9 @@ public class BankApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     /// <summary>Chave de assinatura JWT desta fábrica (para os testes forjarem tokens).</summary>
     public string ChaveJwt { get; } = Convert.ToBase64String(RandomNumberGenerator.GetBytes(48));
 
+    /// <summary>Chave de derivação dos cartões desta fábrica (specs/014-cartao-credito-cobrancas, R1).</summary>
+    public string ChaveCartoes { get; } = Convert.ToBase64String(RandomNumberGenerator.GetBytes(48));
+
     public string ConnectionString => _connectionString
         ?? throw new InvalidOperationException("A fábrica ainda não foi inicializada.");
 
@@ -35,6 +38,7 @@ public class BankApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:Bank", ConnectionString);
         builder.UseSetting("Jwt:ChaveAssinatura", ChaveJwt);
+        builder.UseSetting("Cartoes:ChaveDerivacao", ChaveCartoes);
     }
 
     /// <summary>Abre um contexto direto no banco desta fábrica (asserções sobre a base).</summary>

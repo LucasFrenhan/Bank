@@ -11,4 +11,10 @@ public enum TipoNotificacao
 
     /// <summary>Aviso de crédito, destinado ao recebedor.</summary>
     AvisoCredito = 2,
+
+    /// <summary>Comprovante de cobrança paga no cartão, destinado ao pagador (spec 014, R15).</summary>
+    ComprovanteCobranca = 3,
+
+    /// <summary>Aviso de cobrança paga, destinado ao lojista (spec 014, R15).</summary>
+    CobrancaPaga = 4,
 }

@@ -80,6 +80,7 @@ Autorização: `Bearer`, mesmas políticas de `POST /api/v1/transferencias` (som
 
 ## Histórico
 
+- **1.3.0** (2026-11-24): versão atual em [specs/014 — transferencias-api.md](../../014-cartao-credito-cobrancas/contracts/transferencias-api.md) — novos tipos de lançamento no extrato (issue #22).
 - **1.2.0** (2026-11-18): erro `limite-excedido` no envio; `GET /limites` — issue #33.
 - **1.1.0** (2026-11-18): consulta por identificador; documento do pagador mascarado — issue #36.
 - **1.0.0** (2026-11-17): versão inicial (issues #8 e #13).

@@ -11,7 +11,7 @@ import { formatarMoeda } from '../formatacao/moeda';
 import { useTitulo } from './comum';
 import estilos from './Extrato.module.css';
 import { VAZIO_MOVIMENTACOES } from './Inicio';
-import { descricaoItem, ehEntrada, linkComprovante, nomeContraparte, rotuloDirecao, valorComSinal } from './lancamentos';
+import { descricaoItem, ehEntrada, ehTransferencia, linkComprovante, nomeContraparte, rotuloDirecao, valorComSinal } from './lancamentos';
 import { useCarteira } from './useCarteira';
 import { useExtrato } from './useExtrato';
 import { useLarguraDesktop } from './useLarguraDesktop';
@@ -322,8 +322,8 @@ function ExtratoMobile({
               id: item.lancamentoId,
               entrada: ehEntrada(item),
               nome: nomeContraparte(item),
-              // Abertura mostra a descrição "Saldo inicial de demonstração" (FR-016); as demais, a direção.
-              detalhe: `${item.tipo === 'Abertura' ? descricaoItem(item) : rotuloDirecao(item)} · ${formatarHora(item.criadoEm)}`,
+              // Transferência mostra a direção; os demais tipos, a descrição (specs/007, FR-016; specs/014, FR-038).
+              detalhe: `${ehTransferencia(item) ? rotuloDirecao(item) : descricaoItem(item)} · ${formatarHora(item.criadoEm)}`,
               valor: valorComSinal(item),
               para: linkComprovante(item),
             }))}

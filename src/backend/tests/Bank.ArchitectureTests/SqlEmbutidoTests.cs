@@ -14,6 +14,11 @@ public class SqlEmbutidoTests
         "Procedures/RemoverImpedimentoDeAlteracao.sql",
         "Consultas/BloquearCarteirasParaTransferencia.sql",
         "Consultas/CriarLancamentosDeAbertura.sql",
+        "Procedures/ImpedirAlteracaoDeRegistrosDeCartao.sql",
+        "Procedures/RemoverImpedimentoDeRegistrosDeCartao.sql",
+        "Consultas/BloquearCobranca.sql",
+        "Consultas/BloquearCartao.sql",
+        "Consultas/BloquearRecebivel.sql",
     ];
 
     [Theory]

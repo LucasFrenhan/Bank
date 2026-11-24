@@ -1,8 +1,13 @@
 using Bank.Application.Autenticacao;
 using Bank.Application.Carteiras;
+using Bank.Application.Cartoes;
+using Bank.Application.Cobrancas;
 using Bank.Application.Abstracoes;
+using Bank.Application.Faturas;
 using Bank.Application.Notificacoes;
 using Bank.Application.Observabilidade;
+using Bank.Application.Processamento;
+using Bank.Application.Recebiveis;
 using Bank.Application.Usuarios;
 using Bank.Application.Transferencias;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,8 +36,14 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<IValidateOptions<LimitesTransferenciaOptions>, ValidadorLimitesTransferenciaOptions>();
 
+        services.AddOptions<CartoesOptions>()
+            .BindConfiguration(CartoesOptions.Secao)
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<CartoesOptions>, ValidadorCartoesOptions>();
+
         services.TryAddSingleton(TimeProvider.System);
-        services.AddSingleton<CalendarioBrasilia>();
+        services.TryAddSingleton<CalendarioBrasilia>();
+        services.AddSingleton<MetricasCartoes>();
         services.AddSingleton<MetricasUsuarios>();
         services.AddSingleton<HashSenhaFicticio>();
 
@@ -46,6 +57,22 @@ public static class DependencyInjection
         services.AddScoped<ObterExtrato>();
         services.AddScoped<ConsultarTransferencia>();
         services.AddScoped<ConsultarLimites>();
+
+        // Cartão de crédito (specs/014-cartao-credito-cobrancas)
+        services.AddScoped<SolicitarCartao>();
+        services.AddScoped<ObterMeuCartao>();
+        services.AddScoped<ExibirDadosCartao>();
+        services.AddScoped<EmitirCobranca>();
+        services.AddScoped<ConsultarCobranca>();
+        services.AddScoped<ListarMinhasCobrancas>();
+        services.AddScoped<CancelarCobranca>();
+        services.AddScoped<PagarCobranca>();
+        services.AddScoped<ListarFaturas>();
+        services.AddScoped<ObterFatura>();
+        services.AddScoped<PagarFatura>();
+        services.AddScoped<ListarRecebiveis>();
+        services.AddScoped<ObterRecebivel>();
+        services.AddScoped<AnteciparRecebivel>();
 
         return services;
     }
@@ -62,6 +89,20 @@ public static class DependencyInjection
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<MetricasNotificacoes>();
         services.AddScoped<INotificadorTransferencia, NotificarTransferenciaConcluida>();
+        services.AddScoped<INotificadorCobranca, NotificarCobrancaPaga>();
+
+        return services;
+    }
+
+    /// <summary>Processamento diário, hospedado pelo Worker (specs/014-cartao-credito-cobrancas, research R7).</summary>
+    public static IServiceCollection AddProcessamento(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<CalendarioBrasilia>();
+        services.AddSingleton<MetricasProcessamento>();
+        services.AddScoped<ProcessarDia>();
 
         return services;
     }

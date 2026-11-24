@@ -223,6 +223,519 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bank.Domain.Cartoes.AutorizacaoCartao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("CartaoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cartao_id");
+
+                    b.Property<Guid>("ChaveIdempotencia")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chave_idempotencia");
+
+                    b.Property<Guid>("CobrancaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cobranca_id");
+
+                    b.Property<string>("CodigoAutorizacao")
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("codigo_autorizacao");
+
+                    b.Property<string>("CodigoBandeira")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("codigo_bandeira");
+
+                    b.Property<DateTimeOffset>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<string>("Motivo")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("motivo");
+
+                    b.Property<Guid>("PagadorUsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("pagador_usuario_id");
+
+                    b.Property<string>("Resultado")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("resultado");
+
+                    b.Property<string>("UltimosDigitos")
+                        .IsRequired()
+                        .HasColumnType("char(4)")
+                        .HasColumnName("ultimos_digitos");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_autorizacoes_cartao");
+
+                    b.HasIndex("CartaoId")
+                        .HasDatabaseName("ix_autorizacoes_cartao_cartao_id");
+
+                    b.HasIndex("CobrancaId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_autorizacoes_cartao_cobranca_aprovada")
+                        .HasFilter("resultado = 'Aprovada'");
+
+                    b.HasIndex("CodigoBandeira")
+                        .HasDatabaseName("ix_autorizacoes_cartao_codigo_bandeira");
+
+                    b.HasIndex("PagadorUsuarioId", "ChaveIdempotencia")
+                        .IsUnique()
+                        .HasDatabaseName("ux_autorizacoes_cartao_chave")
+                        .HasFilter("resultado = 'Aprovada'");
+
+                    b.ToTable("autorizacoes_cartao", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_autorizacoes_cartao_motivo", "motivo IN ('CartaoNaoAutorizado', 'FaturaVencida', 'LimiteInsuficiente')");
+
+                            t.HasCheckConstraint("ck_autorizacoes_cartao_resultado", "resultado IN ('Aprovada', 'Recusada')");
+
+                            t.HasCheckConstraint("ck_autorizacoes_cartao_resultado_coerente", "(resultado = 'Aprovada') = (codigo_autorizacao IS NOT NULL) AND (resultado = 'Aprovada') = (motivo IS NULL) AND (resultado = 'Recusada' OR (cartao_id IS NOT NULL AND codigo_bandeira IS NOT NULL))");
+
+                            t.HasCheckConstraint("ck_autorizacoes_cartao_ultimos_digitos", "ultimos_digitos ~ '^[0-9]{4}$'");
+
+                            t.HasCheckConstraint("ck_autorizacoes_cartao_valor_positivo", "valor > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.Bandeira", b =>
+                {
+                    b.Property<string>("Codigo")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("codigo");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("nome");
+
+                    b.HasKey("Codigo")
+                        .HasName("pk_bandeiras");
+
+                    b.ToTable("bandeiras", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Codigo = "001",
+                            Nome = "Visa"
+                        },
+                        new
+                        {
+                            Codigo = "002",
+                            Nome = "Mastercard"
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.Cartao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CodigoBandeira")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("codigo_bandeira");
+
+                    b.Property<DateTimeOffset>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<string>("ImpressaoDigital")
+                        .IsRequired()
+                        .HasMaxLength(44)
+                        .HasColumnType("character varying(44)")
+                        .HasColumnName("impressao_digital");
+
+                    b.Property<decimal>("LimiteTotal")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("limite_total");
+
+                    b.Property<decimal>("LimiteUtilizado")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("limite_utilizado");
+
+                    b.Property<string>("NomeImpresso")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("nome_impresso");
+
+                    b.Property<string>("UltimosDigitos")
+                        .IsRequired()
+                        .HasColumnType("char(4)")
+                        .HasColumnName("ultimos_digitos");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.Property<int>("ValidadeAno")
+                        .HasColumnType("integer")
+                        .HasColumnName("validade_ano");
+
+                    b.Property<int>("ValidadeMes")
+                        .HasColumnType("integer")
+                        .HasColumnName("validade_mes");
+
+                    b.Property<int>("Variacao")
+                        .HasColumnType("integer")
+                        .HasColumnName("variacao");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cartoes");
+
+                    b.HasIndex("CodigoBandeira")
+                        .HasDatabaseName("ix_cartoes_codigo_bandeira");
+
+                    b.HasIndex("ImpressaoDigital")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cartoes_impressao_digital");
+
+                    b.HasIndex("UsuarioId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cartoes_usuario_id");
+
+                    b.ToTable("cartoes", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_cartoes_limite", "limite_total > 0 AND limite_utilizado BETWEEN 0 AND limite_total");
+
+                            t.HasCheckConstraint("ck_cartoes_ultimos_digitos", "ultimos_digitos ~ '^[0-9]{4}$'");
+
+                            t.HasCheckConstraint("ck_cartoes_validade", "validade_mes BETWEEN 1 AND 12");
+
+                            t.HasCheckConstraint("ck_cartoes_variacao", "variacao BETWEEN 0 AND 4");
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.CompraCartao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AutorizacaoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("autorizacao_id");
+
+                    b.Property<DateTimeOffset>("AutorizadaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("autorizada_em");
+
+                    b.Property<Guid>("CartaoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cartao_id");
+
+                    b.Property<Guid>("CobrancaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cobranca_id");
+
+                    b.Property<DateOnly>("DataCompra")
+                        .HasColumnType("date")
+                        .HasColumnName("data_compra");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("descricao");
+
+                    b.Property<string>("Estabelecimento")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("estabelecimento");
+
+                    b.Property<Guid>("FaturaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("fatura_id");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_compras_cartao");
+
+                    b.HasIndex("AutorizacaoId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_compras_cartao_autorizacao_id");
+
+                    b.HasIndex("CartaoId")
+                        .HasDatabaseName("ix_compras_cartao_cartao_id");
+
+                    b.HasIndex("CobrancaId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_compras_cartao_cobranca_id");
+
+                    b.HasIndex("FaturaId")
+                        .HasDatabaseName("ix_compras_cartao_fatura_id");
+
+                    b.ToTable("compras_cartao", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_compras_cartao_valor_positivo", "valor > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.Fatura", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CartaoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cartao_id");
+
+                    b.Property<Guid?>("ChaveIdempotencia")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chave_idempotencia");
+
+                    b.Property<DateOnly>("Competencia")
+                        .HasColumnType("date")
+                        .HasColumnName("competencia");
+
+                    b.Property<int?>("DiasAtraso")
+                        .HasColumnType("integer")
+                        .HasColumnName("dias_atraso");
+
+                    b.Property<DateOnly>("Fechamento")
+                        .HasColumnType("date")
+                        .HasColumnName("fechamento");
+
+                    b.Property<DateOnly>("Inicio")
+                        .HasColumnType("date")
+                        .HasColumnName("inicio");
+
+                    b.Property<decimal?>("Juros")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("juros");
+
+                    b.Property<DateTimeOffset?>("LiberadaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("liberada_em");
+
+                    b.Property<DateTimeOffset?>("PagaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paga_em");
+
+                    b.Property<decimal?>("TaxaJurosMensal")
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("taxa_juros_mensal");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("total");
+
+                    b.Property<decimal?>("ValorPago")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor_pago");
+
+                    b.Property<DateOnly>("Vencimento")
+                        .HasColumnType("date")
+                        .HasColumnName("vencimento");
+
+                    b.HasKey("Id")
+                        .HasName("pk_faturas");
+
+                    b.HasIndex("Fechamento")
+                        .HasDatabaseName("ix_faturas_nao_liberadas")
+                        .HasFilter("liberada_em IS NULL");
+
+                    b.HasIndex("CartaoId", "ChaveIdempotencia")
+                        .IsUnique()
+                        .HasDatabaseName("ux_faturas_chave")
+                        .HasFilter("chave_idempotencia IS NOT NULL");
+
+                    b.HasIndex("CartaoId", "Competencia")
+                        .IsUnique()
+                        .HasDatabaseName("ux_faturas_cartao_competencia");
+
+                    b.HasIndex("CartaoId", "Vencimento")
+                        .HasDatabaseName("ix_faturas_em_aberto")
+                        .HasFilter("liberada_em IS NOT NULL AND paga_em IS NULL");
+
+                    b.ToTable("faturas", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_faturas_datas", "inicio < fechamento AND fechamento < vencimento AND EXTRACT(DAY FROM competencia) = 1");
+
+                            t.HasCheckConstraint("ck_faturas_pagamento_coerente", "num_nonnulls(paga_em, taxa_juros_mensal, dias_atraso, juros, valor_pago, chave_idempotencia) IN (0, 6) AND (paga_em IS NULL OR (liberada_em IS NOT NULL AND dias_atraso >= 0 AND juros >= 0 AND valor_pago = total + juros))");
+
+                            t.HasCheckConstraint("ck_faturas_total", "total >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.LancamentoFatura", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CompraId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("compra_id");
+
+                    b.Property<DateOnly>("DataCompra")
+                        .HasColumnType("date")
+                        .HasColumnName("data_compra");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("descricao");
+
+                    b.Property<string>("Estabelecimento")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("estabelecimento");
+
+                    b.Property<Guid>("FaturaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("fatura_id");
+
+                    b.Property<DateTimeOffset>("LancadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lancado_em");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_lancamentos_fatura");
+
+                    b.HasIndex("CompraId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_lancamentos_fatura_compra_id");
+
+                    b.HasIndex("FaturaId")
+                        .HasDatabaseName("ix_lancamentos_fatura_fatura_id");
+
+                    b.ToTable("lancamentos_fatura", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_lancamentos_fatura_valor_positivo", "valor > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cobrancas.Cobranca", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("CanceladaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelada_em");
+
+                    b.Property<Guid>("CarteiraDestinoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("carteira_destino_id");
+
+                    b.Property<string>("CodigoAutorizacao")
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("codigo_autorizacao");
+
+                    b.Property<string>("CodigoBandeira")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("codigo_bandeira");
+
+                    b.Property<DateTimeOffset>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("descricao");
+
+                    b.Property<Guid>("LojistaUsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lojista_usuario_id");
+
+                    b.Property<DateTimeOffset?>("PagaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paga_em");
+
+                    b.Property<Guid?>("PagadorUsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("pagador_usuario_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("UltimaRecusaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ultima_recusa_em");
+
+                    b.Property<string>("UltimaRecusaMotivo")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("ultima_recusa_motivo");
+
+                    b.Property<string>("UltimosDigitosCartao")
+                        .HasColumnType("char(4)")
+                        .HasColumnName("ultimos_digitos_cartao");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cobrancas");
+
+                    b.HasIndex("CarteiraDestinoId")
+                        .HasDatabaseName("ix_cobrancas_carteira_destino_id");
+
+                    b.HasIndex("CodigoBandeira")
+                        .HasDatabaseName("ix_cobrancas_codigo_bandeira");
+
+                    b.HasIndex("PagadorUsuarioId")
+                        .HasDatabaseName("ix_cobrancas_pagador_usuario_id");
+
+                    b.HasIndex("LojistaUsuarioId", "CriadoEm", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_cobrancas_lojista");
+
+                    b.ToTable("cobrancas", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_cobrancas_cancelada_coerente", "(status = 'Cancelada') = (cancelada_em IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_cobrancas_paga_coerente", "num_nonnulls(pagador_usuario_id, codigo_bandeira, ultimos_digitos_cartao, codigo_autorizacao, paga_em) = CASE status WHEN 'Paga' THEN 5 ELSE 0 END");
+
+                            t.HasCheckConstraint("ck_cobrancas_recusa_coerente", "(ultima_recusa_motivo IS NULL) = (ultima_recusa_em IS NULL)");
+
+                            t.HasCheckConstraint("ck_cobrancas_recusa_motivo", "ultima_recusa_motivo IN ('CartaoNaoAutorizado', 'FaturaVencida', 'LimiteInsuficiente')");
+
+                            t.HasCheckConstraint("ck_cobrancas_status", "status IN ('Pendente', 'Paga', 'Cancelada')");
+
+                            t.HasCheckConstraint("ck_cobrancas_ultimos_digitos", "ultimos_digitos_cartao ~ '^[0-9]{4}$'");
+
+                            t.HasCheckConstraint("ck_cobrancas_valor_positivo", "valor > 0");
+                        });
+                });
+
             modelBuilder.Entity("Bank.Domain.Notificacoes.NotificacaoAuditoria", b =>
                 {
                     b.Property<Guid>("Id")
@@ -273,7 +786,92 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         {
                             t.HasCheckConstraint("ck_notificacoes_auditoria_canal", "canal IN ('simulado')");
 
-                            t.HasCheckConstraint("ck_notificacoes_auditoria_tipo", "tipo IN ('comprovante_envio', 'aviso_credito')");
+                            t.HasCheckConstraint("ck_notificacoes_auditoria_tipo", "tipo IN ('comprovante_envio', 'aviso_credito', 'comprovante_cobranca', 'cobranca_paga')");
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Recebiveis.Recebivel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CarteiraId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("carteira_id");
+
+                    b.Property<Guid?>("ChaveIdempotencia")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chave_idempotencia");
+
+                    b.Property<Guid>("CobrancaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cobranca_id");
+
+                    b.Property<DateTimeOffset>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<DateOnly>("DataPrevista")
+                        .HasColumnType("date")
+                        .HasColumnName("data_prevista");
+
+                    b.Property<Guid>("LojistaUsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lojista_usuario_id");
+
+                    b.Property<DateTimeOffset?>("RecebidoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recebido_em");
+
+                    b.Property<string>("Situacao")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("situacao");
+
+                    b.Property<decimal>("Taxa")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("taxa");
+
+                    b.Property<decimal>("ValorBruto")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor_bruto");
+
+                    b.Property<decimal>("ValorLiquido")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("valor_liquido");
+
+                    b.HasKey("Id")
+                        .HasName("pk_recebiveis");
+
+                    b.HasIndex("CarteiraId")
+                        .HasDatabaseName("ix_recebiveis_carteira_id");
+
+                    b.HasIndex("CobrancaId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_recebiveis_cobranca_id");
+
+                    b.HasIndex("DataPrevista")
+                        .HasDatabaseName("ix_recebiveis_devidos")
+                        .HasFilter("situacao = 'Pendente'");
+
+                    b.HasIndex("LojistaUsuarioId", "ChaveIdempotencia")
+                        .IsUnique()
+                        .HasDatabaseName("ux_recebiveis_chave")
+                        .HasFilter("chave_idempotencia IS NOT NULL");
+
+                    b.HasIndex("LojistaUsuarioId", "CriadoEm", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_recebiveis_lojista");
+
+                    b.ToTable("recebiveis", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_recebiveis_situacao", "situacao IN ('Pendente', 'Liquidado', 'Antecipado')");
+
+                            t.HasCheckConstraint("ck_recebiveis_situacao_coerente", "(situacao = 'Pendente') = (recebido_em IS NULL) AND (situacao = 'Antecipado') = (chave_idempotencia IS NOT NULL) AND (situacao = 'Antecipado' OR taxa = 0)");
+
+                            t.HasCheckConstraint("ck_recebiveis_valores", "valor_bruto > 0 AND taxa >= 0 AND valor_liquido > 0 AND valor_liquido = valor_bruto - taxa");
                         });
                 });
 
@@ -302,6 +900,14 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("direcao");
 
+                    b.Property<Guid?>("FaturaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("fatura_id");
+
+                    b.Property<Guid?>("RecebivelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recebivel_id");
+
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -324,6 +930,16 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasDatabaseName("ux_lancamentos_abertura_por_carteira")
                         .HasFilter("tipo = 'Abertura'");
 
+                    b.HasIndex("FaturaId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_lancamentos_fatura_id")
+                        .HasFilter("fatura_id IS NOT NULL");
+
+                    b.HasIndex("RecebivelId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_lancamentos_recebivel_id")
+                        .HasFilter("recebivel_id IS NOT NULL");
+
                     b.HasIndex("TransferenciaId")
                         .HasDatabaseName("ix_lancamentos_transferencia_id");
 
@@ -335,9 +951,9 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         {
                             t.HasCheckConstraint("ck_lancamentos_direcao", "direcao IN ('Entrada', 'Saida')");
 
-                            t.HasCheckConstraint("ck_lancamentos_tipo", "tipo IN ('Abertura', 'Transferencia')");
+                            t.HasCheckConstraint("ck_lancamentos_origem_coerente", "(tipo = 'Transferencia') = (transferencia_id IS NOT NULL) AND (tipo = 'PagamentoFatura') = (fatura_id IS NOT NULL) AND (tipo IN ('LiquidacaoRecebivel', 'AntecipacaoRecebivel')) = (recebivel_id IS NOT NULL)");
 
-                            t.HasCheckConstraint("ck_lancamentos_transferencia_coerente", "(tipo = 'Transferencia') = (transferencia_id IS NOT NULL)");
+                            t.HasCheckConstraint("ck_lancamentos_tipo", "tipo IN ('Abertura', 'Transferencia', 'PagamentoFatura', 'LiquidacaoRecebivel', 'AntecipacaoRecebivel')");
 
                             t.HasCheckConstraint("ck_lancamentos_valor_positivo", "valor > 0");
                         });
@@ -556,6 +1172,139 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasConstraintName("fk_carteiras_usuarios");
                 });
 
+            modelBuilder.Entity("Bank.Domain.Cartoes.AutorizacaoCartao", b =>
+                {
+                    b.HasOne("Bank.Domain.Cartoes.Cartao", null)
+                        .WithMany()
+                        .HasForeignKey("CartaoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_autorizacoes_cartao_cartoes");
+
+                    b.HasOne("Bank.Domain.Cobrancas.Cobranca", null)
+                        .WithMany()
+                        .HasForeignKey("CobrancaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_autorizacoes_cartao_cobrancas");
+
+                    b.HasOne("Bank.Domain.Cartoes.Bandeira", null)
+                        .WithMany()
+                        .HasForeignKey("CodigoBandeira")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_autorizacoes_cartao_bandeiras");
+
+                    b.HasOne("Bank.Domain.Usuarios.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("PagadorUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_autorizacoes_cartao_usuarios");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.Cartao", b =>
+                {
+                    b.HasOne("Bank.Domain.Cartoes.Bandeira", null)
+                        .WithMany()
+                        .HasForeignKey("CodigoBandeira")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cartoes_bandeiras");
+
+                    b.HasOne("Bank.Domain.Usuarios.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cartoes_usuarios");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.CompraCartao", b =>
+                {
+                    b.HasOne("Bank.Domain.Cartoes.AutorizacaoCartao", null)
+                        .WithMany()
+                        .HasForeignKey("AutorizacaoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_compras_cartao_autorizacoes");
+
+                    b.HasOne("Bank.Domain.Cartoes.Cartao", null)
+                        .WithMany()
+                        .HasForeignKey("CartaoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_compras_cartao_cartoes");
+
+                    b.HasOne("Bank.Domain.Cobrancas.Cobranca", null)
+                        .WithMany()
+                        .HasForeignKey("CobrancaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_compras_cartao_cobrancas");
+
+                    b.HasOne("Bank.Domain.Cartoes.Fatura", null)
+                        .WithMany()
+                        .HasForeignKey("FaturaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_compras_cartao_faturas");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.Fatura", b =>
+                {
+                    b.HasOne("Bank.Domain.Cartoes.Cartao", null)
+                        .WithMany()
+                        .HasForeignKey("CartaoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_faturas_cartoes");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cartoes.LancamentoFatura", b =>
+                {
+                    b.HasOne("Bank.Domain.Cartoes.CompraCartao", null)
+                        .WithMany()
+                        .HasForeignKey("CompraId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_lancamentos_fatura_compras");
+
+                    b.HasOne("Bank.Domain.Cartoes.Fatura", null)
+                        .WithMany()
+                        .HasForeignKey("FaturaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_lancamentos_fatura_faturas");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Cobrancas.Cobranca", b =>
+                {
+                    b.HasOne("Bank.Domain.Carteiras.Carteira", null)
+                        .WithMany()
+                        .HasForeignKey("CarteiraDestinoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cobrancas_carteiras");
+
+                    b.HasOne("Bank.Domain.Cartoes.Bandeira", null)
+                        .WithMany()
+                        .HasForeignKey("CodigoBandeira")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_cobrancas_bandeiras");
+
+                    b.HasOne("Bank.Domain.Usuarios.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("LojistaUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cobrancas_usuarios_lojista");
+
+                    b.HasOne("Bank.Domain.Usuarios.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("PagadorUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_cobrancas_usuarios_pagador");
+                });
+
             modelBuilder.Entity("Bank.Domain.Notificacoes.NotificacaoAuditoria", b =>
                 {
                     b.HasOne("Bank.Domain.Usuarios.Usuario", null)
@@ -566,6 +1315,30 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasConstraintName("fk_notificacoes_auditoria_usuarios_usuario_destino_id");
                 });
 
+            modelBuilder.Entity("Bank.Domain.Recebiveis.Recebivel", b =>
+                {
+                    b.HasOne("Bank.Domain.Carteiras.Carteira", null)
+                        .WithMany()
+                        .HasForeignKey("CarteiraId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_recebiveis_carteiras");
+
+                    b.HasOne("Bank.Domain.Cobrancas.Cobranca", null)
+                        .WithMany()
+                        .HasForeignKey("CobrancaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_recebiveis_cobrancas");
+
+                    b.HasOne("Bank.Domain.Usuarios.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("LojistaUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_recebiveis_usuarios");
+                });
+
             modelBuilder.Entity("Bank.Domain.Transferencias.Lancamento", b =>
                 {
                     b.HasOne("Bank.Domain.Carteiras.Carteira", null)
@@ -574,6 +1347,18 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_lancamentos_carteiras");
+
+                    b.HasOne("Bank.Domain.Cartoes.Fatura", null)
+                        .WithMany()
+                        .HasForeignKey("FaturaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_lancamentos_faturas");
+
+                    b.HasOne("Bank.Domain.Recebiveis.Recebivel", null)
+                        .WithMany()
+                        .HasForeignKey("RecebivelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_lancamentos_recebiveis");
 
                     b.HasOne("Bank.Domain.Transferencias.Transferencia", null)
                         .WithMany()

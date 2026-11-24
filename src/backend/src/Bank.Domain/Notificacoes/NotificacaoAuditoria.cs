@@ -61,9 +61,23 @@ public sealed class NotificacaoAuditoria
     public static NotificacaoAuditoria AvisoCredito(EventoId eventoId, UsuarioId recebedor, decimal valor, string? pagadorNome, DateTimeOffset agora) =>
         new(eventoId, recebedor, TipoNotificacao.AvisoCredito, Texto("Você recebeu", valor, "de", pagadorNome), agora);
 
+    /// <summary>Comprovante da cobrança paga no cartão, para o pagador (specs/014-cartao-credito-cobrancas, FR-035).</summary>
+    public static NotificacaoAuditoria ComprovanteCobranca(EventoId eventoId, UsuarioId pagador, decimal valor, string? lojistaNome, DateTimeOffset agora)
+    {
+        var nome = lojistaNome?.Trim();
+        var destino = string.IsNullOrEmpty(nome) ? string.Empty : $" para {nome}";
+        return new(eventoId, pagador, TipoNotificacao.ComprovanteCobranca, $"Você pagou R$ {Reais(valor)}{destino} no cartão de crédito.", agora);
+    }
+
+    /// <summary>Aviso de cobrança paga, para o lojista; sem o nome do pagador (spec 014, FR-011).</summary>
+    public static NotificacaoAuditoria CobrancaPaga(EventoId eventoId, UsuarioId lojista, decimal valor, DateTimeOffset agora) =>
+        new(eventoId, lojista, TipoNotificacao.CobrancaPaga, $"A sua cobrança de R$ {Reais(valor)} foi paga.", agora);
+
+    private static string Reais(decimal valor) => valor.ToString("#,##0.00", FormatoReais);
+
     private static string Texto(string acao, decimal valor, string preposicao, string? nomeOutraParte)
     {
-        var valorFormatado = valor.ToString("#,##0.00", FormatoReais);
+        var valorFormatado = Reais(valor);
         var nome = nomeOutraParte?.Trim();
         return string.IsNullOrEmpty(nome)
             ? $"{acao} R$ {valorFormatado}."

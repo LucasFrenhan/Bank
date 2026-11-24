@@ -15,6 +15,10 @@ public class PermissoesPorPerfilTests
     [InlineData(TipoConta.PessoaJuridica, Permissao.ReceberTransferencia, true)]
     [InlineData(TipoConta.PessoaJuridica, Permissao.PagarCobrancaCartao, false)]
     [InlineData(TipoConta.PessoaJuridica, Permissao.GerarCobrancaCartao, true)]
+    [InlineData(TipoConta.PessoaFisica, Permissao.UsarCartaoCredito, true)]
+    [InlineData(TipoConta.PessoaJuridica, Permissao.UsarCartaoCredito, false)]
+    [InlineData(TipoConta.PessoaFisica, Permissao.GerenciarRecebiveis, false)]
+    [InlineData(TipoConta.PessoaJuridica, Permissao.GerenciarRecebiveis, true)]
     public void Possui_SegueAMatrizDaRn06(TipoConta tipo, Permissao permissao, bool esperado)
     {
         Assert.Equal(esperado, PermissoesPorPerfil.Possui(tipo, permissao));

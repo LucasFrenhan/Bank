@@ -1,6 +1,7 @@
 using Bank.Application.Abstracoes;
 using Bank.Infrastructure.Mensageria;
 using Bank.Infrastructure.Persistencia;
+using Bank.Infrastructure.Processamento;
 using Bank.Infrastructure.Seguranca;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +32,11 @@ public static class DependencyInjection
         services.AddSingleton<IHasherSenha, HasherSenhaIdentity>();
         services.AddSingleton<IEmissorToken, EmissorTokenJwt>();
 
+        // Dados do cartão derivados, nunca gravados (specs/014-cartao-credito-cobrancas, research R1)
+        services.AddOptions<ChaveCartoesOptions>().BindConfiguration(ChaveCartoesOptions.Secao).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<ChaveCartoesOptions>, ValidadorChaveCartoesOptions>();
+        services.AddSingleton<IDadosCartao, DadosCartaoHmac>();
+
         return services;
     }
 
@@ -53,6 +59,17 @@ public static class DependencyInjection
         services.AddScoped<IExtratoConsultas, ExtratoConsultas>();
         services.AddScoped<INotificacoesAuditoria, NotificacoesAuditoriaRepositorio>(); // spec 011, R2
 
+        // Cartão de crédito (specs/014-cartao-credito-cobrancas, research R9)
+        services.AddScoped<IUnidadeDeTrabalho, UnidadeDeTrabalho>();
+        services.AddScoped<ICarteiraRepositorio, CarteiraRepositorio>();
+        services.AddScoped<ICartaoRepositorio, CartaoRepositorio>();
+        services.AddScoped<ICobrancaRepositorio, CobrancaRepositorio>();
+        services.AddScoped<ICobrancaConsultas, CobrancaConsultas>();
+        services.AddScoped<IFaturaRepositorio, FaturaRepositorio>();
+        services.AddScoped<IFaturaConsultas, FaturaConsultas>();
+        services.AddScoped<IRecebivelRepositorio, RecebivelRepositorio>();
+        services.AddScoped<IRecebivelConsultas, RecebivelConsultas>();
+
         return services;
     }
 
@@ -74,6 +91,19 @@ public static class DependencyInjection
         services.AddHostedService<TopologiaNaInicializacao>();
         services.AddHostedService<DespachanteOutbox>();
         services.AddHostedService<ConsumidorNotificacoesTransferencia>();
+        services.AddHostedService<ConsumidorNotificacoesCobranca>(); // spec 014, US7
+
+        return services;
+    }
+
+    /// <summary>Agendamento do processamento diário no Worker (specs/014-cartao-credito-cobrancas, research R7).</summary>
+    public static IServiceCollection AddProcessamentoDiario(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddOptions<ProcessamentoDiarioOptions>().BindConfiguration(ProcessamentoDiarioOptions.Secao).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<ProcessamentoDiarioOptions>, ValidadorProcessamentoDiarioOptions>();
+        services.AddHostedService<ProcessamentoDiarioHospedado>();
 
         return services;
     }

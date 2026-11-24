@@ -11,7 +11,7 @@ import { NOME_BANCO } from '../marca';
 import { Link } from 'react-router';
 import { ListaLancamentos } from '../design/componentes/ListaLancamentos';
 import { formatarDataRelativa } from '../formatacao/data';
-import { descricaoItem, ehEntrada, linkComprovante, nomeContraparte, valorComSinal } from './lancamentos';
+import { descricaoItem, ehEntrada, ehTransferencia, linkComprovante, nomeContraparte, valorComSinal } from './lancamentos';
 import { useExtrato } from './useExtrato';
 import { useSessaoAtiva } from '../sessao/ContextoSessao';
 import { NOME_TIPO_CONTA } from '../sessao/permissoes';
@@ -168,7 +168,7 @@ export const VAZIO_MOVIMENTACOES = {
 };
 
 function detalhePf(item: ItemExtrato): string {
-  const tipo = item.tipo === 'Abertura' ? descricaoItem(item) : ehEntrada(item) ? 'Transferência recebida' : 'Transferência enviada';
+  const tipo = !ehTransferencia(item) ? descricaoItem(item) : ehEntrada(item) ? 'Transferência recebida' : 'Transferência enviada';
   return `${tipo} · ${formatarDataRelativa(item.criadoEm)}`;
 }
 
