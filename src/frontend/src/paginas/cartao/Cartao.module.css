@@ -1,0 +1,192 @@
+/* Cartão e solicitação (specs/015; docs/design/fontes/cartao/Main e Solicitar). */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.estreita {
+  max-width: 560px;
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2) var(--espaco-3);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--altura-alvo-minimo);
+  font: var(--texto-rotulo);
+  font-weight: 600;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--espaco-6);
+}
+
+.coluna {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  min-width: 0;
+}
+
+.quadro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  min-width: 0;
+  padding: var(--espaco-6);
+}
+
+.quadro h2 {
+  font: var(--texto-h3);
+  font-weight: 600;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.nota {
+  color: var(--cor-texto-suave);
+  font: var(--texto-legenda);
+}
+
+.apoio {
+  margin-top: var(--espaco-2);
+  color: var(--cor-texto-suave);
+}
+
+.rotulo {
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}
+
+.valorGrande {
+  font: var(--texto-display);
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+.valorMedio {
+  font: var(--texto-h2);
+  font-variant-numeric: tabular-nums;
+}
+
+.barra {
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-borda);
+}
+
+.barraUsada {
+  height: 100%;
+  background: var(--cor-primaria);
+}
+
+.linhas {
+  margin: 0;
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espaco-1) var(--espaco-3);
+  padding: var(--espaco-3) 0;
+  font: var(--texto-corpo-m);
+}
+
+.linha + .linha {
+  border-top: 1px solid var(--cor-borda);
+}
+
+.linha dt {
+  color: var(--cor-texto-suave);
+}
+
+.linha dd {
+  margin: 0;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.formularioLinha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.bandeiras {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.bandeiras legend {
+  margin-bottom: var(--espaco-3);
+  padding: 0;
+  font: var(--texto-rotulo);
+}
+
+.opcoes {
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.opcao {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  min-height: 64px;
+  padding: 0 var(--espaco-5);
+  border: 2px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.opcao input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--cor-primaria);
+}
+
+.opcaoMarcada {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria-suave);
+}
+
+.erroBandeira {
+  margin-top: var(--espaco-2);
+  color: var(--cor-erro);
+  font: var(--texto-corpo-m);
+}
+
+@media (min-width: 480px) {
+  .opcoes {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grade {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}

@@ -146,9 +146,9 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Testes
 
-- [ ] T025 [P] [US1] `src/cartao/useDadosCartao.test.tsx`: oculta por clique, desmontagem, `visibilitychange`,
+- [X] T025 [P] [US1] `src/cartao/useDadosCartao.test.tsx`: oculta por clique, desmontagem, `visibilitychange`,
   `pagehide` e 60 s; resposta que chega depois de ocultar é descartada; erro mantém oculto; storage vazio
-- [ ] T026 [P] [US1] `src/paginas/cartao/Cartao.test.tsx`: solicitação (cenários 1 a 3 e 8), cartão e limites
+- [X] T026 [P] [US1] `src/paginas/cartao/Cartao.test.tsx`: solicitação (cenários 1 a 3 e 8), cartão e limites
   (4), fatura atual com links e erro isolado, olho com nome acessível e anúncio (5), copiar só o número (7),
   nome de 150 caracteres, carregando, erro com
   `traceId` e tentar de novo, PJ (9); campo "Link ou código da cobrança" válido e inválido (FR-009)
@@ -156,9 +156,9 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Implementação
 
-- [ ] T028 [P] [US1] Criar `src/cartao/useDadosCartao.ts` (R5) e `src/cartao/CartaoDesenhado.tsx` com
+- [X] T028 [P] [US1] Criar `src/cartao/useDadosCartao.ts` (R5) e `src/cartao/CartaoDesenhado.tsx` com
   `src/cartao/Cartao.module.css` (R12; leitura dígito a dígito)
-- [ ] T029 [US1] Criar `src/paginas/cartao/SolicitarCartao.tsx` (FR-005), `src/paginas/cartao/Cartao.tsx`
+- [X] T029 [US1] Criar `src/paginas/cartao/SolicitarCartao.tsx` (FR-005), `src/paginas/cartao/Cartao.tsx`
   (FR-006 com a região "Fatura atual" e "Ver faturas", FR-007, FR-009) e a rota `/cartao` em `src/App.tsx`
 
 **Checkpoint**: US1 funciona pelo endereço `/cartao`
@@ -173,10 +173,10 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Testes
 
-- [ ] T030 [P] [US2] `src/paginas/cobrancas/Cobrancas.test.tsx`: vazio, filtros no endereço, páginas e "Carregar
+- [X] T030 [P] [US2] `src/paginas/cobrancas/Cobrancas.test.tsx`: vazio, filtros no endereço, páginas e "Carregar
   mais", erro, PF vê área indisponível; `NovaCobranca.test.tsx`: valor e descrição (contador de 200), erros por
   campo da API mantendo o digitado, duplo clique emite uma só, falha de rede orienta a conferir a lista sem reenviar
-- [ ] T031 [P] [US2] `src/paginas/cobrancas/DetalheCobranca.test.tsx`: código, link, copiar e compartilhar (com e
+- [X] T031 [P] [US2] `src/paginas/cobrancas/DetalheCobranca.test.tsx`: código, link, copiar e compartilhar (com e
   sem suporte), paga (sem pagador, link "Ver recebíveis"), última recusa, cancelar com confirmação, cancelamento
   de cobrança já paga
   (10) e já cancelada, atualização a cada 5 s só se pendente e visível, anúncio, falha silenciosa e confirmação
@@ -187,11 +187,11 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Implementação
 
-- [ ] T033 [P] [US2] Criar `src/paginas/cobrancas/useAtualizacaoAutomatica.ts` (R7)
-- [ ] T034 [US2] Criar em `src/paginas/cobrancas/` `SecoesCobrancas.tsx` (navegação "Seções de cobranças"),
+- [X] T033 [P] [US2] Criar `src/paginas/cobrancas/useAtualizacaoAutomatica.ts` (R7)
+- [X] T034 [US2] Criar em `src/paginas/cobrancas/` `SecoesCobrancas.tsx` (navegação "Seções de cobranças"),
   `Cobrancas.tsx` (FR-011) e `NovaCobranca.tsx` (FR-010), com `Cobrancas.module.css` e as rotas `/cobrancas` e
   `/cobrancas/nova`
-- [ ] T035 [US2] Criar `src/paginas/cobrancas/Cobranca.tsx` (rota `/c/:codigo`, escolhe a visão; FR-003; a PF vê
+- [X] T035 [US2] Criar `src/paginas/cobrancas/Cobranca.tsx` (rota `/c/:codigo`, escolhe a visão; FR-003; a PF vê
   só os dados até a US3) e
   `DetalheCobranca.tsx` (FR-012)
 
@@ -207,9 +207,9 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Testes
 
-- [ ] T036 [P] [US3] `src/cartao/validacao.test.ts`: titular, 16 dígitos e Luhn, validade (formato, mês 13, vence
+- [X] T036 [P] [US3] `src/cartao/validacao.test.ts`: titular, 16 dígitos e Luhn, validade (formato, mês 13, vence
   no fim do mês de Brasília), CVV; máscaras
-- [ ] T037 [P] [US3] `src/paginas/cobrancas/PagarCobranca.test.tsx`: cenários 1, 3 a 8 e 10 a 13; CVV limpo e
+- [X] T037 [P] [US3] `src/paginas/cobrancas/PagarCobranca.test.tsx`: cenários 1, 3 a 8 e 10 a 13; CVV limpo e
   focado após recusa; limite atual na recusa; falha de rede e reenvio com a mesma chave; duplo clique;
   `idempotencia-divergente` com cobrança já paga mostra o comprovante e, pendente, pede para conferir com nova chave;
   `pagehide` limpa o formulário; CVV de "Usar meu cartão" nunca preenchido;
@@ -223,8 +223,8 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Implementação
 
-- [ ] T040 [P] [US3] Criar `src/cartao/validacao.ts` (R8; FR-015, data-model "Dados do cartão")
-- [ ] T041 [US3] Criar em `src/paginas/cobrancas/` `PagarCobranca.tsx` (FR-013, FR-014, FR-017), `ComprovanteCartao.tsx`
+- [X] T040 [P] [US3] Criar `src/cartao/validacao.ts` (R8; FR-015, data-model "Dados do cartão")
+- [X] T041 [US3] Criar em `src/paginas/cobrancas/` `PagarCobranca.tsx` (FR-013, FR-014, FR-017), `ComprovanteCartao.tsx`
   (FR-018) e `CobrancaSemAcao.tsx` (outra PJ, indisponível e não encontrada), ligados em `Cobranca.tsx`
 
 **Checkpoint**: MVP completo (US1 + US2 + US3)

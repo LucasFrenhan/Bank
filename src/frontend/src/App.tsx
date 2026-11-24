@@ -1,6 +1,10 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import { Layout } from './design/componentes/Layout';
+import { Cartao } from './paginas/cartao/Cartao';
+import { Cobranca } from './paginas/cobrancas/Cobranca';
+import { Cobrancas } from './paginas/cobrancas/Cobrancas';
+import { NovaCobranca } from './paginas/cobrancas/NovaCobranca';
 import { Comprovante } from './paginas/Comprovante';
 import { ConfirmarTransferencia } from './paginas/ConfirmarTransferencia';
 import { CriarConta } from './paginas/CriarConta';
@@ -29,6 +33,10 @@ export function Rotas() {
       <Route path="/" element={<RotaProtegida><Layout><Inicio /></Layout></RotaProtegida>} />
       <Route path="/perfil" element={<RotaProtegida><Layout><Perfil /></Layout></RotaProtegida>} />
       <Route path="/extrato" element={<RotaProtegida><Layout><Extrato /></Layout></RotaProtegida>} />
+      <Route path="/cartao" element={<RotaProtegida><Layout><Cartao /></Layout></RotaProtegida>} />
+      <Route path="/cobrancas" element={<RotaProtegida><Layout><Cobrancas /></Layout></RotaProtegida>} />
+      <Route path="/cobrancas/nova" element={<RotaProtegida><NovaCobranca /></RotaProtegida>} />
+      <Route path="/c/:codigo" element={<RotaProtegida><Cobranca /></RotaProtegida>} />
       <Route path="/transferir" element={<RotaProtegida><Transferir /></RotaProtegida>} />
       <Route path="/transferir/confirmar" element={<RotaProtegida><ConfirmarTransferencia /></RotaProtegida>} />
       <Route path="/transferencias/:transferenciaId" element={<RotaProtegida><Comprovante /></RotaProtegida>} />

@@ -1,0 +1,138 @@
+/* Cartão desenhado (specs/015; docs/design/fontes/cartao/Main.dc.html). */
+.cartao {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1.586;
+  padding: var(--espaco-6);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-destaque);
+  color: var(--cor-sobre-destaque);
+}
+
+.topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.marcaIcone {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--cor-primaria);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bandeira {
+  font-weight: 600;
+}
+
+.linhaNumero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
+
+.numero {
+  position: relative;
+  min-width: 0;
+  font-family: var(--fonte-mono);
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.olho {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  border: 0;
+  border-radius: var(--raio-controle);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.olho:focus-visible {
+  outline-color: #fff;
+}
+
+.base {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espaco-5);
+  margin: 0;
+}
+
+.base dt {
+  color: var(--cor-sobre-destaque-suave);
+  font: var(--texto-legenda);
+}
+
+.base dd {
+  position: relative;
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.nome {
+  flex: 1;
+  min-width: 0;
+}
+
+.nome dd {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: var(--fonte-mono);
+}
+
+/* Texto só para leitores de tela fora da seleção manual do número. */
+.cartao :global(.apenas-leitor-de-tela) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media (min-width: 400px) {
+  .numero {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 359px) {
+  .cartao {
+    padding: var(--espaco-4);
+  }
+
+  .numero {
+    font-size: 14px;
+  }
+
+  .base {
+    gap: var(--espaco-3);
+  }
+}
