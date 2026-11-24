@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { delay, http, HttpResponse } from 'msw';
+import { api } from '../api/cliente';
 import { DADOS_CARTAO, problema, TRACE_ID } from '../testes/handlers';
 import { servidor } from '../testes/setup';
 import { TEMPO_EXIBICAO_MS, useDadosCartao } from './useDadosCartao';
@@ -84,6 +85,22 @@ describe('useDadosCartao', () => {
     await new Promise((r) => setTimeout(r, 80));
 
     expect(result.current.estado).toEqual({ estado: 'oculto' });
+  });
+
+  it('resposta já recebida quando os dados são ocultados também é descartada', async () => {
+    let responder: (r: Awaited<ReturnType<typeof api.obterDadosCartao>>) => void = () => undefined;
+    const chamada = vi.spyOn(api, 'obterDadosCartao').mockReturnValue(new Promise((r) => (responder = r)));
+    const { result } = renderHook(() => useDadosCartao());
+    let pendente: Promise<void> = Promise.resolve();
+    act(() => {
+      pendente = result.current.exibir();
+    });
+    act(() => result.current.ocultar());
+    responder({ ok: true, dados: DADOS_CARTAO, status: 200 });
+    await act(() => pendente);
+
+    expect(result.current.estado).toEqual({ estado: 'oculto' });
+    chamada.mockRestore();
   });
 
   it('erro mantém os dados ocultos, com o código de suporte', async () => {

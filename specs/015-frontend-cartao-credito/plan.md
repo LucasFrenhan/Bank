@@ -93,12 +93,12 @@ src/frontend/
 │   ├── cobrancas/codigo.ts
 │   ├── operacoes/                   # chaves.ts, useOperacao.ts
 │   ├── formatacao/dia.ts
-│   ├── design/componentes/          # Icones (olho, cartão), Filtros, ListaPaginada, SeloSituacao, Confirmacao, Layout
-│   ├── sessao/                      # SomentePerfil, permissoes, armazenamento
+│   ├── design/componentes/          # Icones (olho, cartão), Filtros, SeloSituacao, Confirmacao, Layout
+│   ├── sessao/                      # permissoes, armazenamento
 │   ├── telemetria/ponte.ts
 │   ├── testes/handlers.ts
-│   └── paginas/                     # cartao/, cobrancas/, faturas/, recebiveis/, Inicio (AvisoFatura), Extrato (Filtros)
-└── e2e/                             # cartao, cobrancas, pagamento, faturas, recebiveis, privacidadeCartao; apoio
+│   └── paginas/                     # cartao/, cobrancas/, faturas/, recebiveis/, ListaPaginada, SomentePerfil, Inicio (AvisoFatura), Extrato (Filtros)
+└── e2e/                             # cartao, cobrancas, pagamento, faturas, recebiveis, privacidadeCartao, telasCartao; apoioCartao
 ```
 
 **Structure Decision**: a lógica sem tela (código, chaves, validação, dias) fica em módulos próprios, testáveis

@@ -41,7 +41,7 @@ Protótipo próprio, aprovado para a [spec 015](../../specs/015-frontend-cartao-
   dono do link).
 - **Fontes:** [`fontes/cartao/`](fontes/cartao/), no mesmo formato, com o arranjo das telas em `canvas.json`. As
   versões de celular (`M-*`) reaproveitam a tela de desktop.
-- **Capturas:** entram com as telas prontas, na implementação da spec 015.
+- **Capturas das telas prontas:** [`telas/`](telas/), de `10-solicitar-cartao` a `20-recebiveis`, em desktop e celular.
 
 | Tela | Perfil | Desktop | Celular |
 | --- | --- | --- | --- |

@@ -105,10 +105,10 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   fusos diferentes; hoje em Brasília; ampliar `src/formatacao/valor.test.ts` com a taxa de 2% (R8: 29990 →
   600/29390; 1 → 0/1; 10000 → 200/9800; 25 → 1/24)
 - [X] T016 [P] Ampliar `src/api/erros.test.ts` com cada linha da tradução de erros do
-  [contrato do frontend](contracts/frontend.md), sempre com `proximaAcao` (SC-006), `acesso-negado` no contexto
-  `area`, e `src/telemetria/telemetria.test.ts`
+  [contrato do frontend](contracts/frontend.md), sempre com `proximaAcao` (SC-006), `acesso-negado` nos contextos
+  das áreas novas, e `src/telemetria/telemetria.test.ts`
   com `/c/:codigo`, `/cartao/faturas/:competencia` e `esperados` sem log de falha (R10)
-- [X] T017 [P] `comp/apoioCartao.test.tsx`: `Filtros` (`aria-pressed`), `ListaPaginada` (páginas no desktop,
+- [X] T017 [P] `src/paginas/apoioCartao.test.tsx`: `Filtros` (`aria-pressed`), `ListaPaginada` (páginas no desktop,
   "Carregar mais" no celular, vazio, erro com tentar de novo, página além da última), `SeloSituacao` (situação
   desconhecida mostra o texto da API), `Confirmacao` (foco no título, `Esc` e cancelar devolvem o foco),
   `SomentePerfil` (texto do FR-002 e link para o início)
@@ -119,7 +119,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   `src/api/cliente.ts` as 13 chamadas usadas pelas telas (contrato 1.1.0, sem as consultas por id de cobrança e
   de recebível), com `Idempotency-Key` nos pagamentos e na antecipação, e
   `esperados` em `chamar`
-- [X] T019 [P] Acrescentar os códigos, contextos (`fatura`, `operacao`, `cancelamento`, `area`) e `proximaAcao`
+- [X] T019 [P] Acrescentar os códigos, contextos (`cartao`, `fatura`, `pagamento`, `cobranca`, `emissao`, `recebivel`) e `proximaAcao`
   em `src/api/erros.ts` e
   exibir a ação em `AvisoErro` (`comp/Feedback.tsx`)
 - [X] T020 [P] Criar `src/cobrancas/codigo.ts`, `src/formatacao/dia.ts`, e a taxa em `src/formatacao/valor.ts` (FR-024)
@@ -129,9 +129,9 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [X] T022 [P] Criar `src/paginas/useConsulta.ts` (carregando/pronto/erro, recarregar, atualizar em silêncio;
   R7; FR-023)
 - [X] T023 [P] Criar `comp/Filtros.tsx` (extraído de `src/paginas/Extrato.tsx`, que passa a usá-lo, sem mudar
-  `Extrato.test.tsx`), `comp/ListaPaginada.tsx`, `comp/SeloSituacao.tsx`, `comp/Confirmacao.tsx` e os ícones de
+  `Extrato.test.tsx`), `src/paginas/ListaPaginada.tsx`, `comp/SeloSituacao.tsx`, `comp/Confirmacao.tsx` e os ícones de
   olho aberto, olho riscado e cartão em `comp/Icones.tsx`
-- [X] T024 Criar `src/sessao/SomentePerfil.tsx`, trocar identificadores em `padraoDaRota`
+- [X] T024 Criar `src/paginas/SomentePerfil.tsx`, trocar identificadores em `padraoDaRota`
   (`src/telemetria/ponte.ts`) e acrescentar em `src/testes/handlers.ts` as respostas da API 1.1.0
 
 **Checkpoint**: API com código curto e testes do backend verdes; apoio do frontend testado sem telas
@@ -242,7 +242,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [X] T042 [P] [US4] `src/paginas/faturas/Faturas.test.tsx`: lista e detalhe de cada situação (cenários 1 a 6),
   datas sem conversão de fuso, sem cartão, erro; ampliar `src/paginas/Inicio.test.tsx` com o aviso (disponível,
   vencida, mais antiga, sem cartão, erro e PJ)
-- [X] T043 [US4] Acrescentar em `e2e/apoio.ts` a emissão, o cartão e o pagamento pela API e a preparação de
+- [X] T043 [US4] Criar `e2e/apoioCartao.ts` com a emissão, o cartão e o pagamento pela API e a preparação de
   faturas disponível e vencida por SQL, numa única transação já com `liberada_em` (R13); `e2e/faturas.spec.ts`:
   lista, detalhe com juros e aviso do início
 
@@ -306,7 +306,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [X] T052 [P] [US7] Ampliar `src/App.test.tsx` e `src/paginas/Perfil.test.tsx`: menu e barra por perfil (4 itens),
   item ativo nas rotas filhas, permissões novas; em `src/paginas/Inicio.test.tsx`, trocar só a verificação de
   "Cobranças" como "Em breve" (FR-001, SC-008)
-- [X] T053 [US7] Ampliar `e2e/responsividade.spec.ts` (6 larguras), `e2e/teclado.spec.ts` (solicitar, pagar,
+- [X] T053 [US7] Criar `e2e/telasCartao.spec.ts` com as 6 larguras, o teclado (solicitar, pagar,
   antecipar, cancelar e pagar fatura) e o axe com todas as telas novas, inclusive os dados exibidos e as
   confirmações abertas (FR-025, SC-007)
 
@@ -319,13 +319,13 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T056 [P] Atualizar `docs/desenvolvimento.md` (telas, rotas, código curto, e2e de faturas) e as capturas das
+- [X] T056 [P] Atualizar `docs/desenvolvimento.md` (telas, rotas, código curto, e2e de faturas) e as capturas das
   telas prontas em `docs/design/telas/`, ligadas em `docs/design/prototipo.md`
-- [ ] T057 [P] Marcar `specs/014-cartao-credito-cobrancas/contracts/cartoes-cobrancas-api.md` como sucedido pela
+- [X] T057 [P] Marcar `specs/014-cartao-credito-cobrancas/contracts/cartoes-cobrancas-api.md` como sucedido pela
   versão 1.1.0 da spec 015
 - [ ] T058 Executar `dotnet test`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` e
   `npm run e2e`, conferir o SC-008 e o FR-026 com a contagem da T002 e medir SC-001 a SC-003 no Compose
-- [ ] T059 Verificação por mutação: quebrar, um de cada vez, o ocultar em 60 s, a chave reaproveitada, o limpar do
+- [X] T059 Verificação por mutação: quebrar, um de cada vez, o ocultar em 60 s, a chave reaproveitada, o limpar do
   CVV, a visibilidade por código e o `CHECK` do código, e confirmar que algum teste falha
 - [ ] T060 Executar o [quickstart](quickstart.md) e atualizar os artefatos da spec que divergirem do código; a
   leitura com NVDA fica para o responsável se não puder ser feita aqui

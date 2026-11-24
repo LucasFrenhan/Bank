@@ -91,8 +91,8 @@
 
 - **Decision**: `traduzirErro` ganha os 11 códigos da spec 014, com título, orientação, variante e
   `proximaAcao` (`rotulo`, `para`), exibida por `AvisoErro`. `saldo-insuficiente` e `idempotencia-divergente`
-  ganham textos por contexto (`fatura`, `operacao`). `acesso-negado` nas rotas novas usa
-  "Área indisponível" (contexto `area`). Todo erro de negócio novo tem próxima ação: link (`para`) ou ação na própria
+  ganham textos por contexto da chamada. `acesso-negado` nas rotas novas usa
+  "Área indisponível" (por contexto da área). Todo erro de negócio novo tem próxima ação: link (`para`) ou ação na própria
   tela. Emitir cobrança não tem chave na API: em falha de rede, a orientação é conferir a lista antes de
   reenviar. Limite insuficiente consulta o limite atual antes de exibir.
 
