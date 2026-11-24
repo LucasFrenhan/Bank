@@ -16,8 +16,8 @@ internal sealed class NotificacaoAuditoriaConfiguracao : IEntityTypeConfiguratio
     public const string ChaveUsuarioDestino = "fk_notificacoes_auditoria_usuarios_usuario_destino_id";
 
     private static readonly ValueConverter<TipoNotificacao, string> ConversorTipo = new(
-        tipo => tipo == TipoNotificacao.ComprovanteEnvio ? "comprovante_envio" : "aviso_credito",
-        texto => texto == "comprovante_envio" ? TipoNotificacao.ComprovanteEnvio : TipoNotificacao.AvisoCredito);
+        tipo => ParaTexto(tipo),
+        texto => ParaTipo(texto));
 
     private static readonly ValueConverter<CanalNotificacao, string> ConversorCanal = new(
         canal => canal == CanalNotificacao.Simulado ? "simulado" : canal.ToString(),
@@ -27,7 +27,7 @@ internal sealed class NotificacaoAuditoriaConfiguracao : IEntityTypeConfiguratio
     {
         builder.ToTable("notificacoes_auditoria", tabela =>
         {
-            tabela.HasCheckConstraint("ck_notificacoes_auditoria_tipo", "tipo IN ('comprovante_envio', 'aviso_credito')");
+            tabela.HasCheckConstraint("ck_notificacoes_auditoria_tipo", "tipo IN ('comprovante_envio', 'aviso_credito', 'comprovante_cobranca', 'cobranca_paga')");
             tabela.HasCheckConstraint("ck_notificacoes_auditoria_canal", "canal IN ('simulado')");
         });
 
@@ -51,4 +51,22 @@ internal sealed class NotificacaoAuditoriaConfiguracao : IEntityTypeConfiguratio
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
     }
+
+    private static string ParaTexto(TipoNotificacao tipo) => tipo switch
+    {
+        TipoNotificacao.ComprovanteEnvio => "comprovante_envio",
+        TipoNotificacao.AvisoCredito => "aviso_credito",
+        TipoNotificacao.ComprovanteCobranca => "comprovante_cobranca",
+        TipoNotificacao.CobrancaPaga => "cobranca_paga",
+        _ => throw new ArgumentOutOfRangeException(nameof(tipo), tipo, "Tipo de notificação sem texto definido."),
+    };
+
+    private static TipoNotificacao ParaTipo(string texto) => texto switch
+    {
+        "comprovante_envio" => TipoNotificacao.ComprovanteEnvio,
+        "aviso_credito" => TipoNotificacao.AvisoCredito,
+        "comprovante_cobranca" => TipoNotificacao.ComprovanteCobranca,
+        "cobranca_paga" => TipoNotificacao.CobrancaPaga,
+        _ => throw new ArgumentOutOfRangeException(nameof(texto), texto, "Tipo de notificação desconhecido."),
+    };
 }

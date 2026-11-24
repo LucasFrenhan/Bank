@@ -1,7 +1,10 @@
 using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
+using Bank.Domain.Cartoes;
+using Bank.Domain.Cobrancas;
 using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
+using Bank.Domain.Recebiveis;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Mensageria;
@@ -33,6 +36,23 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
 
     public DbSet<ContaExterna> ContasExternas => Set<ContaExterna>();
 
+    // Cartão de crédito (specs/014-cartao-credito-cobrancas)
+    public DbSet<Bandeira> Bandeiras => Set<Bandeira>();
+
+    public DbSet<Cartao> Cartoes => Set<Cartao>();
+
+    public DbSet<Cobranca> Cobrancas => Set<Cobranca>();
+
+    public DbSet<AutorizacaoCartao> AutorizacoesCartao => Set<AutorizacaoCartao>();
+
+    public DbSet<Fatura> Faturas => Set<Fatura>();
+
+    public DbSet<CompraCartao> ComprasCartao => Set<CompraCartao>();
+
+    public DbSet<LancamentoFatura> LancamentosFatura => Set<LancamentoFatura>();
+
+    public DbSet<Recebivel> Recebiveis => Set<Recebivel>();
+
     /// <summary>Sequence dos números de conta do banco 001 (specs/012-dados-bancarios-carteira, research R2).</summary>
     public const string SequenceNumeroConta = "seq_numero_conta_one_bank";
 
@@ -47,6 +67,13 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
         configurationBuilder.Properties<EventoId>().HaveConversion<IdentificadorConverter<EventoId>>();
         configurationBuilder.Properties<NotificacaoAuditoriaId>().HaveConversion<IdentificadorConverter<NotificacaoAuditoriaId>>();
         configurationBuilder.Properties<ContaExternaId>().HaveConversion<IdentificadorConverter<ContaExternaId>>();
+        configurationBuilder.Properties<CartaoId>().HaveConversion<IdentificadorConverter<CartaoId>>();
+        configurationBuilder.Properties<CobrancaId>().HaveConversion<IdentificadorConverter<CobrancaId>>();
+        configurationBuilder.Properties<AutorizacaoCartaoId>().HaveConversion<IdentificadorConverter<AutorizacaoCartaoId>>();
+        configurationBuilder.Properties<FaturaId>().HaveConversion<IdentificadorConverter<FaturaId>>();
+        configurationBuilder.Properties<CompraCartaoId>().HaveConversion<IdentificadorConverter<CompraCartaoId>>();
+        configurationBuilder.Properties<LancamentoFaturaId>().HaveConversion<IdentificadorConverter<LancamentoFaturaId>>();
+        configurationBuilder.Properties<RecebivelId>().HaveConversion<IdentificadorConverter<RecebivelId>>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

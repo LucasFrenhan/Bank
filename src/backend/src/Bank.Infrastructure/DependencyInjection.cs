@@ -31,6 +31,11 @@ public static class DependencyInjection
         services.AddSingleton<IHasherSenha, HasherSenhaIdentity>();
         services.AddSingleton<IEmissorToken, EmissorTokenJwt>();
 
+        // Dados do cartão derivados, nunca gravados (specs/014-cartao-credito-cobrancas, research R1)
+        services.AddOptions<ChaveCartoesOptions>().BindConfiguration(ChaveCartoesOptions.Secao).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<ChaveCartoesOptions>, ValidadorChaveCartoesOptions>();
+        services.AddSingleton<IDadosCartao, DadosCartaoHmac>();
+
         return services;
     }
 
@@ -52,6 +57,17 @@ public static class DependencyInjection
         services.AddScoped<IUnidadeDeTransferencia, UnidadeDeTransferencia>();
         services.AddScoped<IExtratoConsultas, ExtratoConsultas>();
         services.AddScoped<INotificacoesAuditoria, NotificacoesAuditoriaRepositorio>(); // spec 011, R2
+
+        // Cartão de crédito (specs/014-cartao-credito-cobrancas, research R9)
+        services.AddScoped<IUnidadeDeTrabalho, UnidadeDeTrabalho>();
+        services.AddScoped<ICarteiraRepositorio, CarteiraRepositorio>();
+        services.AddScoped<ICartaoRepositorio, CartaoRepositorio>();
+        services.AddScoped<ICobrancaRepositorio, CobrancaRepositorio>();
+        services.AddScoped<ICobrancaConsultas, CobrancaConsultas>();
+        services.AddScoped<IFaturaRepositorio, FaturaRepositorio>();
+        services.AddScoped<IFaturaConsultas, FaturaConsultas>();
+        services.AddScoped<IRecebivelRepositorio, RecebivelRepositorio>();
+        services.AddScoped<IRecebivelConsultas, RecebivelConsultas>();
 
         return services;
     }

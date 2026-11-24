@@ -38,16 +38,16 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 **Purpose**: configuração nova (plan.md, "Configuração nova"), sem dependência nem serviço novos
 
-- [ ] T001 [P] Acrescentar em `docker-compose.yml` (serviço `api`) `Cartoes__ChaveDerivacao:
+- [X] T001 [P] Acrescentar em `docker-compose.yml` (serviço `api`) `Cartoes__ChaveDerivacao:
   ${CARTOES_CHAVE_DERIVACAO:-bank-dev-only-card-derivation-key-change-me-0123456789}`,
   `Cartoes__LimitePadrao: ${LIMITE_CARTAO_PADRAO:-5000.00}` e `Cartoes__JurosAtrasoMensalPercentual:
   ${JUROS_ATRASO_MENSAL:-15.00}`; documentar as três em `.env.example`, com o aviso de que trocar a chave
   muda todos os cartões (R1)
-- [ ] T002 [P] Acrescentar em `api/appsettings.json` a seção `Cartoes` (`LimitePadrao` 5000.00,
+- [X] T002 [P] Acrescentar em `api/appsettings.json` a seção `Cartoes` (`LimitePadrao` 5000.00,
   `JurosAtrasoMensalPercentual` 15.00, sem chave) e em `worker/appsettings.json` a seção
   `ProcessamentoDiario` (`Habilitado` true, `IntervaloSegundos` 60); em `worker/appsettings.Testing.json`,
   `Habilitado` false
-- [ ] T003 Definir `Cartoes:ChaveDerivacao` aleatória em `it/BankApiFactory.cs` (propriedade
+- [X] T003 Definir `Cartoes:ChaveDerivacao` aleatória em `it/BankApiFactory.cs` (propriedade
   `ChaveCartoes`, como `ChaveJwt`)
 
 ---
@@ -60,71 +60,71 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Domain — testes
 
-- [ ] T004 [P] `ut/Domain/CalendarioBancarioTests.cs`: feriados fixos e móveis (vetores R12: 2027 — 08 e
+- [X] T004 [P] `ut/Domain/CalendarioBancarioTests.cs`: feriados fixos e móveis (vetores R12: 2027 — 08 e
   09/02, 26/03, 27/05), fim de semana, `ProximoDiaUtil(10/01/2027)` = 11/01/2027 e de dia útil = ela mesma,
   `SomarDiasUteis(24/11/2026, 30)` = 07/01/2027, partida em dia não útil
-- [ ] T005 [P] `ut/Domain/DadosDeCartaoTests.cs`: `NumeroCartao` (16 dígitos, Luhn, espaços aceitos, erro
+- [X] T005 [P] `ut/Domain/DadosDeCartaoTests.cs`: `NumeroCartao` (16 dígitos, Luhn, espaços aceitos, erro
   por campo, `ToString()` mascarado), `Cvv` (3 dígitos; 2, 4 e letras recusados; `ToString()` = `***`),
   `ValidadeCartao` (`MM/AA`, mês 13, vence no fim do mês), `CodigoAutorizacao` (6 de `[A-Z0-9]`), `Bandeira`
   (001/002, código desconhecido)
-- [ ] T006 [P] `ut/Domain/CartaoTests.cs`: emissão (validade = mês + 60 meses, nome em maiúsculas, limite
+- [X] T006 [P] `ut/Domain/CartaoTests.cs`: emissão (validade = mês + 60 meses, nome em maiúsculas, limite
   copiado, utilizado 0), consumir até o limite (inclusivo), recusar acima, liberar, nunca negativo;
   `AutorizadorBandeira` na ordem cartão não autorizado → fatura vencida → limite insuficiente (R11)
-- [ ] T007 [P] `ut/Domain/FaturaTests.cs`: `CompetenciaFatura` (07/12 → 2026-12; 08/12 → 2027-01; virada do
+- [X] T007 [P] `ut/Domain/FaturaTests.cs`: `CompetenciaFatura` (07/12 → 2026-12; 08/12 → 2027-01; virada do
   ano), vencimento em 11/01/2027, `Situacao` em cada data (07, 08 sem liberar, liberada, vencimento, dia
   seguinte, paga), lançar soma e recusa compra de outra fatura ou fatura liberada, liberar só após o dia
   07, liberação depois do vencimento muda o vencimento para o dia da liberação, pagar só `Disponivel` ou
   `Vencida`; `JurosAtraso`: 1.000,00 × 10 dias = 50,00; 299,90 × 1 dia = 1,50; 0 dias = 0; valores do
   pagamento não mudam com outra taxa
-- [ ] T008 [P] `ut/Domain/CobrancaTests.cs`: emissão (valor e descrição; limites 0,01/0/negativo/3 casas,
+- [X] T008 [P] `ut/Domain/CobrancaTests.cs`: emissão (valor e descrição; limites 0,01/0/negativo/3 casas,
   descrição vazia, só espaços, 200 e 201), transições permitidas e proibidas, recusa mantém `Pendente` com
   motivo e instante; `PagamentoCobranca` produz cobrança paga, limite consumido, autorização, compra,
   recebível e evento coerentes
-- [ ] T009 [P] `ut/Domain/RecebivelTests.cs`: data prevista, liquidar só na data ou depois, antecipar só
+- [X] T009 [P] `ut/Domain/RecebivelTests.cs`: data prevista, liquidar só na data ou depois, antecipar só
   antes (no dia previsto recusa), taxa 299,90 → 6,00/293,90; 0,01 → 0,00/0,01; 100,00 → 2,00/98,00; estados
   finais; `ut/Domain/LancamentoCartaoTests.cs`: três novas fábricas, direção e descrição truncada em 200
-- [ ] T010 [P] Ampliar `ut/Domain/PermissoesPorPerfilTests.cs` e `ut/Api/PermissaoRequirementHandlerTests.cs`
+- [X] T010 [P] Ampliar `ut/Domain/PermissoesPorPerfilTests.cs` e `ut/Api/PermissaoRequirementHandlerTests.cs`
   com `UsarCartaoCredito` (só PF) e `GerenciarRecebiveis` (só PJ)
 
 ### Domain — implementação
 
-- [ ] T011 [P] Criar `dom/Calendario/CalendarioBancario.cs` (R12; FR-022a): `Feriados(int ano)` com cache,
+- [X] T011 [P] Criar `dom/Calendario/CalendarioBancario.cs` (R12; FR-022a): `Feriados(int ano)` com cache,
   `EhDiaUtil`, `ProximoDiaUtil`, `SomarDiasUteis`
-- [ ] T012 [P] Criar os 7 identificadores (data-model, "Identificadores tipados novos") no padrão de
+- [X] T012 [P] Criar os 7 identificadores (data-model, "Identificadores tipados novos") no padrão de
   `TransferenciaId`: em `dom/Cartoes/` `CartaoId`, `AutorizacaoCartaoId`, `CompraCartaoId`, `FaturaId`,
   `LancamentoFaturaId`; em `dom/Cobrancas/` `CobrancaId`; em `dom/Recebiveis/` `RecebivelId`
-- [ ] T013 [P] Criar em `dom/Cartoes/` `Bandeira.cs` (`Codigo` 3, `Nome` até 30; `Visa` "001", `Mastercard`
+- [X] T013 [P] Criar em `dom/Cartoes/` `Bandeira.cs` (`Codigo` 3, `Nome` até 30; `Visa` "001", `Mastercard`
   "002"; `Todas`, `DeCodigo`), `NumeroCartao.cs`, `Cvv.cs`, `ValidadeCartao.cs` e `CodigoAutorizacao.cs`
   (`RandomNumberGenerator`), com `ToString()` mascarado (R2) e erros de validação nos campos
   `numeroCartao`, `cvv` e `validade`, sem repetir o valor
-- [ ] T014 Criar `dom/Cartoes/Cartao.cs`, `AutorizacaoCartao.cs`, `AutorizadorBandeira.cs` e
+- [X] T014 Criar `dom/Cartoes/Cartao.cs`, `AutorizacaoCartao.cs`, `AutorizadorBandeira.cs` e
   `ErrosCartao.cs` (`cartao-ja-existente` conflito, `cartao-nao-encontrado`, `cartao-nao-autorizado`,
   `cartao-bloqueado-fatura-vencida` e `limite-cartao-insuficiente` regra de negócio). `LimiteTotal` > 0,
   0 ≤ `LimiteUtilizado` ≤ `LimiteTotal`, `NomeImpresso` 1–150, `UltimosDigitos` 4, `Variacao` 0–4
-- [ ] T015 Criar `dom/Cartoes/CompetenciaFatura.cs`, `JurosAtraso.cs`, `CompraCartao.cs`,
+- [X] T015 Criar `dom/Cartoes/CompetenciaFatura.cs`, `JurosAtraso.cs`, `CompraCartao.cs`,
   `LancamentoFatura.cs`, `Fatura.cs` e `ErrosFatura.cs` (`fatura-nao-encontrada`, `fatura-nao-disponivel`
   conflito, `saldo-insuficiente` com mensagem própria) conforme data-model e R5/R13; `Estabelecimento`
   1–150, `Descricao` 1–200
-- [ ] T016 Criar `dom/Recebiveis/Recebivel.cs` e `ErrosRecebivel.cs` (`recebivel-nao-encontrado`,
+- [X] T016 Criar `dom/Recebiveis/Recebivel.cs` e `ErrosRecebivel.cs` (`recebivel-nao-encontrado`,
   `recebivel-nao-antecipavel` conflito): `PrazoDiasUteis = 30`, `TaxaPercentual = 2`, arredondamento
   `AwayFromZero`, `ValorLiquido = ValorBruto − Taxa` > 0
-- [ ] T017 Criar `dom/Cobrancas/Cobranca.cs`, `CobrancaPaga.cs` (evento, `Tipo` "cobranca.paga", `Versao` 1,
+- [X] T017 Criar `dom/Cobrancas/Cobranca.cs`, `CobrancaPaga.cs` (evento, `Tipo` "cobranca.paga", `Versao` 1,
   com `LojistaNome`), `PagamentoCobranca.cs` (FR-018) e `ErrosCobranca.cs` (`cobranca-nao-encontrada`,
   `cobranca-nao-pendente` conflito)
-- [ ] T018 Ampliar `dom/Transferencias/Lancamento.cs` (`FaturaId?`, `RecebivelId?`, `TipoLancamento`
+- [X] T018 Ampliar `dom/Transferencias/Lancamento.cs` (`FaturaId?`, `RecebivelId?`, `TipoLancamento`
   `PagamentoFatura` = 3, `LiquidacaoRecebivel` = 4, `AntecipacaoRecebivel` = 5 e as três fábricas com as
   descrições de [contracts/transferencias-api.md](contracts/transferencias-api.md)) e
   `dom/Permissoes/Permissao.cs` / `PermissoesPorPerfil.cs` (R16)
 
 ### Schema e persistência
 
-- [ ] T019 [P] Criar `Sql/Procedures/ImpedirAlteracaoDeRegistrosDeCartao.sql` (triggers em
+- [X] T019 [P] Criar `Sql/Procedures/ImpedirAlteracaoDeRegistrosDeCartao.sql` (triggers em
   `autorizacoes_cartao`, `compras_cartao`, `lancamentos_fatura`, reutilizando
   `impedir_alteracao_de_registro_imutavel`) e `RemoverImpedimentoDeRegistrosDeCartao.sql`; criar
   `Sql/Consultas/BloquearCobranca.sql`, `BloquearCartao.sql` (por `@usuario_id` ou `@id`) e
   `BloquearRecebivel.sql` (todas as colunas mapeadas, `FOR UPDATE`, R8); incluir os arquivos em
   `arq/SqlEmbutidoTests.cs`
-- [ ] T020 Criar em `infra/Persistencia/Configuracoes/` as configurações de `Bandeira` (`HasData`),
+- [X] T020 Criar em `infra/Persistencia/Configuracoes/` as configurações de `Bandeira` (`HasData`),
   `Cartao`, `Cobranca`, `AutorizacaoCartao`, `Fatura`, `CompraCartao`, `LancamentoFatura` e `Recebivel`, com
   todos os `CHECK`, FKs (RESTRICT), únicos e índices parciais da tabela "PostgreSQL" do data-model; ajustar
   `LancamentoConfiguracao.cs` (`ck_lancamentos_tipo`, `ck_lancamentos_origem_coerente`,
@@ -132,12 +132,12 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
   `ComprovanteCobranca` = 3 e `CobrancaPaga` = 4, com conversor e `CHECK` (`comprovante_cobranca`,
   `cobranca_paga`) em `NotificacaoAuditoriaConfiguracao.cs`; `DbSet`s e conversores dos 7 ids em
   `BankDbContext.cs`
-- [ ] T021 Gerar a migration `AdicionarCartoesCobrancasERecebiveis` (`dotnet ef migrations add`), que aplica
+- [X] T021 Gerar a migration `AdicionarCartoesCobrancasERecebiveis` (`dotnet ef migrations add`), que aplica
   o SQL de T019 no `Up` e o remove no `Down`; conferir que `Down` + `Up` funciona com dados anteriores
-- [ ] T022 Criar `it/RestricoesCartoesTests.cs`: cada `CHECK`, único e FK recusa dado inválido gravado por
+- [X] T022 Criar `it/RestricoesCartoesTests.cs`: cada `CHECK`, único e FK recusa dado inválido gravado por
   SQL; `UPDATE`/`DELETE` nas três tabelas imutáveis falham; lançamentos e saldos anteriores à migration
   intactos; `Down` + `Up`
-- [ ] T023 Criar `app/Abstracoes/IUnidadeDeTrabalho.cs` (`IniciarAsync`, `ConfirmarAsync` →
+- [X] T023 Criar `app/Abstracoes/IUnidadeDeTrabalho.cs` (`IniciarAsync`, `ConfirmarAsync` →
   `Confirmacao(Ok | Conflito, Restricao)`, `DesfazerAsync`) e `infra/Persistencia/UnidadeDeTrabalho.cs`
   (`ReadCommitted`, `ChangeTracker.Clear` ao desfazer, R9), e `app/Abstracoes/ICarteiraRepositorio.cs` com
   `BloquearAsync(CarteiraId)` + `AdicionarLancamento`, reutilizando
@@ -145,15 +145,15 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Cartão derivado, API e apoio
 
-- [ ] T024 [P] `ut/Infrastructure/DadosCartaoHmacTests.cs`: mesma entrada → mesmos dados; prefixo e Luhn por
+- [X] T024 [P] `ut/Infrastructure/DadosCartaoHmacTests.cs`: mesma entrada → mesmos dados; prefixo e Luhn por
   bandeira; CVV com 3 dígitos (zeros à esquerda); variação, cartão ou chave diferentes mudam o resultado;
   impressão digital não contém o número; chave com menos de 32 bytes recusada na partida; divergência com a
   impressão gravada lança erro sem dados do cartão
-- [ ] T025 Criar `app/Abstracoes/IDadosCartao.cs` e, em `infra/Seguranca/`, `DadosCartaoHmac.cs` e
+- [X] T025 Criar `app/Abstracoes/IDadosCartao.cs` e, em `infra/Seguranca/`, `DadosCartaoHmac.cs` e
   `ChaveCartoesOptions.cs` (`ValidateOnStart`); registrar só em `AddInfrastructure` (API) (R1)
-- [ ] T026 [P] Criar `app/Cartoes/CartoesOptions.cs` + validador (`LimitePadrao` > 0 com 2 casas; juros entre
+- [X] T026 [P] Criar `app/Cartoes/CartoesOptions.cs` + validador (`LimitePadrao` > 0 com 2 casas; juros entre
   0 e 100) com `ut/Application/CartoesOptionsTests.cs`; registrar em `AddApplication`
-- [ ] T027 [P] Criar `app/Observabilidade/MetricasCartoes.cs` (meter `Bank.Cartoes`) e
+- [X] T027 [P] Criar `app/Observabilidade/MetricasCartoes.cs` (meter `Bank.Cartoes`) e
   `MetricasProcessamento.cs` (meter `Bank.Processamento`) com os instrumentos da tabela do plan; incluir os
   meters em `api/Observability/` e `worker/Observability/TelemetriaWorker.cs`
 - [ ] T028 [P] Extrair para `app/Comum/` a leitura comum de `pagina`/`tamanhoPagina` (padrão 20, máximo 100) e
@@ -164,7 +164,7 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
   antecipar) e `it/CartoesApiFactory.cs` (relógio ajustável, saldo inicial PF de
   R$ 5.000,00 e, a partir da US4, `AddProcessamento`, para chamar `ProcessarDia` sem o Worker; o Worker fica
   só no teste do serviço hospedado)
-- [ ] T030 Rodar `dotnet build` e toda a suíte anterior; ajustar só o que a mudança de `Lancamento` exigir
+- [X] T030 Rodar `dotnet build` e toda a suíte anterior; ajustar só o que a mudança de `Lancamento` exigir
 
 **Checkpoint**: Domain completo, banco migrado, suíte anterior verde
 

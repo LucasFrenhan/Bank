@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using Bank.Domain.Cobrancas;
 using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Infrastructure.Mensageria.Contratos;
@@ -24,7 +25,7 @@ public sealed class EventoOutbox
 
     public int Versao { get; private set; }
 
-    /// <summary>Payload JSON (camelCase) conforme contracts/evento-transferencia-concluida.md.</summary>
+    /// <summary>Payload JSON (camelCase) conforme contracts/ do evento.</summary>
     public string Payload { get; private set; } = string.Empty;
 
     public DateTimeOffset OcorridoEm { get; private set; }
@@ -54,16 +55,30 @@ public sealed class EventoOutbox
     {
         ArgumentNullException.ThrowIfNull(evento);
 
+        return Novo(evento.EventoId, TransferenciaConcluida.Tipo, TransferenciaConcluida.Versao,
+            JsonSerializer.Serialize(TransferenciaConcluidaV1.De(evento), TransferenciaConcluidaV1.Json), evento.OcorridoEm);
+    }
+
+    /// <summary>Evento <c>cobranca.paga</c> v1 (specs/014-cartao-credito-cobrancas, FR-021).</summary>
+    public static EventoOutbox De(CobrancaPaga evento)
+    {
+        ArgumentNullException.ThrowIfNull(evento);
+
+        return Novo(evento.EventoId, CobrancaPaga.Tipo, CobrancaPaga.Versao, CobrancaPagaV1.De(evento).Serializar(), evento.OcorridoEm);
+    }
+
+    private static EventoOutbox Novo(EventoId id, string tipo, int versao, string payload, DateTimeOffset ocorridoEm)
+    {
         var atividade = Activity.Current;
         var w3c = atividade is { IdFormat: ActivityIdFormat.W3C };
 
         return new EventoOutbox
         {
-            Id = evento.EventoId,
-            Tipo = TransferenciaConcluida.Tipo,
-            Versao = TransferenciaConcluida.Versao,
-            Payload = JsonSerializer.Serialize(TransferenciaConcluidaV1.De(evento), TransferenciaConcluidaV1.Json),
-            OcorridoEm = evento.OcorridoEm,
+            Id = id,
+            Tipo = tipo,
+            Versao = versao,
+            Payload = payload,
+            OcorridoEm = ocorridoEm,
             TraceParent = w3c ? atividade!.Id : null,
             TraceState = w3c && !string.IsNullOrEmpty(atividade!.TraceStateString) ? atividade.TraceStateString : null,
         };

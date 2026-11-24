@@ -1,5 +1,6 @@
 using Bank.Application.Autenticacao;
 using Bank.Application.Carteiras;
+using Bank.Application.Cartoes;
 using Bank.Application.Abstracoes;
 using Bank.Application.Notificacoes;
 using Bank.Application.Observabilidade;
@@ -31,8 +32,14 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<IValidateOptions<LimitesTransferenciaOptions>, ValidadorLimitesTransferenciaOptions>();
 
+        services.AddOptions<CartoesOptions>()
+            .BindConfiguration(CartoesOptions.Secao)
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<CartoesOptions>, ValidadorCartoesOptions>();
+
         services.TryAddSingleton(TimeProvider.System);
-        services.AddSingleton<CalendarioBrasilia>();
+        services.TryAddSingleton<CalendarioBrasilia>();
+        services.AddSingleton<MetricasCartoes>();
         services.AddSingleton<MetricasUsuarios>();
         services.AddSingleton<HashSenhaFicticio>();
 

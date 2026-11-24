@@ -20,7 +20,8 @@ public class DadosBancariosMigracaoTests
 
     private const string ConsultaCarteiras = "SELECT id::text || '|' || usuario_id || '|' || saldo || '|' || moeda || '|' || atualizado_em FROM carteiras ORDER BY id";
     private const string ConsultaTransferencias = "SELECT t::text FROM transferencias t ORDER BY id";
-    private const string ConsultaLancamentos = "SELECT l::text FROM lancamentos l ORDER BY id";
+    // Só as colunas daquela versão: a spec 014 acrescentou fatura_id e recebivel_id (nulas).
+    private const string ConsultaLancamentos = "SELECT (id, carteira_id, tipo, direcao, valor, transferencia_id, descricao, criado_em)::text FROM lancamentos ORDER BY id";
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 

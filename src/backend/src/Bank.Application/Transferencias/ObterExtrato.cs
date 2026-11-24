@@ -1,5 +1,5 @@
-using System.Globalization;
 using Bank.Application.Abstracoes;
+using Bank.Application.Comum;
 using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
@@ -17,9 +17,6 @@ public sealed record Extrato(IReadOnlyList<ItemExtrato> Itens, int PaginaAtual, 
 /// </summary>
 public sealed class ObterExtrato(ICarteiraConsultas carteiras, IExtratoConsultas extrato)
 {
-    public const int TamanhoPadrao = 20;
-    public const int TamanhoMaximo = 100;
-
     public async Task<Resultado<Extrato>> ExecutarAsync(ObterExtratoConsulta consulta, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(consulta);
@@ -30,7 +27,7 @@ public sealed class ObterExtrato(ICarteiraConsultas carteiras, IExtratoConsultas
             return Resultado.Falha<Extrato>(validacao.Erros);
         }
 
-        var (pagina, tamanho, direcao) = validacao.Valor;
+        var (paginacao, direcao) = validacao.Valor;
 
         var carteira = await carteiras.ObterDoUsuarioAsync(consulta.UsuarioId, cancellationToken);
         if (carteira is null)
@@ -38,7 +35,7 @@ public sealed class ObterExtrato(ICarteiraConsultas carteiras, IExtratoConsultas
             return Resultado.Falha<Extrato>(ErrosUsuario.NaoEncontrado);
         }
 
-        var resultado = await extrato.ObterAsync(carteira.CarteiraId, direcao, (pagina - 1) * tamanho, tamanho, cancellationToken);
+        var resultado = await extrato.ObterAsync(carteira.CarteiraId, direcao, paginacao.Deslocamento, paginacao.Tamanho, cancellationToken);
 
         var itens = resultado.Itens
             .Select(item => item.Contraparte is null
@@ -46,24 +43,13 @@ public sealed class ObterExtrato(ICarteiraConsultas carteiras, IExtratoConsultas
                 : item with { Contraparte = item.Contraparte with { Documento = Documento.Ocultar(item.Contraparte.Documento) } })
             .ToList();
 
-        return Resultado.Ok(new Extrato(itens, pagina, tamanho, resultado.TotalItens));
+        return Resultado.Ok(new Extrato(itens, paginacao.Numero, paginacao.Tamanho, resultado.TotalItens));
     }
 
-    private static Resultado<(int Pagina, int Tamanho, DirecaoLancamento? Direcao)> Validar(ObterExtratoConsulta consulta)
+    private static Resultado<(Paginacao Paginacao, DirecaoLancamento? Direcao)> Validar(ObterExtratoConsulta consulta)
     {
-        var erros = new List<Erro>();
-
-        var pagina = 1;
-        if (consulta.Pagina is not null && (!int.TryParse(consulta.Pagina, NumberStyles.None, CultureInfo.InvariantCulture, out pagina) || pagina < 1))
-        {
-            erros.Add(Erro.Validacao("pagina", "A página deve ser um número inteiro maior ou igual a 1."));
-        }
-
-        var tamanho = TamanhoPadrao;
-        if (consulta.TamanhoPagina is not null && (!int.TryParse(consulta.TamanhoPagina, NumberStyles.None, CultureInfo.InvariantCulture, out tamanho) || tamanho is < 1 or > TamanhoMaximo))
-        {
-            erros.Add(Erro.Validacao("tamanhoPagina", $"O tamanho da página deve estar entre 1 e {TamanhoMaximo}."));
-        }
+        var paginacao = Paginacao.Ler(consulta.Pagina, consulta.TamanhoPagina);
+        var erros = new List<Erro>(paginacao.Erros);
 
         DirecaoLancamento? direcao = consulta.Direcao switch
         {
@@ -78,7 +64,7 @@ public sealed class ObterExtrato(ICarteiraConsultas carteiras, IExtratoConsultas
         }
 
         return erros.Count > 0
-            ? Resultado.Falha<(int, int, DirecaoLancamento?)>(erros)
-            : Resultado.Ok((pagina, tamanho, direcao));
+            ? Resultado.Falha<(Paginacao, DirecaoLancamento?)>(erros)
+            : Resultado.Ok((paginacao.Valor, direcao));
     }
 }

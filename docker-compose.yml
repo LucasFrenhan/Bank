@@ -99,6 +99,11 @@ services:
       # padrão: variável vazia desliga o limite; só a não definida usa o valor padrão.
       Transferencias__Limites__PessoaFisica__PorOperacao: ${LIMITE_PF_POR_OPERACAO-1000.00}
       Transferencias__Limites__PessoaFisica__Diario: ${LIMITE_PF_DIARIO-5000.00}
+      # Cartão de crédito (specs/014-cartao-credito-cobrancas, research R1 e R13). Chave só de
+      # desenvolvimento: trocá-la muda o número e o CVV de todos os cartões.
+      Cartoes__ChaveDerivacao: ${CARTOES_CHAVE_DERIVACAO:-bank-dev-only-card-derivation-key-change-me-0123456789}
+      Cartoes__LimitePadrao: ${LIMITE_CARTAO_PADRAO:-5000.00}
+      Cartoes__JurosAtrasoMensalPercentual: ${JUROS_ATRASO_MENSAL:-15.00}
     ports:
       - "127.0.0.1:${API_PORT:-8080}:8080"
     depends_on:
