@@ -94,44 +94,44 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Apoio do frontend — testes
 
-- [ ] T013 [P] `src/cobrancas/codigo.test.ts`: `extrairCodigo` (código, minúsculas, sem hífen, espaços, link
+- [X] T013 [P] `src/cobrancas/codigo.test.ts`: `extrairCodigo` (código, minúsculas, sem hífen, espaços, link
   completo, barra final; inválidos = `null`), `formatarCodigo`, `linkDaCobranca` (até 12 caracteres depois da
   origem; SC-003a), `textoDeCompartilhamento`
-- [ ] T014 [P] `src/operacoes/operacoes.test.tsx`: chave criada no primeiro envio, mantida após falha de rede,
+- [X] T014 [P] `src/operacoes/operacoes.test.tsx`: chave criada no primeiro envio, mantida após falha de rede,
   422 e 5xx e ao recarregar; descartada em sucesso, `idempotencia-divergente` e operação não mais possível;
   `removerSessao()` apaga `bank.operacoes`; nada além de operação e chave é gravado; segundo clique não envia;
   sem `sessionStorage`, funciona em memória
-- [ ] T015 [P] `src/formatacao/dia.test.ts`: `AAAA-MM-DD` e `AAAA-MM` por extenso e curto sem mudar de dia em
+- [X] T015 [P] `src/formatacao/dia.test.ts`: `AAAA-MM-DD` e `AAAA-MM` por extenso e curto sem mudar de dia em
   fusos diferentes; hoje em Brasília; ampliar `src/formatacao/valor.test.ts` com a taxa de 2% (R8: 29990 →
   600/29390; 1 → 0/1; 10000 → 200/9800; 25 → 1/24)
-- [ ] T016 [P] Ampliar `src/api/erros.test.ts` com cada linha da tradução de erros do
+- [X] T016 [P] Ampliar `src/api/erros.test.ts` com cada linha da tradução de erros do
   [contrato do frontend](contracts/frontend.md), sempre com `proximaAcao` (SC-006), `acesso-negado` no contexto
   `area`, e `src/telemetria/telemetria.test.ts`
   com `/c/:codigo`, `/cartao/faturas/:competencia` e `esperados` sem log de falha (R10)
-- [ ] T017 [P] `comp/apoioCartao.test.tsx`: `Filtros` (`aria-pressed`), `ListaPaginada` (páginas no desktop,
+- [X] T017 [P] `comp/apoioCartao.test.tsx`: `Filtros` (`aria-pressed`), `ListaPaginada` (páginas no desktop,
   "Carregar mais" no celular, vazio, erro com tentar de novo, página além da última), `SeloSituacao` (situação
   desconhecida mostra o texto da API), `Confirmacao` (foco no título, `Esc` e cancelar devolvem o foco),
   `SomentePerfil` (texto do FR-002 e link para o início)
 
 ### Apoio do frontend — implementação
 
-- [ ] T018 Regenerar `src/api/schema.d.ts` (`npm run api:tipos` com `BANK_API_URL`) e acrescentar em
+- [X] T018 Regenerar `src/api/schema.d.ts` (`npm run api:tipos` com `BANK_API_URL`) e acrescentar em
   `src/api/cliente.ts` as 13 chamadas usadas pelas telas (contrato 1.1.0, sem as consultas por id de cobrança e
   de recebível), com `Idempotency-Key` nos pagamentos e na antecipação, e
   `esperados` em `chamar`
-- [ ] T019 [P] Acrescentar os códigos, contextos (`fatura`, `operacao`, `cancelamento`, `area`) e `proximaAcao`
+- [X] T019 [P] Acrescentar os códigos, contextos (`fatura`, `operacao`, `cancelamento`, `area`) e `proximaAcao`
   em `src/api/erros.ts` e
   exibir a ação em `AvisoErro` (`comp/Feedback.tsx`)
-- [ ] T020 [P] Criar `src/cobrancas/codigo.ts`, `src/formatacao/dia.ts`, e a taxa em `src/formatacao/valor.ts` (FR-024)
-- [ ] T021 [P] Criar `src/operacoes/chaves.ts` e `src/operacoes/useOperacao.ts` (R6; FR-016) e apagar
+- [X] T020 [P] Criar `src/cobrancas/codigo.ts`, `src/formatacao/dia.ts`, e a taxa em `src/formatacao/valor.ts` (FR-024)
+- [X] T021 [P] Criar `src/operacoes/chaves.ts` e `src/operacoes/useOperacao.ts` (R6; FR-016) e apagar
   `bank.operacoes` em
   `removerSessao()` (`src/sessao/armazenamento.ts`)
-- [ ] T022 [P] Criar `src/paginas/useConsulta.ts` (carregando/pronto/erro, recarregar, atualizar em silêncio;
+- [X] T022 [P] Criar `src/paginas/useConsulta.ts` (carregando/pronto/erro, recarregar, atualizar em silêncio;
   R7; FR-023)
-- [ ] T023 [P] Criar `comp/Filtros.tsx` (extraído de `src/paginas/Extrato.tsx`, que passa a usá-lo, sem mudar
+- [X] T023 [P] Criar `comp/Filtros.tsx` (extraído de `src/paginas/Extrato.tsx`, que passa a usá-lo, sem mudar
   `Extrato.test.tsx`), `comp/ListaPaginada.tsx`, `comp/SeloSituacao.tsx`, `comp/Confirmacao.tsx` e os ícones de
   olho aberto, olho riscado e cartão em `comp/Icones.tsx`
-- [ ] T024 Criar `src/sessao/SomentePerfil.tsx`, trocar identificadores em `padraoDaRota`
+- [X] T024 Criar `src/sessao/SomentePerfil.tsx`, trocar identificadores em `padraoDaRota`
   (`src/telemetria/ponte.ts`) e acrescentar em `src/testes/handlers.ts` as respostas da API 1.1.0
 
 **Checkpoint**: API com código curto e testes do backend verdes; apoio do frontend testado sem telas

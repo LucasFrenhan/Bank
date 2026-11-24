@@ -142,6 +142,120 @@ export function falhaEm(metodo: 'get' | 'post', caminho: string, codigo: string,
   return http[metodo](`*${caminho}`, () => (codigo === 'rede' ? HttpResponse.error() : problema(codigo, status, extra)));
 }
 
+/* ---------- Cartão, cobranças, faturas e recebíveis (specs/014 e specs/015) ---------- */
+
+export const VISA = { codigo: '001', nome: 'Visa' };
+export const DADOS_CARTAO = { nomeImpresso: 'LUCAS SILVA', numero: '4000001234567899', validade: '11/31', cvv: '123', bandeira: VISA };
+export const CODIGO = '7K3F-9QXM';
+export const ID_COBRANCA = '019a8f77-1111-7890-abcd-ef1234567890';
+
+export function cartaoCredito(extra: object = {}) {
+  return {
+    cartaoId: '019a8f77-5555-7890-abcd-ef1234567890',
+    bandeira: VISA,
+    nomeImpresso: 'LUCAS SILVA',
+    ultimosDigitos: '7899',
+    validade: '11/31',
+    limiteTotal: 5000,
+    limiteDisponivel: 4700.1,
+    comprasALancar: 299.9,
+    criadoEm: '2026-11-24T12:00:00Z',
+    ...extra,
+  };
+}
+
+/** Cobrança da PJ da sessão de teste (`usuario-1`) por padrão não é: o lojista é `loja-1`. */
+export function cobranca(extra: object = {}) {
+  return {
+    cobrancaId: ID_COBRANCA,
+    codigo: CODIGO,
+    lojista: { usuarioId: 'loja-1', nome: 'Cafeteria Grão Especial LTDA', documento: '98765432000199' },
+    valor: 299.9,
+    descricao: 'Kit 3 Pacotes',
+    status: 'Pendente',
+    criadoEm: '2026-11-24T16:30:00Z',
+    pagaEm: null,
+    canceladaEm: null,
+    pagamento: null,
+    ultimaRecusa: null,
+    ...extra,
+  };
+}
+
+export const COBRANCA_PAGA = {
+  status: 'Paga',
+  pagaEm: '2026-11-24T16:35:00Z',
+  pagamento: { bandeira: VISA, ultimosDigitosCartao: '7899', codigoAutorizacao: 'AUT84K' },
+};
+
+export function pagamento(extra: object = {}) {
+  return {
+    cobrancaId: ID_COBRANCA,
+    status: 'Paga',
+    valor: 299.9,
+    bandeira: VISA,
+    ultimosDigitosCartao: '7899',
+    codigoAutorizacao: 'AUT84K',
+    lojistaNome: 'Cafeteria Grão Especial LTDA',
+    pagaEm: '2026-11-24T16:35:00Z',
+    ...extra,
+  };
+}
+
+export function fatura(extra: object = {}) {
+  return {
+    competencia: '2026-12',
+    inicio: '2026-11-08',
+    fechamento: '2026-12-07',
+    vencimento: '2026-12-10',
+    situacao: 'Aberta',
+    total: 0,
+    diasAtraso: 0,
+    juros: 0,
+    valorAPagar: null,
+    pagaEm: null,
+    valorPago: null,
+    ...extra,
+  };
+}
+
+export function faturaDetalhada(extra: object = {}) {
+  return { ...fatura(), lancamentos: [], ...extra };
+}
+
+export function recebivel(extra: object = {}) {
+  return {
+    recebivelId: '019a8f77-9999-7890-abcd-ef1234567890',
+    cobrancaId: ID_COBRANCA,
+    descricao: 'Kit 3 Pacotes',
+    situacao: 'Pendente',
+    valorBruto: 299.9,
+    taxa: 0,
+    valorLiquido: 299.9,
+    dataPrevista: '2099-01-07',
+    recebidoEm: null,
+    criadoEm: '2026-11-24T16:35:00Z',
+    ...extra,
+  };
+}
+
+/** Lista paginada como a API: aplica o filtro, a página e o tamanho. */
+export function paginado(caminho: string, itens: object[], filtro?: { parametro: string; campo: string }) {
+  return http.get(`*${caminho}`, ({ request }) => {
+    const url = new URL(request.url);
+    const pagina = Number(url.searchParams.get('pagina') ?? '1');
+    const tamanho = Number(url.searchParams.get('tamanhoPagina') ?? '20');
+    const valor = filtro ? url.searchParams.get(filtro.parametro) : null;
+    const filtrados = valor && filtro ? itens.filter((i) => (i as Record<string, unknown>)[filtro.campo] === valor) : itens;
+    return HttpResponse.json({
+      itens: filtrados.slice((pagina - 1) * tamanho, pagina * tamanho),
+      paginaAtual: pagina,
+      tamanhoPagina: tamanho,
+      totalItens: filtrados.length,
+    });
+  });
+}
+
 export const handlersPadrao = [
   http.post('*/api/v1/autenticacao/login', () =>
     HttpResponse.json({ tokenAcesso: tokenFalso(), tipoToken: 'Bearer', expiraEmSegundos: 3600 }),
@@ -168,6 +282,9 @@ export const handlersPadrao = [
   // Sem limites por padrão (a dica fica como na spec 007); os testes da spec 009 usam limitesDe.
   limitesDe({ porOperacao: null, diario: null, transferidoHoje: 0, disponivelHoje: null }),
   extratoDe([ITEM_ABERTURA]),
+  // Sem cartão por padrão: o início e as telas da PF ficam como antes da specs/015.
+  http.get('*/api/v1/cartoes/meu', () => problema('cartao-nao-encontrado', 404)),
+  http.get('*/api/v1/faturas', () => problema('cartao-nao-encontrado', 404)),
   // Depois do extrato: a rota literal /extrato tem precedência, como na API (spec 008).
   consultaDe({ [ID_TRANSFERENCIA]: comprovante() }),
 ];

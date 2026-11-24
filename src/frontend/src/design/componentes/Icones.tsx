@@ -110,3 +110,27 @@ export const IconeCadeado = () => (
     <path d="M8 11V8a4 4 0 0 1 8 0v3" />
   </svg>
 );
+
+/* ---------- Cartão (specs/015) ---------- */
+
+export const IconeCartao = () => (
+  <svg {...base}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="M3 10h18M7 15h4" />
+  </svg>
+);
+
+/** Dados visíveis. */
+export const IconeOlhoAberto = () => (
+  <svg {...base} width={24} height={24}>
+    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+/** Dados ocultos. */
+export const IconeOlhoRiscado = () => (
+  <svg {...base} width={24} height={24}>
+    <path d="M9.9 5.2A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4M6.2 6.6A17 17 0 0 0 2 12s3.6 7 10 7c1.8 0 3.3-.5 4.6-1.2M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18" />
+  </svg>
+);

@@ -1,0 +1,61 @@
+.confirmacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-controle);
+  background: var(--cor-fundo);
+}
+
+.titulo {
+  font: var(--texto-h3);
+  font-weight: 600;
+}
+
+.linhas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin: 0;
+  font: var(--texto-corpo-m);
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espaco-1) var(--espaco-4);
+}
+
+.linha dt {
+  color: var(--cor-texto-suave);
+}
+
+.linha dd {
+  margin: 0;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.destaque {
+  padding-top: var(--espaco-3);
+  border-top: 1px solid var(--cor-borda);
+  font: var(--texto-corpo-l);
+}
+
+.destaque dt,
+.destaque dd {
+  color: var(--cor-texto);
+  font-weight: 600;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+}
+
+.acoes > * {
+  flex: 1 1 160px;
+}

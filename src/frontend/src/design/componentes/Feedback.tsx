@@ -67,13 +67,36 @@ const variantePorErro: Record<string, VarianteAviso> = {
 };
 
 /** Erro da API traduzido (FR-018/FR-019): mensagem, código de suporte e ação sugerida. */
-export function AvisoErro({ erro, aoTentarDeNovo, id }: { erro: MensagemErro; aoTentarDeNovo?: () => void; id?: string }) {
+export function AvisoErro({
+  erro,
+  aoTentarDeNovo,
+  aoAgir,
+  id,
+}: {
+  erro: MensagemErro;
+  aoTentarDeNovo?: () => void;
+  /** Próxima ação feita na própria tela (recusas sem link — specs/015). */
+  aoAgir?: () => void;
+  id?: string;
+}) {
   return (
     <Aviso variante={variantePorErro[erro.variante ?? ''] ?? 'erro'} titulo={erro.mensagem} {...(id ? { id } : {})}>
       {erro.detalhe ? <p>{erro.detalhe}</p> : null}
       {erro.traceId && erro.codigo === 'inesperado' ? (
         <p>
           Código para o suporte: <span className={estilos.codigoSuporte}>{erro.traceId}</span>
+        </p>
+      ) : null}
+      {erro.proximaAcao?.para ? (
+        <p>
+          <Link to={erro.proximaAcao.para}>{erro.proximaAcao.rotulo}</Link>
+        </p>
+      ) : null}
+      {erro.proximaAcao && !erro.proximaAcao.para && aoAgir ? (
+        <p>
+          <button type="button" className={[estilos.botao, estilos.secundario].join(' ')} onClick={aoAgir}>
+            {erro.proximaAcao.rotulo}
+          </button>
         </p>
       ) : null}
       {erro.acao === 'ir-para-login' ? (

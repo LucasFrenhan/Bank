@@ -20,11 +20,15 @@ export function registrarNavegacao(rota: string): void {
 
 /**
  * Rota sem query string e com identificadores trocados pelo parâmetro (specs/007, contrato
- * "Telemetria"): `/transferencias/{uuid}` → `/transferencias/:id`.
+ * "Telemetria"): `/transferencias/{uuid}` → `/transferencias/:id`; `/c/{codigo}` → `/c/:codigo`; mês da fatura →
+ * `/cartao/faturas/:competencia` (specs/015, research R10).
  */
 export function padraoDaRota(rota: string): string {
   const caminho = rota.split(/[?#]/)[0] ?? rota;
-  return caminho.replace(/^\/transferencias\/[^/]+$/, '/transferencias/:id');
+  return caminho
+    .replace(/^\/transferencias\/[^/]+$/, '/transferencias/:id')
+    .replace(/^\/c\/[^/]+\/?$/i, '/c/:codigo')
+    .replace(/^\/cartao\/faturas\/[^/]+\/?$/i, '/cartao/faturas/:competencia');
 }
 
 export function registrarFalhaApi(falha: { codigo: string; status?: number; traceId?: string }): void {
