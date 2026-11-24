@@ -11,7 +11,10 @@ namespace Bank.Application.Cobrancas;
 
 public sealed record EmitirCobrancaComando(UsuarioId LojistaUsuarioId, decimal? Valor, string? Descricao);
 
-/// <summary>Emite uma cobrança na carteira do lojista (specs/014-cartao-credito-cobrancas, US2; FR-009).</summary>
+/// <summary>
+/// Emite uma cobrança na carteira do lojista (specs/014-cartao-credito-cobrancas, US2; FR-009). O código sorteado que já
+/// existir é trocado (specs/015-frontend-cartao-credito, research R1).
+/// </summary>
 public sealed partial class EmitirCobranca(
     ICobrancaRepositorio cobrancas,
     ICobrancaConsultas consultas,
@@ -21,6 +24,8 @@ public sealed partial class EmitirCobranca(
     MetricasCartoes metricas,
     ILogger<EmitirCobranca> logger)
 {
+    public const int MaximoTentativas = 5;
+
     public async Task<Resultado<DetalheCobranca>> ExecutarAsync(EmitirCobrancaComando comando, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(comando);
@@ -38,25 +43,40 @@ public sealed partial class EmitirCobranca(
             return Resultado.Falha<DetalheCobranca>(ErrosUsuario.NaoEncontrado);
         }
 
-        var cobranca = Cobranca.Emitir(comando.LojistaUsuarioId, carteira.CarteiraId, valor.Valor, descricao.Valor, relogio.AgoraEmMicrossegundos());
+        for (var tentativa = 1; tentativa <= MaximoTentativas; tentativa++)
+        {
+            var cobranca = Cobranca.Emitir(
+                comando.LojistaUsuarioId, carteira.CarteiraId, valor.Valor, descricao.Valor, CodigoCobranca.Novo(), relogio.AgoraEmMicrossegundos());
+            if (!await GravarAsync(cobranca, cancellationToken))
+            {
+                continue;
+            }
+
+            metricas.RegistrarCobrancaEmitida();
+            LogEmitida(logger, cobranca.Id.Valor, comando.LojistaUsuarioId.Valor, cobranca.Valor);
+
+            var dados = await consultas.ObterAsync(cobranca.Id, cancellationToken)
+                ?? throw new InvalidOperationException("A cobrança emitida não foi encontrada.");
+            return Resultado.Ok(DetalheCobranca.Para(comando.LojistaUsuarioId, dados));
+        }
+
+        throw new InvalidOperationException("Não foi possível gerar um código de cobrança inédito.");
+    }
+
+    /// <summary>Falso se o código sorteado já existe.</summary>
+    private async Task<bool> GravarAsync(Cobranca cobranca, CancellationToken cancellationToken)
+    {
         await unidade.IniciarAsync(cancellationToken);
         try
         {
             cobrancas.Adicionar(cobranca);
-            await unidade.ConfirmarAsync(cancellationToken);
+            return await unidade.ConfirmarAsync(cancellationToken) != ResultadoGravacao.CodigoDeCobrancaDuplicado;
         }
         catch
         {
             await unidade.DesfazerAsync(CancellationToken.None);
             throw;
         }
-
-        metricas.RegistrarCobrancaEmitida();
-        LogEmitida(logger, cobranca.Id.Valor, comando.LojistaUsuarioId.Valor, cobranca.Valor);
-
-        var dados = await consultas.ObterAsync(cobranca.Id, cancellationToken)
-            ?? throw new InvalidOperationException("A cobrança emitida não foi encontrada.");
-        return Resultado.Ok(DetalheCobranca.Para(comando.LojistaUsuarioId, dados));
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Cobrança {CobrancaId} emitida pelo lojista {LojistaUsuarioId}: valor {Valor}")]

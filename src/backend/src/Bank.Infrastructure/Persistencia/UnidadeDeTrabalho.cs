@@ -64,6 +64,7 @@ internal sealed class UnidadeDeTrabalho(BankDbContext contexto) : IUnidadeDeTrab
                 AutorizacaoCartaoConfiguracao.IndiceChave or FaturaConfiguracao.IndiceChave or RecebivelConfiguracao.IndiceChave => ResultadoGravacao.ChaveDuplicada,
                 CartaoConfiguracao.IndiceUsuario => ResultadoGravacao.CartaoDoUsuarioDuplicado,
                 CartaoConfiguracao.IndiceImpressaoDigital => ResultadoGravacao.NumeroDeCartaoDuplicado,
+                CobrancaConfiguracao.IndiceCodigo => ResultadoGravacao.CodigoDeCobrancaDuplicado,
                 _ => null,
             }
             : null;

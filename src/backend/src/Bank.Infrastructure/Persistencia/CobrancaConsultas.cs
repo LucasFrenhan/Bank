@@ -11,6 +11,9 @@ internal sealed class CobrancaConsultas(BankDbContext contexto) : ICobrancaConsu
     public Task<DadosCobranca?> ObterAsync(CobrancaId cobrancaId, CancellationToken cancellationToken) =>
         Projetar(contexto.Cobrancas.Where(c => c.Id == cobrancaId)).SingleOrDefaultAsync(cancellationToken);
 
+    public Task<DadosCobranca?> ObterPorCodigoAsync(CodigoCobranca codigo, CancellationToken cancellationToken) =>
+        Projetar(contexto.Cobrancas.Where(c => c.Codigo == codigo)).SingleOrDefaultAsync(cancellationToken);
+
     public async Task<Pagina<DadosCobranca>> ListarDoLojistaAsync(UsuarioId lojista, StatusCobranca? status, int deslocamento, int quantidade, CancellationToken cancellationToken)
     {
         var consulta = contexto.Cobrancas.Where(c => c.LojistaUsuarioId == lojista);
@@ -30,6 +33,6 @@ internal sealed class CobrancaConsultas(BankDbContext contexto) : ICobrancaConsu
         from c in cobrancas.AsNoTracking()
         join lojista in contexto.Usuarios on c.LojistaUsuarioId equals lojista.Id
         select new DadosCobranca(
-            c.Id, c.LojistaUsuarioId, lojista.NomeCompleto, lojista.Documento, c.Valor, c.Descricao, c.Status, c.CriadoEm, c.PagaEm, c.CanceladaEm,
+            c.Id, c.Codigo, c.LojistaUsuarioId, lojista.NomeCompleto, lojista.Documento, c.Valor, c.Descricao, c.Status, c.CriadoEm, c.PagaEm, c.CanceladaEm,
             c.PagadorUsuarioId, c.CodigoBandeira, c.UltimosDigitosCartao, c.CodigoAutorizacao, c.UltimaRecusaMotivo, c.UltimaRecusaEm);
 }

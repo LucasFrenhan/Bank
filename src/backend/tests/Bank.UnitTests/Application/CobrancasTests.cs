@@ -1,3 +1,4 @@
+using Bank.Application.Abstracoes;
 using Bank.Application.Cobrancas;
 using Bank.Domain.Cartoes;
 using Bank.Domain.Cobrancas;
@@ -29,6 +30,62 @@ public sealed class CobrancasTests : IDisposable
         Assert.Equal((pj.Carteira.Id, 10m, "Café"), (cobranca.CarteiraDestinoId, cobranca.Valor, cobranca.Descricao));
         Assert.Equal(cobranca.Id, resultado.Valor.Dados.CobrancaId);
         Assert.Contains(_banco.Medicoes, m => m.Nome == "bank.cobrancas.emitidas");
+    }
+
+    /// <summary>Código curto (specs/015-frontend-cartao-credito, research R1).</summary>
+    [Fact]
+    public async Task Emitir_CodigoRepetido_SorteiaOutro()
+    {
+        var pj = _banco.CriarPj();
+        for (var i = 0; i < EmitirCobranca.MaximoTentativas - 1; i++)
+        {
+            _banco.Confirmacoes.Enqueue(ResultadoGravacao.CodigoDeCobrancaDuplicado);
+        }
+
+        var resultado = await Emitir().ExecutarAsync(new EmitirCobrancaComando(pj.Id, 10m, "Café"), Ct);
+
+        var cobranca = Assert.Single(_banco.Cobrancas);
+        Assert.Equal(cobranca.Codigo, resultado.Valor.Dados.Codigo);
+        Assert.Single(_banco.Medicoes, m => m.Nome == "bank.cobrancas.emitidas");
+    }
+
+    [Fact]
+    public async Task Emitir_CincoCodigosRepetidos_FalhaSemGravarNemMedir()
+    {
+        var pj = _banco.CriarPj();
+        for (var i = 0; i < 5; i++)
+        {
+            _banco.Confirmacoes.Enqueue(ResultadoGravacao.CodigoDeCobrancaDuplicado);
+        }
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Emitir().ExecutarAsync(new EmitirCobrancaComando(pj.Id, 10m, "Café"), Ct));
+
+        Assert.Empty(_banco.Confirmacoes);
+        Assert.Empty(_banco.Cobrancas);
+        Assert.DoesNotContain(_banco.Medicoes, m => m.Nome == "bank.cobrancas.emitidas");
+    }
+
+    [Fact]
+    public async Task ConsultarPorCodigo_MesmaVisibilidade_EMalformadoOuInexistente()
+    {
+        var pj = _banco.CriarPj();
+        var (pf, cartao, _) = _banco.CriarPfComCartao();
+        var outraPj = _banco.CriarPj();
+        var paga = _banco.Comprar(cartao, pj, 10m);
+        var codigo = _banco.Cobrancas.Single(c => c.Id == paga.Compra.CobrancaId).Codigo;
+        var casoDeUso = new ConsultarCobrancaPorCodigo(_banco);
+
+        foreach (var forma in new[] { codigo.ToString(), codigo.Valor, codigo.Valor.ToLowerInvariant() })
+        {
+            Assert.NotNull((await casoDeUso.ExecutarAsync(new ConsultarCobrancaPorCodigoConsulta(pj.Id, forma), Ct)).Valor.Pagamento);
+        }
+
+        Assert.NotNull((await casoDeUso.ExecutarAsync(new ConsultarCobrancaPorCodigoConsulta(pf.Id, codigo.Valor), Ct)).Valor.Pagamento);
+        Assert.Null((await casoDeUso.ExecutarAsync(new ConsultarCobrancaPorCodigoConsulta(outraPj.Id, codigo.Valor), Ct)).Valor.Pagamento);
+        foreach (var invalido in new[] { null, "", "abc", "22222222" })
+        {
+            Assert.Equal(ErrosCobranca.NaoEncontrada, Assert.Single((await casoDeUso.ExecutarAsync(new ConsultarCobrancaPorCodigoConsulta(pf.Id, invalido), Ct)).Erros));
+        }
     }
 
     [Fact]

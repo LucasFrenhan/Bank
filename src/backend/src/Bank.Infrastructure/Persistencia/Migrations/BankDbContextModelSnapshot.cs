@@ -648,6 +648,11 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("carteira_destino_id");
 
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasColumnType("char(8)")
+                        .HasColumnName("codigo");
+
                     b.Property<string>("CodigoAutorizacao")
                         .HasMaxLength(6)
                         .HasColumnType("character varying(6)")
@@ -708,6 +713,10 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                     b.HasIndex("CarteiraDestinoId")
                         .HasDatabaseName("ix_cobrancas_carteira_destino_id");
 
+                    b.HasIndex("Codigo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cobrancas_codigo");
+
                     b.HasIndex("CodigoBandeira")
                         .HasDatabaseName("ix_cobrancas_codigo_bandeira");
 
@@ -721,6 +730,8 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                     b.ToTable("cobrancas", null, t =>
                         {
                             t.HasCheckConstraint("ck_cobrancas_cancelada_coerente", "(status = 'Cancelada') = (cancelada_em IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_cobrancas_codigo", "codigo ~ '^[2-9A-HJKMNP-TV-Z]{8}$'");
 
                             t.HasCheckConstraint("ck_cobrancas_paga_coerente", "num_nonnulls(pagador_usuario_id, codigo_bandeira, ultimos_digitos_cartao, codigo_autorizacao, paga_em) = CASE status WHEN 'Paga' THEN 5 ELSE 0 END");
 

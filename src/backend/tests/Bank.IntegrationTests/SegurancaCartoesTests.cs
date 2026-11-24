@@ -23,6 +23,7 @@ public class SegurancaCartoesTests(BankApiFactory factory) : IClassFixture<BankA
         { "POST", Cobrancas, "PessoaFisica" },
         { "GET", MinhasCobrancas, "PessoaFisica" },
         { "GET", $"{Cobrancas}/{Id}", null },
+        { "GET", $"{Cobrancas}/codigo/7K3F-9QXM", null },
         { "POST", $"{Cobrancas}/{Id}/cancelar", "PessoaFisica" },
         { "POST", $"{Cobrancas}/{Id}/pagar", "PessoaJuridica" },
         { "GET", Faturas, "PessoaJuridica" },
@@ -78,6 +79,7 @@ public class SegurancaCartoesTests(BankApiFactory factory) : IClassFixture<BankA
 
         Verificar(Cartoes, "post", "201", "400", "401", "403", "409");
         Verificar(MeuCartao, "get", "200", "401", "403", "404");
+        Verificar(Cobrancas + "/codigo/{codigo}", "get", "200", "401", "403", "404");
         Verificar(MeusDados, "get", "200", "401", "403", "404");
         Verificar(Cobrancas, "post", "201", "400", "401", "403");
         Verificar(MinhasCobrancas, "get", "200", "400", "401", "403");

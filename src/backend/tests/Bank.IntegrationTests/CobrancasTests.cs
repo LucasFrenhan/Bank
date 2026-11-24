@@ -1,4 +1,10 @@
 using System.Net;
+using Bank.Application.Abstracoes;
+using Bank.Domain.Carteiras;
+using Bank.Domain.Cobrancas;
+using Bank.Domain.Transferencias;
+using Bank.Domain.Usuarios;
+using Microsoft.Extensions.DependencyInjection;
 using static Bank.IntegrationTests.ApiCartoes;
 using static Bank.IntegrationTests.ApiTransferencias;
 
@@ -16,12 +22,97 @@ public class CobrancasTests(CartoesApiFactory factory) : IClassFixture<CartoesAp
         var json = await PostOkAsync(client, pj.Token, Cobrancas, new { valor = 299.90m, descricao = "  Café Especial " }, status: HttpStatusCode.Created);
 
         Assert.Equal(
-            ["cobrancaId", "lojista", "valor", "descricao", "status", "criadoEm", "pagaEm", "canceladaEm", "pagamento", "ultimaRecusa"],
+            ["cobrancaId", "codigo", "lojista", "valor", "descricao", "status", "criadoEm", "pagaEm", "canceladaEm", "pagamento", "ultimaRecusa"],
             json.EnumerateObject().Select(p => p.Name));
         Assert.Equal(("299.90", "Café Especial", "Pendente"), (json.GetProperty("valor").GetRawText(), json.GetProperty("descricao").GetString(), json.GetProperty("status").GetString()));
         var lojista = json.GetProperty("lojista");
         Assert.Equal((pj.UsuarioId, "Empresa Exemplo Ltda", pj.Documento), (lojista.GetProperty("usuarioId").GetGuid(), lojista.GetProperty("nome").GetString(), lojista.GetProperty("documento").GetString()));
         Assert.Equal(System.Text.Json.JsonValueKind.Null, json.GetProperty("pagamento").ValueKind);
+        Assert.Matches("^[2-9A-HJKMNP-TV-Z]{4}-[2-9A-HJKMNP-TV-Z]{4}$", json.GetProperty("codigo").GetString());
+    }
+
+    /// <summary>Código curto (specs/015-frontend-cartao-credito, FR-009a e FR-009b).</summary>
+    [Fact]
+    public async Task ConsultarPorCodigo_MesmaRespostaEVisibilidadeDaConsultaPorId()
+    {
+        using var client = factory.CreateClient();
+        var pj = await CriarPjAsync(client);
+        var pagador = await CriarPfComCartaoAsync(factory, client);
+        var terceiro = await CriarPfAsync(client);
+        var outraPj = await CriarPjAsync(client);
+        var cobranca = await EmitirAsync(client, pj);
+        var codigo = (await GetOkAsync(client, pj.Token, $"{Cobrancas}/{cobranca}")).GetProperty("codigo").GetString()!;
+        string[] formas = [codigo, codigo.ToLowerInvariant(), codigo.Replace("-", "", StringComparison.Ordinal), Uri.EscapeDataString(" " + codigo.Replace("-", " ", StringComparison.Ordinal) + " ")];
+
+        (await PagarAsync(client, pagador, cobranca, corpo: pagador.Corpo(cvv: pagador.Cvv == "000" ? "001" : "000"))).Dispose();
+        await VerificarAsync();
+        (await PagarAsync(client, pagador, cobranca)).Dispose();
+        await VerificarAsync();
+
+        Assert.Equal(codigo, (await GetOkAsync(client, pj.Token, MinhasCobrancas)).GetProperty("itens")[0].GetProperty("codigo").GetString());
+
+        async Task VerificarAsync()
+        {
+            foreach (var token in new[] { pj.Token, pagador.Conta.Token, terceiro.Token, outraPj.Token })
+            {
+                var porId = (await GetOkAsync(client, token, $"{Cobrancas}/{cobranca}")).GetRawText();
+                foreach (var forma in formas)
+                {
+                    Assert.Equal(porId, (await GetOkAsync(client, token, $"{Cobrancas}/codigo/{forma}")).GetRawText());
+                }
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData("22222222")]
+    [InlineData("7K3F9QX")]
+    [InlineData("0000-0000")]
+    [InlineData("019a8f77-1111-7890-abcd-ef1234567890")]
+    [InlineData("%20")]
+    public async Task ConsultarPorCodigo_MalformadoOuInexistente_404(string codigo)
+    {
+        using var client = factory.CreateClient();
+        var pf = await CriarPfAsync(client);
+
+        using var resposta = await GetComTokenAsync(client, pf.Token, $"{Cobrancas}/codigo/{codigo}");
+
+        await ApiBank.AssertProblemaAsync(resposta, HttpStatusCode.NotFound, Tipo("cobranca-nao-encontrada"));
+    }
+
+    /// <summary>A colisão no banco vira um resultado, para o caso de uso sortear outro código (research R1).</summary>
+    [Fact]
+    public async Task CodigoRepetido_ViraResultadoDaUnidadeDeTrabalho()
+    {
+        using var client = factory.CreateClient();
+        var pj = await CriarPjAsync(client);
+        await using var escopo = factory.Services.CreateAsyncScope();
+        var unidade = escopo.ServiceProvider.GetRequiredService<IUnidadeDeTrabalho>();
+        var repositorio = escopo.ServiceProvider.GetRequiredService<ICobrancaRepositorio>();
+        var codigo = CodigoCobranca.Novo();
+
+        Assert.Equal(ResultadoGravacao.Ok, await GravarAsync());
+        Assert.Equal(ResultadoGravacao.CodigoDeCobrancaDuplicado, await GravarAsync());
+
+        async Task<ResultadoGravacao> GravarAsync()
+        {
+            var ct = TestContext.Current.CancellationToken;
+            await unidade.IniciarAsync(ct);
+            repositorio.Adicionar(Cobranca.Emitir(UsuarioId.De(pj.UsuarioId), CarteiraId.De(pj.CarteiraId), ValorTransferencia.Criar(1m).Valor, "x", codigo, DateTimeOffset.UtcNow));
+            return await unidade.ConfirmarAsync(ct);
+        }
+    }
+
+    [Fact]
+    public async Task Cancelar_MantemOCodigo()
+    {
+        using var client = factory.CreateClient();
+        var pj = await CriarPjAsync(client);
+        var emitida = await PostOkAsync(client, pj.Token, Cobrancas, new { valor = 1m, descricao = "x" }, status: HttpStatusCode.Created);
+
+        var cancelada = await PostOkAsync(client, pj.Token, $"{Cobrancas}/{emitida.GetProperty("cobrancaId").GetGuid()}/cancelar");
+
+        Assert.Equal(emitida.GetProperty("codigo").GetString(), cancelada.GetProperty("codigo").GetString());
     }
 
     public static TheoryData<object, string[]> Invalidas() => new()

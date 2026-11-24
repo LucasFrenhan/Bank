@@ -29,6 +29,9 @@ public sealed class Cobranca
 
     public CobrancaId Id { get; private set; }
 
+    /// <summary>Imutável (specs/015-frontend-cartao-credito, FR-009a).</summary>
+    public CodigoCobranca Codigo { get; private set; } = null!;
+
     public UsuarioId LojistaUsuarioId { get; private set; }
 
     public CarteiraId CarteiraDestinoId { get; private set; }
@@ -71,14 +74,16 @@ public sealed class Cobranca
             : Resultado.Falha<string>(Erro.Validacao(CampoDescricao, "Informe a descrição da cobrança."));
     }
 
-    public static Cobranca Emitir(UsuarioId lojista, CarteiraId carteiraDestino, ValorTransferencia valor, string descricao, DateTimeOffset agora)
+    public static Cobranca Emitir(UsuarioId lojista, CarteiraId carteiraDestino, ValorTransferencia valor, string descricao, CodigoCobranca codigo, DateTimeOffset agora)
     {
         ArgumentNullException.ThrowIfNull(valor);
+        ArgumentNullException.ThrowIfNull(codigo);
         ArgumentException.ThrowIfNullOrWhiteSpace(descricao);
 
         return new Cobranca
         {
             Id = CobrancaId.Novo(agora),
+            Codigo = codigo,
             LojistaUsuarioId = lojista,
             CarteiraDestinoId = carteiraDestino,
             Valor = valor.Valor,

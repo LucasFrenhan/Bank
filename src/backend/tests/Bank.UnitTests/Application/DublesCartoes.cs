@@ -123,7 +123,7 @@ internal sealed class BancoCartoes : IUsuarioConsultas, ICarteiraConsultas, ICar
 
     public Cobranca CriarCobranca(Usuario lojista, decimal valor = 299.90m)
     {
-        var cobranca = Cobranca.Emitir(lojista.Id, lojista.Carteira.Id, ValorTransferencia.Criar(valor).Valor, "Café", Relogio.Agora);
+        var cobranca = Cobranca.Emitir(lojista.Id, lojista.Carteira.Id, ValorTransferencia.Criar(valor).Valor, "Café", CodigoCobranca.Novo(), Relogio.Agora);
         Cobrancas.Add(cobranca);
         return cobranca;
     }
@@ -234,6 +234,9 @@ internal sealed class BancoCartoes : IUsuarioConsultas, ICarteiraConsultas, ICar
     public Task<DadosCobranca?> ObterAsync(CobrancaId cobrancaId, CancellationToken cancellationToken) =>
         Task.FromResult(Cobrancas.Where(c => c.Id == cobrancaId).Select(Projetar).SingleOrDefault());
 
+    public Task<DadosCobranca?> ObterPorCodigoAsync(CodigoCobranca codigo, CancellationToken cancellationToken) =>
+        Task.FromResult(Cobrancas.Where(c => c.Codigo == codigo).Select(Projetar).SingleOrDefault());
+
     public Task<Pagina<DadosCobranca>> ListarDoLojistaAsync(UsuarioId lojista, StatusCobranca? status, int deslocamento, int quantidade, CancellationToken cancellationToken)
     {
         var todas = Cobrancas.Where(c => c.LojistaUsuarioId == lojista && (status is null || c.Status == status)).Select(Projetar).ToList();
@@ -333,7 +336,7 @@ internal sealed class BancoCartoes : IUsuarioConsultas, ICarteiraConsultas, ICar
     private DadosCobranca Projetar(Cobranca c)
     {
         var lojista = Usuarios.Find(u => u.Id == c.LojistaUsuarioId)!;
-        return new DadosCobranca(c.Id, c.LojistaUsuarioId, lojista.NomeCompleto, lojista.Documento, c.Valor, c.Descricao, c.Status, c.CriadoEm, c.PagaEm, c.CanceladaEm,
+        return new DadosCobranca(c.Id, c.Codigo, c.LojistaUsuarioId, lojista.NomeCompleto, lojista.Documento, c.Valor, c.Descricao, c.Status, c.CriadoEm, c.PagaEm, c.CanceladaEm,
             c.PagadorUsuarioId, c.CodigoBandeira, c.UltimosDigitosCartao, c.CodigoAutorizacao, c.UltimaRecusaMotivo, c.UltimaRecusaEm);
     }
 

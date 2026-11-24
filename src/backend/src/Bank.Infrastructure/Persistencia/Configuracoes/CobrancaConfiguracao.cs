@@ -7,14 +7,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Bank.Infrastructure.Persistencia.Configuracoes;
 
-/// <summary>Tabela <c>cobrancas</c> (specs/014-cartao-credito-cobrancas, data-model; FR-009 a FR-013).</summary>
+/// <summary>Tabela <c>cobrancas</c> (specs/014-cartao-credito-cobrancas, data-model; FR-009 a FR-013) e o código curto (specs/015, FR-009a).</summary>
 internal sealed class CobrancaConfiguracao : IEntityTypeConfiguration<Cobranca>
 {
+    public const string IndiceCodigo = "ux_cobrancas_codigo";
+
     public void Configure(EntityTypeBuilder<Cobranca> builder)
     {
         builder.ToTable("cobrancas", tabela =>
         {
             tabela.HasCheckConstraint("ck_cobrancas_valor_positivo", "valor > 0");
+            tabela.HasCheckConstraint("ck_cobrancas_codigo", "codigo ~ '^[2-9A-HJKMNP-TV-Z]{8}$'");
             tabela.HasCheckConstraint("ck_cobrancas_status", "status IN ('Pendente', 'Paga', 'Cancelada')");
             tabela.HasCheckConstraint("ck_cobrancas_paga_coerente",
                 "num_nonnulls(pagador_usuario_id, codigo_bandeira, ultimos_digitos_cartao, codigo_autorizacao, paga_em) = CASE status WHEN 'Paga' THEN 5 ELSE 0 END");
@@ -27,6 +30,8 @@ internal sealed class CobrancaConfiguracao : IEntityTypeConfiguration<Cobranca>
         builder.HasKey(c => c.Id).HasName("pk_cobrancas");
 
         builder.Property(c => c.Id).HasColumnName("id").ValueGeneratedNever();
+        builder.Property(c => c.Codigo).HasColumnName("codigo").HasColumnType("char(8)").IsRequired()
+            .HasConversion(c => c.Valor, valor => CodigoCobranca.Criar(valor)!);
         builder.Property(c => c.LojistaUsuarioId).HasColumnName("lojista_usuario_id").IsRequired();
         builder.Property(c => c.CarteiraDestinoId).HasColumnName("carteira_destino_id").IsRequired();
         builder.Property(c => c.Valor).HasColumnName("valor").HasColumnType("numeric(18,2)").IsRequired();
@@ -45,6 +50,7 @@ internal sealed class CobrancaConfiguracao : IEntityTypeConfiguration<Cobranca>
         builder.HasIndex(c => new { c.LojistaUsuarioId, c.CriadoEm, c.Id })
             .IsDescending(false, true, true)
             .HasDatabaseName("ix_cobrancas_lojista");
+        builder.HasIndex(c => c.Codigo).IsUnique().HasDatabaseName(IndiceCodigo);
         builder.HasIndex(c => c.CarteiraDestinoId).HasDatabaseName("ix_cobrancas_carteira_destino_id");
         builder.HasIndex(c => c.PagadorUsuarioId).HasDatabaseName("ix_cobrancas_pagador_usuario_id");
         builder.HasIndex(c => c.CodigoBandeira).HasDatabaseName("ix_cobrancas_codigo_bandeira");

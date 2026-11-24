@@ -40,7 +40,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 - [X] T001 Versionar as fontes do protótipo aprovado em `docs/design/fontes/cartao/` e o índice em
   `docs/design/prototipo.md` (commit 42f6a1c)
-- [ ] T002 Subir o Compose a partir da branch, emitir algumas cobranças ainda sem código (base para o quickstart,
+- [X] T002 Subir o Compose a partir da branch, emitir algumas cobranças ainda sem código (base para o quickstart,
   cenário 2) e registrar a contagem atual de testes do backend, do frontend e e2e para o SC-008
 
 ---
@@ -53,41 +53,41 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 
 ### Código curto — testes
 
-- [ ] T003 [P] `ut/Domain/CodigoCobrancaTests.cs`: `Novo()` com 8 caracteres de
+- [X] T003 [P] `ut/Domain/CodigoCobrancaTests.cs`: `Novo()` com 8 caracteres de
   `23456789ABCDEFGHJKMNPQRSTVWXYZ`; `Criar` aceita minúsculas, espaços e hífen; recusa nulo, vazio, 7, 9 e os
   caracteres 0, 1, I, L, O e U; `Valor` sem hífen; `ToString()` = `XXXX-XXXX`
-- [ ] T004 [P] Ampliar os testes de emissão e de consulta em `ut/Application/` (com `BancoCartoes` de
+- [X] T004 [P] Ampliar os testes de emissão e de consulta em `ut/Application/` (com `BancoCartoes` de
   `ut/Application/DublesCartoes.cs`): código gravado; `CodigoDeCobrancaDuplicado` gera outro código, até 5
   tentativas, e depois exceção, sem gravar, sem métrica e sem log de emissão; consulta por código com a
   visibilidade da consulta por id (emissora,
   outra PJ, PF); malformado e inexistente = `cobranca-nao-encontrada`
-- [ ] T005 [P] Ampliar `it/CobrancasTests.cs`: `codigo` logo após `cobrancaId` na emissão, consulta, lista e
+- [X] T005 [P] Ampliar `it/CobrancasTests.cs`: `codigo` logo após `cobrancaId` na emissão, consulta, lista e
   cancelamento (lista exata de campos); `GET /api/v1/cobrancas/codigo/{codigo}` em maiúsculas, minúsculas, sem
   hífen e com espaços = mesma resposta da consulta por id; 401 (sem token e token inválido), 403 (claims
   ausentes), 404 (malformado e inexistente) com `ProblemDetails` e `traceId`; o código continua o mesmo depois de
   cancelar e de pagar (it/PagamentoCobrancaTests.cs)
-- [ ] T006 [P] Criar `it/CodigoCobrancaMigracaoTests.cs`, no padrão de `it/DadosBancariosMigracaoTests.cs`:
+- [X] T006 [P] Criar `it/CodigoCobrancaMigracaoTests.cs`, no padrão de `it/DadosBancariosMigracaoTests.cs`:
   migra até `AdicionarCartoesCobrancasERecebiveis`, insere cobranças `Pendente`, `Paga` e `Cancelada`, aplica
   `AdicionarCodigoCobranca` e confere código válido e único em todas, com as demais colunas iguais; ampliar
   `it/RestricoesCartoesTests.cs` com `ux_cobrancas_codigo`, `ck_cobrancas_codigo` e `NOT NULL`
-- [ ] T007 [P] Ampliar `it/OpenApiTests.cs` com a rota nova e o campo `codigo` obrigatório
+- [X] T007 [P] Ampliar `it/OpenApiTests.cs` com a rota nova e o campo `codigo` obrigatório
 
 ### Código curto — implementação
 
-- [ ] T008 Criar `dom/Cobrancas/CodigoCobranca.cs` (R1; FR-009a) e acrescentar `Codigo`, imutável, a
+- [X] T008 Criar `dom/Cobrancas/CodigoCobranca.cs` (R1; FR-009a) e acrescentar `Codigo`, imutável, a
   `dom/Cobrancas/Cobranca.cs`, recebido em `Emitir`; ajustar `ut/CartoesDeTeste.cs` e as chamadas existentes
-- [ ] T009 Em `app/`: `ResultadoGravacao.CodigoDeCobrancaDuplicado` (`Abstracoes/IUnidadeDeTrabalho.cs`),
+- [X] T009 Em `app/`: `ResultadoGravacao.CodigoDeCobrancaDuplicado` (`Abstracoes/IUnidadeDeTrabalho.cs`),
   `ObterPorCodigoAsync` e `Codigo` em `DadosCobranca` (`Abstracoes/ICobrancaConsultas.cs`), tentativas em
   `Cobrancas/EmitirCobranca.cs` (R1), `Cobrancas/ConsultarCobrancaPorCodigo.cs` e `Codigo` em
   `Cobrancas/DetalheCobranca.cs`; ajustar `ut/Application/DublesCartoes.cs`
-- [ ] T010 Em `infra/Persistencia/`: mapear `codigo char(8) NOT NULL` com `ux_cobrancas_codigo` e
+- [X] T010 Em `infra/Persistencia/`: mapear `codigo char(8) NOT NULL` com `ux_cobrancas_codigo` e
   `ck_cobrancas_codigo` (`codigo ~ '^[2-9A-HJKMNP-TV-Z]{8}$'`) em `Configuracoes/CobrancaConfiguracao.cs`;
   traduzir a violação do índice em `UnidadeDeTrabalho.cs`; consulta em `CobrancaConsultas.cs`; incluir `codigo`
   em `Sql/Consultas/BloquearCobranca.sql`
-- [ ] T011 Criar `infra/Persistencia/Sql/Migracoes/PreencherCodigosDasCobrancas.sql` (R2) e a migration
+- [X] T011 Criar `infra/Persistencia/Sql/Migracoes/PreencherCodigosDasCobrancas.sql` (R2) e a migration
   `AdicionarCodigoCobranca` (coluna anulável → script → `NOT NULL`, índice e `CHECK`; `Down` remove tudo);
   ajustar os `INSERT` de cobranças por SQL em `it/RestricoesCartoesTests.cs` e `it/VolumeProcessamentoTests.cs`
-- [ ] T012 Em `api/Endpoints/CobrancasEndpoints.cs`: `codigo` em `CobrancaResposta` e
+- [X] T012 Em `api/Endpoints/CobrancasEndpoints.cs`: `codigo` em `CobrancaResposta` e
   `GET /cobrancas/codigo/{codigo}` (FR-009b), conforme
   [contracts/cartoes-cobrancas-api.md](contracts/cartoes-cobrancas-api.md);
   T003–T007 e os testes anteriores do backend passando

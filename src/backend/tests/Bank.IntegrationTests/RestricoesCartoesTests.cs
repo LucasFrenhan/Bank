@@ -28,6 +28,9 @@ public class RestricoesCartoesTests(BankApiFactory factory) : IClassFixture<Bank
         { "UPDATE cartoes SET variacao = 5", "ck_cartoes_variacao" },
         { "UPDATE cartoes SET codigo_bandeira = '003'", "fk_cartoes_bandeiras" },
         { "UPDATE cobrancas SET valor = 0", "ck_cobrancas_valor_positivo" },
+        { "UPDATE cobrancas SET codigo = '7K3F9QX0'", "ck_cobrancas_codigo" },
+        { "UPDATE cobrancas SET codigo = '7k3f9qxm'", "ck_cobrancas_codigo" },
+        { "UPDATE cobrancas SET codigo = '7K3F9QX'", "ck_cobrancas_codigo" },
         { "UPDATE cobrancas SET status = 'Outro', pagador_usuario_id = NULL, codigo_bandeira = NULL, ultimos_digitos_cartao = NULL, codigo_autorizacao = NULL, paga_em = NULL", "ck_cobrancas_status" },
         { "UPDATE cobrancas SET status = 'Pendente'", "ck_cobrancas_paga_coerente" },
         { "UPDATE cobrancas SET codigo_autorizacao = NULL", "ck_cobrancas_paga_coerente" },
@@ -83,6 +86,7 @@ public class RestricoesCartoesTests(BankApiFactory factory) : IClassFixture<Bank
         { "INSERT INTO cartoes SELECT gen_random_uuid(), usuario_id, codigo_bandeira, nome_impresso, ultimos_digitos, validade_ano, validade_mes, variacao, 'outra', limite_total, 0, criado_em FROM cartoes LIMIT 1", "ux_cartoes_usuario_id" },
         { "INSERT INTO lancamentos_fatura SELECT gen_random_uuid(), fatura_id, compra_id, estabelecimento, descricao, valor, data_compra, lancado_em FROM lancamentos_fatura LIMIT 1", "ux_lancamentos_fatura_compra_id" },
         { "INSERT INTO faturas (id, cartao_id, competencia, inicio, fechamento, vencimento, total) SELECT gen_random_uuid(), cartao_id, competencia, inicio, fechamento, vencimento, 0 FROM faturas LIMIT 1", "ux_faturas_cartao_competencia" },
+        { "INSERT INTO cobrancas (id, lojista_usuario_id, carteira_destino_id, valor, descricao, status, criado_em, codigo) SELECT gen_random_uuid(), lojista_usuario_id, carteira_destino_id, 1, 'x', 'Pendente', now(), codigo FROM cobrancas LIMIT 1", "ux_cobrancas_codigo" },
         { "INSERT INTO recebiveis SELECT gen_random_uuid(), cobranca_id, lojista_usuario_id, carteira_id, valor_bruto, taxa, valor_liquido, data_prevista, situacao, criado_em, recebido_em, chave_idempotencia FROM recebiveis LIMIT 1", "ux_recebiveis_cobranca_id" },
         { "INSERT INTO autorizacoes_cartao SELECT gen_random_uuid(), cobranca_id, pagador_usuario_id, cartao_id, codigo_bandeira, ultimos_digitos, valor, resultado, motivo, codigo_autorizacao, gen_random_uuid(), criado_em FROM autorizacoes_cartao LIMIT 1", "ux_autorizacoes_cartao_cobranca_aprovada" },
         { "INSERT INTO lancamentos (id, carteira_id, tipo, direcao, valor, recebivel_id, criado_em) SELECT gen_random_uuid(), carteira_id, 'LiquidacaoRecebivel', 'Entrada', 1, id, now() FROM recebiveis CROSS JOIN generate_series(1, 2)", "ux_lancamentos_recebivel_id" },
@@ -100,6 +104,17 @@ public class RestricoesCartoesTests(BankApiFactory factory) : IClassFixture<Bank
         var erro = await Assert.ThrowsAsync<PostgresException>(() => contexto.Database.ExecuteSqlRawAsync(comando, Ct));
 
         Assert.Equal(restricao, erro.ConstraintName);
+    }
+
+    [Fact]
+    public async Task Cobranca_SemCodigo_Recusada()
+    {
+        await PrepararAsync();
+        await using var contexto = factory.CriarContexto();
+
+        var erro = await Assert.ThrowsAsync<PostgresException>(() => contexto.Database.ExecuteSqlRawAsync("UPDATE cobrancas SET codigo = NULL", Ct));
+
+        Assert.Equal((PostgresErrorCodes.NotNullViolation, "codigo"), (erro.SqlState, erro.ColumnName));
     }
 
     [Fact]
@@ -144,7 +159,7 @@ public class RestricoesCartoesTests(BankApiFactory factory) : IClassFixture<Bank
         var hoje = DateOnly.FromDateTime(agora.UtcDateTime);
 
         var cartao = Cartao.Emitir(CartaoId.Novo(agora), Bank.Domain.Usuarios.UsuarioId.De(pf.UsuarioId), Bandeira.Visa, "Lucas Silva", ValidadeCartao.DaEmissao(hoje), 0, "7899", "impressao", 5000m, agora);
-        var cobranca = Cobranca.Emitir(Bank.Domain.Usuarios.UsuarioId.De(pj.UsuarioId), Bank.Domain.Carteiras.CarteiraId.De(pj.CarteiraId), ValorTransferencia.Criar(100m).Valor, "Café", agora);
+        var cobranca = Cobranca.Emitir(Bank.Domain.Usuarios.UsuarioId.De(pj.UsuarioId), Bank.Domain.Carteiras.CarteiraId.De(pj.CarteiraId), ValorTransferencia.Criar(100m).Valor, "Café", CodigoCobranca.Novo(), agora);
         var fatura = Fatura.Abrir(cartao.Id, CompetenciaFatura.De(hoje), agora);
         var execucao = PagamentoCobranca.Executar(cobranca, cartao, fatura, "Loja", hoje, Guid.NewGuid(), agora).Valor;
         contexto.AddRange(cartao, cobranca, fatura, execucao.Autorizacao, execucao.Compra, execucao.Recebivel, fatura.Lancar(execucao.Compra, agora));
