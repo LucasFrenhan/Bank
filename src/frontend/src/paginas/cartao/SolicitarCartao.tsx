@@ -72,6 +72,7 @@ export function SolicitarCartao({
                   definirSemBandeira(false);
                 }}
               />
+              <span className={estilos.circulo} aria-hidden="true" />
               {opcao.nome}
             </label>
           ))}

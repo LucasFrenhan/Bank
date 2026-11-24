@@ -79,12 +79,14 @@ function Formulario({ consulta, aoFicarSemCartao }: { consulta: CobrancaPronta; 
   async function usarMeuCartao() {
     definirBuscando(true);
     definirErro(null);
+    // Limpo no clique, e não na resposta, para não apagar um CVV digitado enquanto os dados chegam.
+    alterar('cvv', '');
     const resultado = await api.obterDadosCartao();
     definirBuscando(false);
 
     if (resultado.ok) {
       const { nomeImpresso, numero, validade } = resultado.dados;
-      definirCartao({ nome: nomeImpresso, numero: mascararNumero(numero), validade, cvv: '' });
+      definirCartao((atual) => ({ ...atual, nome: nomeImpresso, numero: mascararNumero(numero), validade }));
       definirErros({});
       cvv.current?.focus();
     } else if (resultado.erro.codigo === 'cartao-nao-encontrado') {

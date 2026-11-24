@@ -94,6 +94,24 @@ describe('Pagar cobrança', () => {
     expect(screen.getByLabelText('Validade')).toHaveValue('11/31');
   });
 
+  it('"Usar meu cartão" apaga o CVV anterior no clique, mas não o digitado enquanto busca', async () => {
+    api();
+    servidor.use(
+      http.get('*/api/v1/cartoes/meu/dados', async () => {
+        await delay(60);
+        return HttpResponse.json(DADOS_CARTAO);
+      }),
+    );
+    const { usuario } = abrir();
+    await usuario.type(await screen.findByLabelText('CVV'), '999');
+    await usuario.click(screen.getByRole('button', { name: 'Usar meu cartão' }));
+    expect(screen.getByLabelText('CVV')).toHaveValue('');
+    fireEvent.change(screen.getByLabelText('CVV'), { target: { value: '123' } });
+
+    await waitFor(() => expect(screen.getByLabelText('Número do cartão')).toHaveValue('4000 0012 3456 7899'));
+    expect(screen.getByLabelText('CVV')).toHaveValue('123');
+  });
+
   it('formato inválido: erro em cada campo, nada enviado', async () => {
     const estado = api();
     const { usuario } = abrir();

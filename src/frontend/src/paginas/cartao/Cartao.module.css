@@ -150,6 +150,7 @@
 }
 
 .opcao {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--espaco-3);
@@ -162,10 +163,32 @@
   cursor: pointer;
 }
 
+/* O rádio ocupa a opção inteira (alvo de toque); o círculo é desenhado. */
 .opcao input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.opcao:has(input:focus-visible) {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.circulo {
+  flex: none;
   width: 20px;
   height: 20px;
-  accent-color: var(--cor-primaria);
+  border: 2px solid #64748b;
+  border-radius: 50%;
+}
+
+.opcaoMarcada .circulo {
+  border: 6px solid var(--cor-primaria);
 }
 
 .opcaoMarcada {
@@ -180,6 +203,17 @@
 }
 
 @media (min-width: 480px) {
+  /* Botão ao lado do campo, alinhado à caixa de texto (rótulo de 20 px + espaço de 8 px). */
+  .formularioLinha {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .formularioLinha > :last-child {
+    margin-top: 28px;
+  }
+
   .opcoes {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }

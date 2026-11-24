@@ -152,7 +152,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   (4), fatura atual com links e erro isolado, olho com nome acessível e anúncio (5), copiar só o número (7),
   nome de 150 caracteres, carregando, erro com
   `traceId` e tentar de novo, PJ (9); campo "Link ou código da cobrança" válido e inválido (FR-009)
-- [ ] T027 [P] [US1] `e2e/cartao.spec.ts`: solicitar, exibir, ocultar, trocar de aba e recarregar, contra a API
+- [X] T027 [P] [US1] `e2e/cartao.spec.ts`: solicitar, exibir, ocultar, trocar de aba e recarregar, contra a API
 
 ### Implementação
 
@@ -182,7 +182,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   (10) e já cancelada, atualização a cada 5 s só se pendente e visível, anúncio, falha silenciosa e confirmação
   substituída pelo
   pagamento
-- [ ] T032 [P] [US2] `e2e/cobrancas.spec.ts`: emitir, copiar o link, filtrar, abrir e cancelar; outra janela paga
+- [X] T032 [P] [US2] `e2e/cobrancas.spec.ts`: emitir, copiar o link, filtrar, abrir e cancelar; outra janela paga
   pela API e o detalhe muda para "Paga" em até 10 s
 
 ### Implementação
@@ -214,10 +214,10 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   `idempotencia-divergente` com cobrança já paga mostra o comprovante e, pendente, pede para conferir com nova chave;
   `pagehide` limpa o formulário; CVV de "Usar meu cartão" nunca preenchido;
   formulário com `cc-name`, `cc-number`, `cc-exp` e `cc-csc`; sessão expirada descarta os dados
-- [ ] T038 [P] [US3] `e2e/pagamento.spec.ts`: link sem sessão → login → cobrança → "Usar meu cartão" → comprovante
+- [X] T038 [P] [US3] `e2e/pagamento.spec.ts`: link sem sessão → login → cobrança → "Usar meu cartão" → comprovante
   reaberto; CVV errado; limite insuficiente; resposta perdida (interceptada) e novo envio = uma compra; código em
   minúsculas e sem hífen
-- [ ] T039 [P] [US3] `e2e/privacidadeCartao.spec.ts`: percorre cartão e pagamento e procura número e CVV em
+- [X] T039 [P] [US3] `e2e/privacidadeCartao.spec.ts`: percorre cartão e pagamento e procura número e CVV em
   `sessionStorage`, `localStorage`, endereço, histórico, título e corpos OTLP; a chave da operação fora do OTLP
   (SC-005, FR-008)
 
@@ -242,7 +242,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [X] T042 [P] [US4] `src/paginas/faturas/Faturas.test.tsx`: lista e detalhe de cada situação (cenários 1 a 6),
   datas sem conversão de fuso, sem cartão, erro; ampliar `src/paginas/Inicio.test.tsx` com o aviso (disponível,
   vencida, mais antiga, sem cartão, erro e PJ)
-- [ ] T043 [US4] Acrescentar em `e2e/apoio.ts` a emissão, o cartão e o pagamento pela API e a preparação de
+- [X] T043 [US4] Acrescentar em `e2e/apoio.ts` a emissão, o cartão e o pagamento pela API e a preparação de
   faturas disponível e vencida por SQL, numa única transação já com `liberada_em` (R13); `e2e/faturas.spec.ts`:
   lista, detalhe com juros e aviso do início
 
@@ -266,7 +266,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [X] T046 [P] [US5] `src/paginas/faturas/PagarFatura.test.tsx`: confirmação com valor, juros, saldo e saldo
   depois; saldo menor bloqueia; recusa da API por saldo; falha e reenvio com a mesma chave; duplo clique; paga em
   outra aba; valor pago devolvido diferente do mostrado
-- [ ] T047 [US5] Ampliar `e2e/faturas.spec.ts`: pagar disponível e vencida; saldo, extrato e limite atualizados
+- [X] T047 [US5] Ampliar `e2e/faturas.spec.ts`: pagar disponível e vencida; saldo, extrato e limite atualizados
 
 ### Implementação
 
@@ -285,7 +285,7 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [X] T049 [P] [US6] `src/paginas/recebiveis/Recebiveis.test.tsx`: lista, filtros, páginas, vazio, erro, PF;
   confirmação com taxa, líquido, data e aviso; sucesso com os valores da API; sem ação se liquidado, antecipado ou
   previsto para hoje; `recebivel-nao-antecipavel` atualiza a situação; falha e duplo clique
-- [ ] T050 [P] [US6] `e2e/recebiveis.spec.ts`: cobrança de R$ 299,90 paga pela API, antecipar e conferir saldo e
+- [X] T050 [P] [US6] `e2e/recebiveis.spec.ts`: cobrança de R$ 299,90 paga pela API, antecipar e conferir saldo e
   extrato
 
 ### Implementação
@@ -306,14 +306,14 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
 - [X] T052 [P] [US7] Ampliar `src/App.test.tsx` e `src/paginas/Perfil.test.tsx`: menu e barra por perfil (4 itens),
   item ativo nas rotas filhas, permissões novas; em `src/paginas/Inicio.test.tsx`, trocar só a verificação de
   "Cobranças" como "Em breve" (FR-001, SC-008)
-- [ ] T053 [US7] Ampliar `e2e/responsividade.spec.ts` (6 larguras), `e2e/teclado.spec.ts` (solicitar, pagar,
+- [X] T053 [US7] Ampliar `e2e/responsividade.spec.ts` (6 larguras), `e2e/teclado.spec.ts` (solicitar, pagar,
   antecipar, cancelar e pagar fatura) e o axe com todas as telas novas, inclusive os dados exibidos e as
   confirmações abertas (FR-025, SC-007)
 
 ### Implementação
 
 - [X] T054 [US7] Atualizar `comp/Layout.tsx` (menu e barra; FR-001) e `src/sessao/permissoes.ts` (FR-004)
-- [ ] T055 [US7] Corrigir o que T053 apontar nas telas novas
+- [X] T055 [US7] Corrigir o que T053 apontar nas telas novas
 
 ---
 
