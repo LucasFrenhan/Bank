@@ -203,13 +203,13 @@ repetir com a cópia bloqueada
 
 **Purpose**: telemetria, documentação e validação final
 
-- [ ] T025 [P] Em `front/e2e/telemetria.spec.ts`, novo caso: entrar com PF, copiar os dados da conta,
+- [X] T025 [P] Em `front/e2e/telemetria.spec.ts`, novo caso: entrar com PF, copiar os dados da conta,
   esperar envios OTLP e conferir que `numero` (delimitado: `(?<!\d)numero(?!\d)`), `numero-digito` e os
   nomes `agencia`/`contaBancaria` não aparecem em nenhum corpo (FR-013, SC-005, R8)
-- [ ] T026 [P] Em `docs/design/prototipo.md`, registrar o nome "One Bank", o ícone "1B" e o cartão
+- [X] T026 [P] Em `docs/design/prototipo.md`, registrar o nome "One Bank", o ícone "1B" e o cartão
   "Dados da conta" (ausentes das telas originais) e trocar a mensagem por "Nenhuma conta One Bank com
   esse documento." (FR-015)
-- [ ] T027 [P] Em `docs/desenvolvimento.md`, seção curta "Dados da conta e nome One Bank (frontend)" com
+- [X] T027 [P] Em `docs/desenvolvimento.md`, seção curta "Dados da conta e nome One Bank (frontend)" com
   links para a spec 013, o contrato v1.3.0 e o quickstart, e a conta poupança de teste já documentada
 - [ ] T028 Rodar `npm run lint`, `npm run typecheck`, `npm test` e `npm run build` em `src/frontend/`,
   reconstruir o frontend no Compose e rodar `npm run e2e` (desktop e mobile), tudo verde

@@ -299,6 +299,19 @@ Definidos em [`specs/007-frontend-transferencias`](../specs/007-frontend-transfe
   pela API (`acumularSaldo` e `criarLancamentos` em `src/frontend/e2e/apoio.ts`), sem acessar o
   banco.
 
+### Dados da conta e nome One Bank (frontend)
+
+Definidos em [`specs/013-frontend-dados-bancarios`](../specs/013-frontend-dados-bancarios/spec.md) —
+[contrato do frontend v1.3.0](../specs/013-frontend-dados-bancarios/contracts/frontend.md) e
+[roteiro de validação](../specs/013-frontend-dados-bancarios/quickstart.md).
+
+- O início (PF e PJ) mostra o cartão "Dados da conta" com o `contaBancaria` de
+  `GET /api/v1/carteiras/minha`, sempre como texto, e copia só os dados bancários. Para ver uma
+  **conta poupança**, use o script `criar-conta-poupanca.sql` descrito acima.
+- O nome do banco na interface vem de `NOME_BANCO` (`src/marca.ts`); `src/marca.test.ts` falha se
+  o nome antigo voltar. O nome ao lado do código do banco vem da API.
+- Agência e conta nunca vão para a telemetria do navegador.
+
 ## Fluxo de desenvolvimento (SDD)
 
 1. Crie a branch da spec a partir de `main` atualizada, com o mesmo nome da pasta da
