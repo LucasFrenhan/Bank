@@ -16,12 +16,14 @@ docker compose up -d --build --wait
 ```powershell
 cd src/frontend
 npm ci
+$env:BANK_API_URL = "http://localhost:8080"
 npm run api:tipos
+Remove-Item Env:BANK_API_URL
 git diff --stat src/api/schema.d.ts
 ```
 
 Esperado: a única mudança é aditiva — `contaBancaria` em `MinhaCarteiraResposta` e os esquemas
-`ContaBancariaResposta` e `BancoResposta`. `BANK_API_URL` aponta para outra API, se preciso.
+`ContaBancariaResposta` e `BancoResposta`. `BANK_API_URL` aponta para a API do Compose (8080).
 
 ## Verificações automáticas
 
