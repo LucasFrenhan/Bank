@@ -211,12 +211,15 @@ repetir com a cópia bloqueada
   esse documento." (FR-015)
 - [X] T027 [P] Em `docs/desenvolvimento.md`, seção curta "Dados da conta e nome One Bank (frontend)" com
   links para a spec 013, o contrato v1.3.0 e o quickstart, e a conta poupança de teste já documentada
-- [ ] T028 Rodar `npm run lint`, `npm run typecheck`, `npm test` e `npm run build` em `src/frontend/`,
+- [X] T028 Rodar `npm run lint`, `npm run typecheck`, `npm test` e `npm run build` em `src/frontend/`,
   reconstruir o frontend no Compose e rodar `npm run e2e` (desktop e mobile), tudo verde
-- [ ] T029 Executar o roteiro de `specs/013-frontend-dados-bancarios/quickstart.md`, inclusive a conta
+- [X] T029 Executar o roteiro de `specs/013-frontend-dados-bancarios/quickstart.md`, inclusive a conta
   poupança e os ícones, conferindo capturas em desktop e mobile; registrar o que não puder ser
-  verificado aqui (leitor de tela e atalho no celular)
-- [ ] T030 Conferir spec, contrato e código lado a lado e atualizar os documentos de
+  verificado aqui (leitor de tela e atalho no celular). **Resultado (2026-11-24)**: passos 1 a 3 e 5 a
+  11 verificados por e2e, teste de componente, roteiro automatizado ou captura; **pendentes de conferência manual**: passo 4 com
+  NVDA (a árvore de acessibilidade foi conferida) e o atalho num celular real (passo 10; o PNG foi
+  conferido)
+- [X] T030 Conferir spec, contrato e código lado a lado e atualizar os documentos de
   `specs/013-frontend-dados-bancarios/` se algo divergiu (Princípio I)
 
 ---

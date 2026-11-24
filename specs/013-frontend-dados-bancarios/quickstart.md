@@ -32,11 +32,12 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
-docker compose -f ../../docker-compose.yml up -d --build --wait frontend
+docker compose -f ../../docker-compose.yml up -d --build --no-deps --wait frontend
 npm run e2e
 ```
 
-Esperado: tudo verde, em `desktop` e `mobile`.
+Esperado: tudo verde, em `desktop` e `mobile`. O `--no-deps` evita recriar o Postgres, o que deixaria a
+API com conexões mortas e causaria um 500 passageiro no e2e.
 
 ## Roteiro manual (http://localhost:3000)
 
@@ -46,7 +47,7 @@ Esperado: tudo verde, em `desktop` e `mobile`.
 | 2 | Cadastrar uma PJ e abrir o início | Cartão abaixo de "Receber transferências"; CNPJ e seu "Copiar" como antes | US1.2 |
 | 3 | Conta poupança (comando abaixo) | Tipo "Conta poupança" | US1.3 |
 | 4 | Leitor de tela (NVDA) sobre o cartão | Rótulo e valor juntos; agência e conta dígito a dígito; "dígito N" | US1.5 |
-| 5 | Parar a API (`docker compose stop api`) e recarregar | Erro atual da tela, sem o cartão; `docker compose start api` ao final | US1.7 |
+| 5 | Parar a API (`docker compose stop api`) e recarregar | Carregamento e, em até 60 s (tempo limite do nginx), o erro atual da tela, sempre sem o cartão; `docker compose start api` ao final e "Tentar de novo" recupera | US1.7 |
 | 6 | "Copiar" e colar num editor | As 3 linhas, sem nome nem documento; aviso de sucesso; copiar de novo repete o aviso | US3.1, US3.3 |
 | 7 | Bloquear a área de transferência do site e copiar | Mensagem de falha; a seleção manual copia só o texto visível | US3.2 |
 | 8 | Percorrer entrar, criar conta, 404, início, transferir, comprovante, extrato e perfil | Ícone "1B", "One Bank" na marca (onde existe), no título e nos textos | US2 |

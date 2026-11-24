@@ -99,6 +99,7 @@ specs/013-frontend-dados-bancarios/
     │   ├── paginas/
     │   │   ├── DadosDaConta.tsx            # cartão (R3, R5)
     │   │   ├── useCopia.ts                 # cópia com aviso (R4)
+    │   │   ├── TextoAvisoCopia.tsx         # região de aviso, com estilo de erro na falha (R4)
     │   │   ├── Inicio.tsx                  # cartão em PF e PJ; CNPJ usa useCopia
     │   │   ├── Autenticado.module.css      # grade do cartão e coluna da PJ
     │   │   ├── comum.ts, Comprovante.tsx, NaoEncontrada.tsx   # NOME_BANCO

@@ -41,7 +41,8 @@ estão em Clarifications. As decisões abaixo são de desenho.
 - **Decision**: hook `useCopia` em `src/paginas/useCopia.ts`, com `copiar(texto, { sucesso, falha })` e
   `aviso` (`{ texto, falhou }`); o cartão do CNPJ passa a usá-lo, com os mesmos textos. O aviso é
   limpo antes de cada cópia, e a falha usa a cor de erro (hoje a do CNPJ sai na cor de sucesso;
-  FR-007). Cada cartão tem a própria região `role="status"`.
+  FR-007). Cada cartão tem a própria região `role="status"`, no componente comum
+  `TextoAvisoCopia`.
 - **Rationale**: a segunda cópia da mesma lógica justifica o hook; limpar o aviso faz a cópia repetida
   ser anunciada de novo; avisos separados não se confundem (edge case da PJ). Sem
   `navigator.clipboard` (contexto inseguro) a chamada lança e cai na mensagem de falha.
@@ -79,7 +80,8 @@ estão em Clarifications. As decisões abaixo são de desenho.
 - **Decision**: `Marca` mantém o `<span aria-hidden>` com o texto "1B", em fonte menor para caber em
   28 px. `favicon.svg` ganha contornos de "1" e "B" (sem `<text>`), mesmo fundo `#1d4ed8` e raio;
   `apple-touch-icon.png` (180×180, fundo sem cantos, como hoje) é gerado a partir do mesmo desenho
-  com o Chromium do Playwright, já disponível, por um comando avulso sem script versionado.
+  com o Chromium do Playwright, já disponível, por um comando avulso sem script versionado. O
+  traço do "1" e o do "B" ficam alinhados à grade de 16 px.
   Legibilidade conferida por captura de 16 × 16 px, com "1" e "B" distinguíveis (FR-009).
 - **Rationale**: o favicon é renderizado isolado, sem as fontes da página (motivo já registrado no
   arquivo); nenhuma dependência nova.
