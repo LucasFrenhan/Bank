@@ -180,3 +180,46 @@
   font: var(--texto-rotulo);
   font-weight: 600;
 }
+
+/* ---------- Dados da conta no início (specs/013) ---------- */
+.resumoPj {
+  align-items: start;
+}
+
+.colunaCartoes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--espaco-4);
+}
+
+.dadosConta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--espaco-4);
+  margin: 0;
+  padding: var(--espaco-5) var(--espaco-6);
+}
+
+.campoConta dt {
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}
+
+.campoConta dd {
+  position: relative;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Texto só para leitores de tela fora da seleção manual (US3.2; research R3). */
+.campoConta :global(.apenas-leitor-de-tela) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.apoioConta {
+  padding: 0 var(--espaco-6) var(--espaco-5);
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}

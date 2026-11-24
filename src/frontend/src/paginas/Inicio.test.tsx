@@ -1,6 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { carteira, extratoDe, itemExtrato, problema, titular, TRACE_ID } from '../testes/handlers';
+import type { ContaBancaria } from '../api/cliente';
+import type { TipoConta } from '../sessao/claims';
+import { carteira, contaBancaria, extratoDe, itemExtrato, problema, titular, TRACE_ID } from '../testes/handlers';
 import { renderizarApp } from '../testes/renderizar';
 import { servidor } from '../testes/setup';
 
@@ -179,5 +181,93 @@ describe('Início — movimentações reais (specs/007: US5; FR-022 a FR-024)', 
     const menuPj = await screen.findByRole('navigation', { name: 'Menu principal' });
     expect(within(menuPj).getByRole('link', { name: 'Recebimentos' })).toHaveAttribute('href', '/extrato?direcao=entradas');
     expect(within(menuPj).getByText('Cobranças').closest('[aria-disabled]')).toHaveAttribute('aria-disabled', 'true');
+  });
+});
+
+describe('Início — dados da conta (specs/013, US1)', () => {
+  function usarConta(tipoConta: TipoConta, alteracoes: Partial<ContaBancaria> = {}) {
+    servidor.use(
+      http.get('*/api/v1/carteiras/minha', () =>
+        HttpResponse.json({ ...carteira(tipoConta), contaBancaria: contaBancaria(alteracoes) }),
+      ),
+      http.get('*/api/v1/usuarios/me', () => HttpResponse.json(titular(tipoConta))),
+    );
+  }
+
+  /** Valor do campo: o `dd` do mesmo grupo do `dt`. */
+  function campo(regiao: HTMLElement, rotulo: string): HTMLElement {
+    const grupo = within(regiao).getByText(rotulo, { selector: 'dt' }).parentElement!;
+    return grupo.querySelector('dd')!;
+  }
+
+  it('PF: banco, agência, conta com dígito, tipo e texto de apoio', async () => {
+    usarConta('PessoaFisica');
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    expect(within(regiao).getByRole('heading', { level: 2, name: 'Dados da conta' })).toBeInTheDocument();
+    expect(Array.from(regiao.querySelectorAll('dt'), (dt) => dt.textContent)).toEqual(['Banco', 'Agência', 'Conta', 'Tipo']);
+    expect(campo(regiao, 'Banco')).toHaveTextContent('001 – One Bank');
+    expect(within(campo(regiao, 'Agência')).getByText('0001')).toBeInTheDocument();
+    expect(within(campo(regiao, 'Conta')).getByText('00000042-0')).toBeInTheDocument();
+    expect(campo(regiao, 'Tipo')).toHaveTextContent('Conta corrente');
+    expect(within(regiao).getByText('Para receber de clientes One Bank, informe o seu CPF.')).toBeInTheDocument();
+  });
+
+  it('agência e conta são lidas dígito a dígito por leitores de tela', async () => {
+    usarConta('PessoaFisica');
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    const agencia = campo(regiao, 'Agência');
+    expect(within(agencia).getByText('0001')).toHaveAttribute('aria-hidden', 'true');
+    expect(within(agencia).getByText('0 0 0 1')).toHaveClass('apenas-leitor-de-tela');
+    const conta = campo(regiao, 'Conta');
+    expect(within(conta).getByText('00000042-0')).toHaveAttribute('aria-hidden', 'true');
+    expect(within(conta).getByText('0 0 0 0 0 0 4 2, dígito 0')).toHaveClass('apenas-leitor-de-tela');
+  });
+
+  it('PJ: mesmos dados depois de "Receber transferências", sem o número do CNPJ', async () => {
+    usarConta('PessoaJuridica');
+    renderizarApp('/', { sessao: 'PessoaJuridica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    expect(campo(regiao, 'Banco')).toHaveTextContent('001 – One Bank');
+    expect(within(regiao).getByText('00000042-0')).toBeInTheDocument();
+    expect(within(regiao).getByText('Para receber de clientes One Bank, informe o seu CNPJ.')).toBeInTheDocument();
+
+    expect(await screen.findByText('12.ABC.345/01DE-35')).toBeInTheDocument();
+    expect(within(regiao).queryByText(/12\.?ABC/)).not.toBeInTheDocument();
+    const receber = screen.getByRole('heading', { name: 'Receber transferências' });
+    expect(receber.compareDocumentPosition(regiao) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it.each([
+    ['ContaPoupanca', 'Conta poupança'],
+    ['ContaSalario', 'Conta'],
+  ])('tipo %s é exibido como "%s"', async (tipo, nome) => {
+    usarConta('PessoaFisica', { tipo });
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    expect(campo(regiao, 'Tipo').textContent).toBe(nome);
+  });
+
+  it('o nome do banco vem da API (FR-002)', async () => {
+    usarConta('PessoaFisica', { banco: { codigo: '009', nome: 'Banco de Teste' } });
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    expect(campo(regiao, 'Banco')).toHaveTextContent('009 – Banco de Teste');
+  });
+
+  it('carregando ou com erro, não mostra o cartão', async () => {
+    servidor.use(http.get('*/api/v1/carteiras/minha', () => problema('qualquer', 500)));
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    expect(screen.getByRole('status')).toHaveTextContent('Carregando sua carteira…');
+    expect(screen.queryByText('Dados da conta')).not.toBeInTheDocument();
+    await screen.findByRole('alert');
+    expect(screen.queryByText('Dados da conta')).not.toBeInTheDocument();
   });
 });

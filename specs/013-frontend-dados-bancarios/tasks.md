@@ -83,7 +83,7 @@ agência, conta-dígito e tipo são os entregues pela API para aquela carteira
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T008 [P] [US1] Em `front/src/paginas/Inicio.test.tsx`, novo `describe` "Início — dados da conta
+- [X] T008 [P] [US1] Em `front/src/paginas/Inicio.test.tsx`, novo `describe` "Início — dados da conta
   (specs/013, US1)" (deve falhar): PF com região "Dados da conta", `h2`, Banco "001 – One Bank",
   Agência "0001", Conta "00000042-0", Tipo "Conta corrente" e "Para receber de clientes One Bank,
   informe o seu CPF."; PJ com os mesmos campos, "…o seu CNPJ.", depois de "Receber transferências" na
@@ -91,7 +91,7 @@ agência, conta-dígito e tipo são os entregues pela API para aquela carteira
   desconhecido → "Conta"; nome do banco vindo da API (mock com outro nome); cada `dt` associado ao
   seu `dd`; texto para leitores "0 0 0 1" e "0 0 0 0 0 0 4 2, dígito 0" com o valor visível em
   `aria-hidden`; carregando ou erro da carteira → sem a região (US1.1 a US1.7)
-- [ ] T009 [P] [US1] Em `front/e2e/apoio.ts`, criar `contaBancariaPelaApi(page, conta)` (usa
+- [X] T009 [P] [US1] Em `front/e2e/apoio.ts`, criar `contaBancariaPelaApi(page, conta)` (usa
   `tokenPelaApi` e `GET /api/v1/carteiras/minha`, devolve `contaBancaria`); em
   `front/e2e/inicio.spec.ts`, novo `describe` "Início — dados da conta (spec 013)" com PF e PJ: cada
   valor igual ao da API, texto de apoio, `semViolacoesA11y`, `semRolagemHorizontal` e posição por
@@ -101,16 +101,16 @@ agência, conta-dígito e tipo são os entregues pela API para aquela carteira
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Criar `front/src/paginas/DadosDaConta.tsx`: `DadosDaConta({ conta, documento }: {
+- [X] T010 [US1] Criar `front/src/paginas/DadosDaConta.tsx`: `DadosDaConta({ conta, documento }: {
   conta: ContaBancaria; documento: 'CPF' | 'CNPJ' })` com `Cartao rotulo="Dados da conta"`, `h2` em
   `.cabecalhoSecao`, `<dl>` com Banco, Agência, Conta e Tipo, nessa ordem, agência e conta com
   `aria-hidden` + `.apenas-leitor-de-tela` (R3), e o parágrafo de apoio com `NOME_BANCO` (FR-001,
   FR-004, FR-011)
-- [ ] T011 [US1] Em `front/src/paginas/Autenticado.module.css`, estilos do cartão: grade de duas
+- [X] T011 [US1] Em `front/src/paginas/Autenticado.module.css`, estilos do cartão: grade de duas
   colunas `minmax(0, 1fr)` em todas as larguras, `overflow-wrap: anywhere`, algarismos tabulares,
   `user-select: none` no texto só para leitores, texto de apoio suave; coluna empilhada da PJ e
   saldo alinhado ao topo quando ela existe (R5)
-- [ ] T012 [US1] Em `front/src/paginas/Inicio.tsx`, incluir `<DadosDaConta>` em `.resumo`: na PF
+- [X] T012 [US1] Em `front/src/paginas/Inicio.tsx`, incluir `<DadosDaConta>` em `.resumo`: na PF
   (`documento="CPF"`) logo após o saldo; na PJ (`documento="CNPJ"`), dentro de uma coluna com
   "Receber transferências" primeiro; T008 verde
 

@@ -15,10 +15,11 @@ import { useExtrato } from './useExtrato';
 import { useSessaoAtiva } from '../sessao/ContextoSessao';
 import { NOME_TIPO_CONTA } from '../sessao/permissoes';
 import estilos from './Autenticado.module.css';
+import { DadosDaConta } from './DadosDaConta';
 import { primeiroNome, useTitulo } from './comum';
 import { useCarteira } from './useCarteira';
 
-/** Tela inicial PF/PJ (spec 004 US3; specs/007 US5, FR-022 a FR-024). */
+/** Tela inicial PF/PJ (spec 004 US3; specs/007 US5, FR-022 a FR-024; specs/013). */
 export function Inicio() {
   useTitulo('Início');
   const sessao = useSessaoAtiva();
@@ -73,6 +74,7 @@ function InicioPf({ carteira }: { carteira: MinhaCarteira }) {
             </BotaoLink>
           </div>
         </Saldo>
+        <DadosDaConta conta={carteira.contaBancaria} documento="CPF" />
       </div>
 
       <Movimentacoes titulo="Últimas movimentações" consulta={CONSULTA_PF} verTudo="/extrato" detalhe={detalhePf} />
@@ -88,18 +90,21 @@ function InicioPj({ carteira }: { carteira: MinhaCarteira }) {
         <Selo>{NOME_TIPO_CONTA.PessoaJuridica}</Selo>
       </div>
 
-      <div className={estilos.resumo}>
+      <div className={[estilos.resumo, estilos.resumoPj].join(' ')}>
         <Saldo carteira={carteira} />
-        <Cartao className={estilos.secao}>
-          <div className={estilos.cabecalhoSecao}>
-            <h2>Receber transferências</h2>
-          </div>
-          <p className={estilos.avisoPj}>
-            Clientes com conta Bank transferem para você informando o seu CNPJ. Contas Pessoa Jurídica não enviam
-            transferências.
-          </p>
-          <CnpjParaReceber />
-        </Cartao>
+        <div className={estilos.colunaCartoes}>
+          <Cartao className={estilos.secao}>
+            <div className={estilos.cabecalhoSecao}>
+              <h2>Receber transferências</h2>
+            </div>
+            <p className={estilos.avisoPj}>
+              Clientes com conta Bank transferem para você informando o seu CNPJ. Contas Pessoa Jurídica não enviam
+              transferências.
+            </p>
+            <CnpjParaReceber />
+          </Cartao>
+          <DadosDaConta conta={carteira.contaBancaria} documento="CNPJ" />
+        </div>
       </div>
 
       <Movimentacoes
