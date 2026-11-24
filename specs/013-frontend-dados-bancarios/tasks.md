@@ -127,33 +127,33 @@ agência, conta-dígito e tipo são os entregues pela API para aquela carteira
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T013 [P] [US2] Criar `front/src/marca.test.ts` (deve falhar): com `import.meta.glob` (`?raw`,
+- [X] T013 [P] [US2] Criar `front/src/marca.test.ts` (deve falhar): com `import.meta.glob` (`?raw`,
   `eager`) de `./**/*.{ts,tsx}` (exceto `*.test.*` e `api/schema.d.ts`, gerado) e `../index.html`, nenhum arquivo contém `Bank`
   como palavra sem "One " antes (`/(?<!One )\bBank\b/`), e a lista de arquivos lidos não é vazia e
   inclui `index.html` (SC-003, R6)
-- [ ] T014 [P] [US2] Atualizar os testes com os textos novos (devem falhar): `front/src/App.test.tsx`
+- [X] T014 [P] [US2] Atualizar os testes com os textos novos (devem falhar): `front/src/App.test.tsx`
   (título "Criar conta · One Bank"; marca com nome acessível exatamente "One Bank" e "1B" em
   `aria-hidden`; texto da página não encontrada), `front/src/api/erros.test.ts`,
   `front/src/paginas/Transferir.test.tsx`, `front/src/paginas/ConfirmarTransferencia.test.tsx`
   ("Nenhuma conta One Bank com esse documento."), `front/src/paginas/Comprovante.test.tsx` (resumo
   nativo e copiado começa com "Comprovante de transferência — One Bank") e
   `front/src/paginas/Inicio.test.tsx` ("Clientes com conta One Bank")
-- [ ] T015 [P] [US2] Em `front/e2e/transferencia.spec.ts`, trocar a mensagem por "Nenhuma conta One
+- [X] T015 [P] [US2] Em `front/e2e/transferencia.spec.ts`, trocar a mensagem por "Nenhuma conta One
   Bank com esse documento."; em `front/e2e/inicio.spec.ts`, conferir o título "Início · One Bank"
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Usar `NOME_BANCO` em `front/src/paginas/comum.ts` (título), `front/src/api/erros.ts`,
+- [X] T016 [US2] Usar `NOME_BANCO` em `front/src/paginas/comum.ts` (título), `front/src/api/erros.ts`,
   `front/src/paginas/Comprovante.tsx`, `front/src/paginas/Inicio.tsx` e
   `front/src/paginas/NaoEncontrada.tsx`, e o texto direto em `front/index.html` (título e descrição);
   nomes técnicos (`bank.*`, `bank-frontend`, `BANK_API_URL`) ficam como estão (FR-008)
-- [ ] T017 [US2] Em `front/src/design/componentes/Feedback.tsx`, `Marca` com "1B" em `aria-hidden` e
+- [X] T017 [US2] Em `front/src/design/componentes/Feedback.tsx`, `Marca` com "1B" em `aria-hidden` e
   `NOME_BANCO`; em `front/src/design/componentes/componentes.module.css`, reduzir a fonte de
   `.marcaIcone` para o "1B" caber em 28 px sem mudar cor, raio e tamanho (FR-009, FR-010)
-- [ ] T018 [P] [US2] Redesenhar `front/public/favicon.svg` com contornos (`<path>`) de "1" e "B"
+- [X] T018 [P] [US2] Redesenhar `front/public/favicon.svg` com contornos (`<path>`) de "1" e "B"
   brancos sobre o `rect` `#1d4ed8` atual (sem `<text>`), atualizando o comentário do arquivo; conferir
   por captura no Chromium, em 16 e 32 px, que "1" e "B" se distinguem (FR-009, R7)
-- [ ] T019 [US2] Gerar `front/public/apple-touch-icon.png` (180×180, fundo `#1d4ed8` sem cantos
+- [X] T019 [US2] Gerar `front/public/apple-touch-icon.png` (180×180, fundo `#1d4ed8` sem cantos
   arredondados nem transparência, como o atual) a partir do desenho de T018 com o Chromium do
   Playwright, por script temporário fora do repositório; conferir a imagem (R7)
 

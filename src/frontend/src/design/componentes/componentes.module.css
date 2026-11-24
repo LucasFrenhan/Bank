@@ -256,8 +256,9 @@
   border-radius: 8px;
   background: var(--cor-primaria);
   color: #fff;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 /* ---------- Aviso: variante neutra e ícone (specs/007) ---------- */

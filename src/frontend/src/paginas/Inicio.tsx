@@ -7,6 +7,7 @@ import { IconeExtrato, IconeTransferir } from '../design/componentes/Icones';
 import { formatarDataHora } from '../formatacao/data';
 import { formatarMoeda } from '../formatacao/moeda';
 import type { ConsultaExtrato, ItemExtrato, MinhaCarteira } from '../api/cliente';
+import { NOME_BANCO } from '../marca';
 import { Link } from 'react-router';
 import { ListaLancamentos } from '../design/componentes/ListaLancamentos';
 import { formatarDataRelativa } from '../formatacao/data';
@@ -98,8 +99,8 @@ function InicioPj({ carteira }: { carteira: MinhaCarteira }) {
               <h2>Receber transferências</h2>
             </div>
             <p className={estilos.avisoPj}>
-              Clientes com conta Bank transferem para você informando o seu CNPJ. Contas Pessoa Jurídica não enviam
-              transferências.
+              {`Clientes com conta ${NOME_BANCO} transferem para você informando o seu CNPJ. `}
+              Contas Pessoa Jurídica não enviam transferências.
             </p>
             <CnpjParaReceber />
           </Cartao>

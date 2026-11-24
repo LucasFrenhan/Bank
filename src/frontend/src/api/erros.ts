@@ -5,6 +5,7 @@
  */
 
 import { formatarCentavos, saldoEmCentavos } from '../formatacao/valor';
+import { NOME_BANCO } from '../marca';
 
 export const PREFIXO_TIPO = 'urn:bank:problema:';
 
@@ -53,7 +54,7 @@ export const MENSAGENS = {
   rede: 'Não foi possível conectar. Verifique sua internet e tente de novo.',
   inesperado: 'Algo deu errado',
   // Transferências (specs/007-frontend-transferencias, data-model "Tradução de erros").
-  destinatarioNaoEncontrado: 'Nenhuma conta Bank com esse documento.',
+  destinatarioNaoEncontrado: `Nenhuma conta ${NOME_BANCO} com esse documento.`,
   autotransferencia: 'Esse documento é o seu',
   autotransferenciaDetalhe: 'Não é possível transferir para a própria carteira.',
   saldoInsuficiente: 'Saldo insuficiente',

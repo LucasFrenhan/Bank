@@ -121,7 +121,7 @@ describe('Confirmação — recusas (US2)', () => {
 
   it.each([
     ['autotransferencia', 422, 'Esse documento é o seu'],
-    ['destinatario-nao-encontrado', 404, 'Nenhuma conta Bank com esse documento.'],
+    ['destinatario-nao-encontrado', 404, 'Nenhuma conta One Bank com esse documento.'],
     ['acesso-negado', 403, 'Indisponível para Pessoa Jurídica'],
   ])('%s → "%s"', async (codigo, status, texto) => {
     servidor.use(falhaEm('post', '/api/v1/transferencias', codigo, status));

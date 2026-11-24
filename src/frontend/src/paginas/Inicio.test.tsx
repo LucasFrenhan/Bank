@@ -28,7 +28,7 @@ describe('Início (US3; FR-014 a FR-016)', () => {
 
     expect(await screen.findByRole('heading', { name: 'Empresa Exemplo Ltda' })).toBeInTheDocument();
     expect(screen.getByText(/R\$\s0,00/)).toBeInTheDocument();
-    expect(screen.getByText(/Contas Pessoa Jurídica não enviam transferências/)).toBeInTheDocument();
+    expect(screen.getByText(/^Clientes com conta One Bank transferem .*Contas Pessoa Jurídica não enviam transferências\.$/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Transferir/ })).not.toBeInTheDocument();
     expect(screen.queryByText('Transferir')).not.toBeInTheDocument();
   });

@@ -11,6 +11,7 @@ import { formatarCentavos, saldoEmCentavos } from '../formatacao/valor';
 import { useSessaoAtiva } from '../sessao/ContextoSessao';
 import { lerComprovante } from '../transferencia/armazenamento';
 import { useTitulo } from './comum';
+import { NOME_BANCO } from '../marca';
 import estilos from './Transferencia.module.css';
 import { descreverDocumento } from './Transferir';
 
@@ -102,7 +103,7 @@ function ComprovanteEncontrado({ comprovante }: { comprovante: DadosComprovante 
 
   async function compartilhar() {
     const linhas = [
-      `Comprovante de transferência — Bank`,
+      `Comprovante de transferência — ${NOME_BANCO}`,
       `Valor: ${valor}`,
       `De: ${pagador}`,
       `Para: ${recebedor}`,

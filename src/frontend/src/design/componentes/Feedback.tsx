@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import type { MensagemErro } from '../../api/erros';
+import { NOME_BANCO } from '../../marca';
 import estilos from './componentes.module.css';
 import { IconeAlerta, IconeCadeado, IconeErro, IconeInformacao } from './Icones';
 
@@ -130,9 +131,9 @@ export function Marca({ para = '/' }: { para?: string }) {
   return (
     <Link to={para} className={estilos.marca}>
       <span className={estilos.marcaIcone} aria-hidden="true">
-        B
+        1B
       </span>
-      <span>Bank</span>
+      <span>{NOME_BANCO}</span>
     </Link>
   );
 }

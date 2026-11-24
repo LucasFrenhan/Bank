@@ -67,7 +67,7 @@ describe('traduzirErro — transferências (specs/007, data-model "Tradução de
 
     expect(erro.codigo).toBe('destinatario-nao-encontrado');
     expect(erro.variante).toBe('erro-campo');
-    expect(erro.campos).toEqual({ documento: ['Nenhuma conta Bank com esse documento.'] });
+    expect(erro.campos).toEqual({ documento: ['Nenhuma conta One Bank com esse documento.'] });
   });
 
   it.each([

@@ -30,6 +30,7 @@ test.describe('Início', () => {
     await expect(saldo.getByRole('link', { name: /Ver extrato/ })).toHaveAttribute('href', '/extrato');
     const movimentacoes = page.getByRole('region', { name: 'Últimas movimentações' });
     await expect(movimentacoes.getByText('Saldo inicial', { exact: true })).toBeVisible();
+    await expect(page).toHaveTitle('Início · One Bank');
     await expect(movimentacoes.getByText(/^Saldo inicial de demonstração · Hoje, \d{2}:\d{2}$/)).toBeVisible();
     await semViolacoesA11y(page);
   });
