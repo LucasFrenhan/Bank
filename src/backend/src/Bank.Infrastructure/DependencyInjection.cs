@@ -1,6 +1,7 @@
 using Bank.Application.Abstracoes;
 using Bank.Infrastructure.Mensageria;
 using Bank.Infrastructure.Persistencia;
+using Bank.Infrastructure.Processamento;
 using Bank.Infrastructure.Seguranca;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -90,6 +91,19 @@ public static class DependencyInjection
         services.AddHostedService<TopologiaNaInicializacao>();
         services.AddHostedService<DespachanteOutbox>();
         services.AddHostedService<ConsumidorNotificacoesTransferencia>();
+        services.AddHostedService<ConsumidorNotificacoesCobranca>(); // spec 014, US7
+
+        return services;
+    }
+
+    /// <summary>Agendamento do processamento diário no Worker (specs/014-cartao-credito-cobrancas, research R7).</summary>
+    public static IServiceCollection AddProcessamentoDiario(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddOptions<ProcessamentoDiarioOptions>().BindConfiguration(ProcessamentoDiarioOptions.Secao).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<ProcessamentoDiarioOptions>, ValidadorProcessamentoDiarioOptions>();
+        services.AddHostedService<ProcessamentoDiarioHospedado>();
 
         return services;
     }

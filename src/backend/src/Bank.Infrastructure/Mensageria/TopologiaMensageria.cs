@@ -32,14 +32,14 @@ internal static class TopologiaMensageria
         "notificacoes.transferencias.dlq",
         ComFilasEspera: true);
 
-    /// <summary>Preparação para a Fase 4: sem consumidor, portanto sem filas de espera.</summary>
+    /// <summary>Consumidor e filas de espera desde a specs/014-cartao-credito-cobrancas (US7).</summary>
     public static readonly DescritorFila Cobrancas = new(
         "notificacoes-cobrancas",
         "notificacoes.cobrancas.fila",
         "cobranca.paga",
         "cobranca.paga.dlq",
         "notificacoes.cobrancas.dlq",
-        ComFilasEspera: false);
+        ComFilasEspera: true);
 
     public static IReadOnlyList<DescritorFila> Filas { get; } = [Transferencias, Cobrancas];
 

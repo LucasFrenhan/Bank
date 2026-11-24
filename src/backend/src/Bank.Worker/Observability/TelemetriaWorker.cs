@@ -31,11 +31,14 @@ public static class TelemetriaWorker
 
         var openTelemetry = builder.Services.AddOpenTelemetry()
             .ConfigureResource(recurso => recurso.AddService(NomeServico))
-            .WithTracing(tracing => tracing.AddSource(TelemetriaMensageria.Nome))
+            .WithTracing(tracing => tracing
+                .AddSource(TelemetriaMensageria.Nome)
+                .AddSource(Bank.Application.Processamento.ProcessarDia.NomeFonte))
             .WithMetrics(metricas => metricas
                 .AddMeter("System.Runtime")
                 .AddMeter(TelemetriaMensageria.Nome)
-                .AddMeter(MeterNotificacoes))
+                .AddMeter(MeterNotificacoes)
+                .AddMeter(Bank.Application.Observabilidade.MetricasProcessamento.NomeMeter))
             .WithLogging();
 
         if (!builder.Environment.IsEnvironment("Testing"))

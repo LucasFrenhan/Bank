@@ -38,7 +38,7 @@ public class TopologiaMensageriaTests
     {
         Assert.Equal(
             [("notificacoes.transferencias.fila", "transferencia.concluida", "notificacoes.transferencias.dlq", "transferencia.concluida.dlq", true),
-             ("notificacoes.cobrancas.fila", "cobranca.paga", "notificacoes.cobrancas.dlq", "cobranca.paga.dlq", false)],
+             ("notificacoes.cobrancas.fila", "cobranca.paga", "notificacoes.cobrancas.dlq", "cobranca.paga.dlq", true)],
             TopologiaMensageria.Filas.Select(f => (f.Fila, f.RoutingKey, f.FilaDlq, f.RoutingKeyDlq, f.ComFilasEspera)));
         Assert.Equal(("banco.eventos.topic", "banco.eventos.dlx"), (TopologiaMensageria.ExchangeEventos, TopologiaMensageria.ExchangeDlx));
     }

@@ -36,6 +36,10 @@ app.MapAutenticacaoEndpoints();
 app.MapCarteirasEndpoints();
 app.MapUsuariosEndpoints();
 app.MapTransferenciasEndpoints();
+app.MapCartoesEndpoints();
+app.MapCobrancasEndpoints();
+app.MapFaturasEndpoints();
+app.MapRecebiveisEndpoints();
 app.MapTestEndpoints();
 
 await app.RunAsync();

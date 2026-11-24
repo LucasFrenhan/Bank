@@ -21,7 +21,7 @@ public class TopologiaTests(AmbienteMensageria ambiente) : IClassFixture<Ambient
         {
             try
             {
-                await broker.ObterFilaAsync("notificacoes.cobrancas.dlq", Ct);
+                await broker.ObterFilaAsync("notificacoes.cobrancas.espera.400", Ct); // a última declarada
                 return true;
             }
             catch (HttpRequestException)
@@ -47,12 +47,15 @@ public class TopologiaTests(AmbienteMensageria ambiente) : IClassFixture<Ambient
         // Testes usam 100/200/400 ms (appsettings.Testing.json do Worker).
         foreach (var intervalo in new[] { 100, 200, 400 })
         {
-            var espera = await broker.ObterFilaAsync($"notificacoes.transferencias.espera.{intervalo}", Ct);
-            Assert.True(espera.GetProperty("durable").GetBoolean());
-            var argumentosEspera = espera.GetProperty("arguments");
-            Assert.Equal(intervalo, argumentosEspera.GetProperty("x-message-ttl").GetInt32());
-            Assert.Equal(string.Empty, argumentosEspera.GetProperty("x-dead-letter-exchange").GetString());
-            Assert.Equal("notificacoes.transferencias.fila", argumentosEspera.GetProperty("x-dead-letter-routing-key").GetString());
+            foreach (var consumidor in new[] { "transferencias", "cobrancas" }) // cobranças: specs/014
+            {
+                var espera = await broker.ObterFilaAsync($"notificacoes.{consumidor}.espera.{intervalo}", Ct);
+                Assert.True(espera.GetProperty("durable").GetBoolean());
+                var argumentosEspera = espera.GetProperty("arguments");
+                Assert.Equal(intervalo, argumentosEspera.GetProperty("x-message-ttl").GetInt32());
+                Assert.Equal(string.Empty, argumentosEspera.GetProperty("x-dead-letter-exchange").GetString());
+                Assert.Equal($"notificacoes.{consumidor}.fila", argumentosEspera.GetProperty("x-dead-letter-routing-key").GetString());
+            }
         }
 
         Assert.Contains(("banco.eventos.dlx", "transferencia.concluida.dlq"), await broker.ObterBindingsAsync("notificacoes.transferencias.dlq", Ct));

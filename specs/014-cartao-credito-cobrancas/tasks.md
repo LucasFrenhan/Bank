@@ -156,11 +156,11 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 - [X] T027 [P] Criar `app/Observabilidade/MetricasCartoes.cs` (meter `Bank.Cartoes`) e
   `MetricasProcessamento.cs` (meter `Bank.Processamento`) com os instrumentos da tabela do plan; incluir os
   meters em `api/Observability/` e `worker/Observability/TelemetriaWorker.cs`
-- [ ] T028 [P] Extrair para `app/Comum/` a leitura comum de `pagina`/`tamanhoPagina` (padrão 20, máximo 100) e
+- [X] T028 [P] Extrair para `app/Comum/` a leitura comum de `pagina`/`tamanhoPagina` (padrão 20, máximo 100) e
   de `Idempotency-Key`, usando-a nos casos novos sem mudar mensagens nem comportamento dos atuais; em
   `api/Endpoints/`, compartilhar a marcação OpenAPI do cabeçalho; títulos dos 11 novos códigos de erro
   (T014–T017, exceto `saldo-insuficiente`, que já existe) em `api/ErrorHandling/ResultadoHttpExtensions.cs`
-- [ ] T029 [P] Criar `it/ApiCartoes.cs` (ajudantes: criar PF com cartão, PJ, cobrança, pagar, ler fatura,
+- [X] T029 [P] Criar `it/ApiCartoes.cs` (ajudantes: criar PF com cartão, PJ, cobrança, pagar, ler fatura,
   antecipar) e `it/CartoesApiFactory.cs` (relógio ajustável, saldo inicial PF de
   R$ 5.000,00 e, a partir da US4, `AddProcessamento`, para chamar `ProcessarDia` sem o Worker; o Worker fica
   só no teste do serviço hospedado)
@@ -178,21 +178,21 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Tests
 
-- [ ] T031 [P] [US1] `ut/Application/SolicitarCartaoTests.cs`: bandeira ausente/desconhecida, já existente,
+- [X] T031 [P] [US1] `ut/Application/SolicitarCartaoTests.cs`: bandeira ausente/desconhecida, já existente,
   colisão de impressão digital incrementa `variacao` (até 5 tentativas), conflito do único de usuário vira
   `cartao-ja-existente`, limite copiado da configuração
-- [ ] T032 [P] [US1] `it/CartoesTests.cs`: cenários 1–8 da US1; 50 solicitações simultâneas → 1 cartão
+- [X] T032 [P] [US1] `it/CartoesTests.cs`: cenários 1–8 da US1; 50 solicitações simultâneas → 1 cartão
   (SC-003); `GET /meu` sem número nem CVV; `/meu/dados` sempre igual e com `Cache-Control: no-store`; PF sem
   cartão 404; PJ 403; 401; mudança do limite configurado não altera cartão existente
-- [ ] T033 [P] [US1] `it/OpenApiTests.cs`: três rotas de cartão e respostas documentadas
+- [X] T033 [P] [US1] `it/OpenApiTests.cs`: três rotas de cartão e respostas documentadas
 
 ### Implementation
 
-- [ ] T034 [US1] Criar `app/Abstracoes/ICartaoRepositorio.cs` (adicionar, obter por usuário sem rastreio,
+- [X] T034 [US1] Criar `app/Abstracoes/ICartaoRepositorio.cs` (adicionar, obter por usuário sem rastreio,
   bloquear por usuário e por id, total a lançar) e `infra/Persistencia/CartaoRepositorio.cs`
-- [ ] T035 [US1] Criar `app/Cartoes/SolicitarCartao.cs`, `ObterMeuCartao.cs` e `ExibirDadosCartao.cs`
+- [X] T035 [US1] Criar `app/Cartoes/SolicitarCartao.cs`, `ObterMeuCartao.cs` e `ExibirDadosCartao.cs`
   (FR-002 a FR-008; logs só com `CartaoId` e bandeira)
-- [ ] T036 [US1] Criar `api/Endpoints/CartoesEndpoints.cs` (contrato; `no-store` em `/meu/dados`; resposta
+- [X] T036 [US1] Criar `api/Endpoints/CartoesEndpoints.cs` (contrato; `no-store` em `/meu/dados`; resposta
   com dados crus com `PrintMembers` mascarado) e mapear em `api/Program.cs`
 
 **Checkpoint**: US1 funcional
@@ -207,19 +207,19 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Tests
 
-- [ ] T037 [P] [US2] `ut/Application/CobrancasTests.cs`: emissão, visibilidade por papel (emissor, pagador,
+- [X] T037 [P] [US2] `ut/Application/CobrancasTests.cs`: emissão, visibilidade por papel (emissor, pagador,
   terceiro) de `pagamento` e `ultimaRecusa`, lista paginada, cancelamento próprio e alheio
-- [ ] T038 [P] [US2] `it/CobrancasTests.cs`: cenários 1–8 da US2, `cobrancaId` inválido 400, filtro `status`
+- [X] T038 [P] [US2] `it/CobrancasTests.cs`: cenários 1–8 da US2, `cobrancaId` inválido 400, filtro `status`
   inválido 400, 401/403, identidade do pagador ausente, rotas no OpenAPI
 
 ### Implementation
 
-- [ ] T039 [US2] Criar `app/Abstracoes/ICobrancaRepositorio.cs` (adicionar, bloquear) e
+- [X] T039 [US2] Criar `app/Abstracoes/ICobrancaRepositorio.cs` (adicionar, bloquear) e
   `ICobrancaConsultas.cs` (por id com lojista, página do emissor) e as implementações em
   `infra/Persistencia/`
-- [ ] T040 [US2] Criar `app/Cobrancas/EmitirCobranca.cs`, `ConsultarCobranca.cs`,
+- [X] T040 [US2] Criar `app/Cobrancas/EmitirCobranca.cs`, `ConsultarCobranca.cs`,
   `ListarMinhasCobrancas.cs` e `CancelarCobranca.cs` (FR-009 a FR-013; cancelamento com a cobrança bloqueada)
-- [ ] T041 [US2] Criar `api/Endpoints/CobrancasEndpoints.cs` com as quatro rotas (literal `/minhas` antes de
+- [X] T041 [US2] Criar `api/Endpoints/CobrancasEndpoints.cs` com as quatro rotas (literal `/minhas` antes de
   `/{cobrancaId}`) e mapear em `api/Program.cs`
 
 **Checkpoint**: US1 e US2 funcionais
@@ -234,33 +234,33 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Tests
 
-- [ ] T042 [P] [US3] `ut/Application/PagarCobrancaTests.cs`: validação acumulada por campo, ordem das
+- [X] T042 [P] [US3] `ut/Application/PagarCobrancaTests.cs`: validação acumulada por campo, ordem das
   verificações do contrato, dados de terceiro/CVV/validade errados e sem cartão → mesmo erro, repetição da
   chave, divergência (outra cobrança, outros dados), recusa gravada e chave não consumida, corrida no único
   da chave, compra com fatura já liberada vai ao ciclo seguinte (R6), `ToString()` do comando sem dados
-- [ ] T043 [P] [US3] `it/PagamentoCobrancaTests.cs`: cenários 1–13 da US3 (o 13 com fatura vencida preparada
+- [X] T043 [P] [US3] `it/PagamentoCobrancaTests.cs`: cenários 1–13 da US3 (o 13 com fatura vencida preparada
   por SQL no arranjo), validade vencida, limite inclusivo, saldos inalterados, recebível e compra criados,
   evento único no outbox com o contrato, cada erro do contrato, 401/403
-- [ ] T044 [P] [US3] `it/ConcorrenciaPagamentoTests.cs`: 50 pagamentos da mesma cobrança → 1 aprovado; duas
+- [X] T044 [P] [US3] `it/ConcorrenciaPagamentoTests.cs`: 50 pagamentos da mesma cobrança → 1 aprovado; duas
   cobranças que excedem o limite → 1 aprovada; cancelar × pagar → 1 vence; mesma chave simultânea → 1 efeito;
   limite disponível = total − compras não quitadas (SC-003, SC-004)
-- [ ] T045 [P] [US3] Ampliar `ut/Infrastructure/ContratoEventosTests.cs` (`lojistaNome` opcional, campos e
+- [X] T045 [P] [US3] Ampliar `ut/Infrastructure/ContratoEventosTests.cs` (`lojistaNome` opcional, campos e
   formato) e `it/DadosSensiveisCartaoTests.cs`: após emitir, exibir, pagar e recusar, nenhum número ou CVV em
   tabelas (todas as colunas de texto/json), logs, spans, métricas, outbox e corpos de erro (SC-009)
 
 ### Implementation
 
-- [ ] T046 [US3] Criar `app/Abstracoes/IFaturaRepositorio.cs` (obter ou abrir por cartão e competência,
+- [X] T046 [US3] Criar `app/Abstracoes/IFaturaRepositorio.cs` (obter ou abrir por cartão e competência,
   existe vencida, adicionar compra), `IRecebivelRepositorio.cs` (adicionar) e as implementações em
   `infra/Persistencia/`; em `ICobrancaRepositorio`, autorização por chave e adicionar autorização
-- [ ] T047 [US3] Ajustar `infra/Mensageria/Contratos/CobrancaPagaV1.cs` (`LojistaNome`) e criar a sobrecarga
+- [X] T047 [US3] Ajustar `infra/Mensageria/Contratos/CobrancaPagaV1.cs` (`LojistaNome`) e criar a sobrecarga
   `EventoOutbox.De(CobrancaPaga)`; a gravação fica no repositório de cobranças
-- [ ] T048 [US3] Criar `app/Cobrancas/PagarCobranca.cs` (FR-014 a FR-021): validar, repetição, iniciar,
+- [X] T048 [US3] Criar `app/Cobrancas/PagarCobranca.cs` (FR-014 a FR-021): validar, repetição, iniciar,
   bloquear cobrança e cartão, repetição de novo, ler o relógio, decidir, gravar aprovação ou recusa,
   confirmar; instante em microssegundos; métrica `bank.cobrancas.autorizacoes` e logs sem dados do cartão
-- [ ] T049 [US3] Acrescentar `POST /{cobrancaId}/pagar` em `api/Endpoints/CobrancasEndpoints.cs` (requisição
+- [X] T049 [US3] Acrescentar `POST /{cobrancaId}/pagar` em `api/Endpoints/CobrancasEndpoints.cs` (requisição
   com `PrintMembers` mascarado; 200 na primeira vez e na repetição)
-- [ ] T050 [US3] Medir p95 do pagamento com 100 pagamentos sequenciais em `it/PagamentoCobrancaTests.cs`
+- [X] T050 [US3] Medir p95 do pagamento com 100 pagamentos sequenciais em `it/PagamentoCobrancaTests.cs`
   (≤ 2 s, SC-002)
 
 **Checkpoint**: MVP completo (US1–US3)
@@ -275,29 +275,29 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Tests
 
-- [ ] T051 [P] [US4] `ut/Application/ProcessarDiaTests.cs`: dia não útil não faz nada; ordem lançar → liberar
+- [X] T051 [P] [US4] `ut/Application/ProcessarDiaTests.cs`: dia não útil não faz nada; ordem lançar → liberar
   → liquidar; compra de hoje não entra; falha em um cartão não para os demais e conta em `falhas`; repetição
   sem efeito
-- [ ] T052 [P] [US4] `it/ProcessamentoDiarioTests.cs`: cenários 1–8 e 11 da US4; 07 às 23:59:59 e 08 à 00:00
+- [X] T052 [P] [US4] `it/ProcessamentoDiarioTests.cs`: cenários 1–8 e 11 da US4; 07 às 23:59:59 e 08 à 00:00
   (Brasília); domingo 07/03/2027; virada do ano; compra não confirmada segura o cartão (R6); duas execuções
   simultâneas; interrupção no meio; dias perdidos; liberação depois do vencimento; serviço hospedado ligado
   dispara na partida e à 00:00
-- [ ] T053 [P] [US4] `it/FaturasTests.cs`: cenários 9 e 10 da US4, fatura atual sem compras (total 0),
+- [X] T053 [P] [US4] `it/FaturasTests.cs`: cenários 9 e 10 da US4, fatura atual sem compras (total 0),
   competência inválida 400, inexistente 404, PF sem cartão 404, paginação, 401/403, OpenAPI
-- [ ] T054 [P] [US4] `it/VolumeProcessamentoTests.cs`: 10.000 compras em 1.000 cartões (dados por SQL) em
+- [X] T054 [P] [US4] `it/VolumeProcessamentoTests.cs`: 10.000 compras em 1.000 cartões (dados por SQL) em
   ≤ 5 min, cada uma lançada uma vez (SC-005, SC-007)
 
 ### Implementation
 
-- [ ] T055 [US4] Acrescentar a `IFaturaRepositorio` os cartões com fatura a processar, as faturas não
+- [X] T055 [US4] Acrescentar a `IFaturaRepositorio` os cartões com fatura a processar, as faturas não
   liberadas com compras a lançar e adicionar lançamento; criar `app/Abstracoes/IFaturaConsultas.cs` (lista e
   detalhe) e `infra/Persistencia/FaturaConsultas.cs`
-- [ ] T056 [US4] Criar `app/Processamento/ProcessarDia.cs` (etapas lançar e liberar, uma transação por
+- [X] T056 [US4] Criar `app/Processamento/ProcessarDia.cs` (etapas lançar e liberar, uma transação por
   cartão, com o cartão bloqueado) e `AddProcessamento` em `app/DependencyInjection.cs` (R7)
-- [ ] T057 [US4] Criar `infra/Processamento/ProcessamentoDiarioOptions.cs` (`IntervaloSegundos` ≥ 1) e
+- [X] T057 [US4] Criar `infra/Processamento/ProcessamentoDiarioOptions.cs` (`IntervaloSegundos` ≥ 1) e
   `ProcessamentoDiarioHospedado.cs` (partida, 00:00 de Brasília e intervalo; erro não encerra o serviço; span
   só quando há trabalho); registrar em `worker/Program.cs` com a validação do fuso na partida
-- [ ] T058 [US4] Criar `app/Faturas/ListarFaturas.cs` e `ObterFatura.cs` (fatura atual virtual sem compras) e
+- [X] T058 [US4] Criar `app/Faturas/ListarFaturas.cs` e `ObterFatura.cs` (fatura atual virtual sem compras) e
   `api/Endpoints/FaturasEndpoints.cs` com os dois `GET`; mapear em `api/Program.cs`
 
 **Checkpoint**: compras aparecem na fatura do ciclo certo
@@ -312,16 +312,16 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Tests
 
-- [ ] T059 [P] [US5] `ut/Application/PagarFaturaTests.cs`: disponível, vencida com juros, saldo insuficiente,
+- [X] T059 [P] [US5] `ut/Application/PagarFaturaTests.cs`: disponível, vencida com juros, saldo insuficiente,
   aberta/fechada/paga, repetição e divergência da chave, limite liberado sem os juros
-- [ ] T060 [P] [US5] `it/PagamentoFaturaTests.cs`: cenários 1–7 da US5; dois pagamentos simultâneos → 1
+- [X] T060 [P] [US5] `it/PagamentoFaturaTests.cs`: cenários 1–7 da US5; dois pagamentos simultâneos → 1
   débito; não conta no limite diário de transferência (FR-029); compra bloqueada por fatura vencida e aprovada
   depois de pagar (US3, cenários 13 e 14); no dia do vencimento não bloqueia; taxa guardada não muda com a
   configuração; saldo = razão; cada erro do contrato; 401/403
 
 ### Implementation
 
-- [ ] T061 [US5] Criar `app/Faturas/PagarFatura.cs` (FR-028, FR-028a: bloquear cartão e carteira, calcular,
+- [X] T061 [US5] Criar `app/Faturas/PagarFatura.cs` (FR-028, FR-028a: bloquear cartão e carteira, calcular,
   debitar, lançar, liberar limite) com métrica `bank.faturas.pagamentos` e `POST
   /faturas/{competencia}/pagar` em `api/Endpoints/FaturasEndpoints.cs`; em `IFaturaRepositorio`, fatura por
   chave
@@ -338,20 +338,20 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Tests
 
-- [ ] T062 [P] [US6] `ut/Application/RecebiveisTests.cs`: lista e detalhe próprios, antecipação, repetição,
+- [X] T062 [P] [US6] `ut/Application/RecebiveisTests.cs`: lista e detalhe próprios, antecipação, repetição,
   divergência, estados finais, dia previsto; `ProcessarDia` etapa liquidar com falha isolada
-- [ ] T063 [P] [US6] `it/RecebiveisTests.cs`: cenários 1–8 da US6; antecipar × liquidar simultâneos → 1
+- [X] T063 [P] [US6] `it/RecebiveisTests.cs`: cenários 1–8 da US6; antecipar × liquidar simultâneos → 1
   crédito; mesma chave simultânea; processamento parado na data prevista; saldo = razão e extrato; filtros e
   erros do contrato; 401/403; OpenAPI (SC-008)
 
 ### Implementation
 
-- [ ] T064 [US6] Acrescentar a `IRecebivelRepositorio` bloquear, por chave e devidos até a data; criar
+- [X] T064 [US6] Acrescentar a `IRecebivelRepositorio` bloquear, por chave e devidos até a data; criar
   `app/Abstracoes/IRecebivelConsultas.cs` e `infra/Persistencia/RecebivelConsultas.cs`
-- [ ] T065 [US6] Criar `app/Recebiveis/ListarRecebiveis.cs`, `ObterRecebivel.cs` e `AnteciparRecebivel.cs`
+- [X] T065 [US6] Criar `app/Recebiveis/ListarRecebiveis.cs`, `ObterRecebivel.cs` e `AnteciparRecebivel.cs`
   (FR-032, FR-033; bloquear recebível e carteira) e `api/Endpoints/RecebiveisEndpoints.cs`; mapear em
   `api/Program.cs`
-- [ ] T066 [US6] Acrescentar a etapa liquidar em `app/Processamento/ProcessarDia.cs` (FR-031, uma transação
+- [X] T066 [US6] Acrescentar a etapa liquidar em `app/Processamento/ProcessarDia.cs` (FR-031, uma transação
   por recebível)
 
 **Checkpoint**: ciclo do lojista completo
@@ -366,18 +366,18 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 
 ### Tests
 
-- [ ] T067 [P] [US7] `ut/Infrastructure/LeitorCobrancaPagaTests.cs` (campos obrigatórios, versão, tipo,
+- [X] T067 [P] [US7] `ut/Infrastructure/LeitorCobrancaPagaTests.cs` (campos obrigatórios, versão, tipo,
   `lojistaNome` ausente), `ut/Domain/NotificacaoAuditoriaTests.cs` (textos do contrato) e
   `ut/Application/NotificarCobrancaPagaTests.cs`; ajustar `ut/Infrastructure/TopologiaMensageriaTests.cs`
-- [ ] T068 [P] [US7] `it/NotificacoesCobrancaTests.cs`: cenários 1–3 da US7 ponta a ponta (API → outbox →
+- [X] T068 [P] [US7] `it/NotificacoesCobrancaTests.cs`: cenários 1–3 da US7 ponta a ponta (API → outbox →
   Worker), reentrega, mensagem inválida na DLQ, falha transitória passa pela espera, trace contínuo, texto sem
   dados do cartão; ajustar `it/TopologiaTests.cs` (filas de espera de cobranças) e a prontidão do Worker
 
 ### Implementation
 
-- [ ] T069 [US7] Criar em `dom/Notificacoes/NotificacaoAuditoria.cs` as fábricas `ComprovanteCobranca` e
+- [X] T069 [US7] Criar em `dom/Notificacoes/NotificacaoAuditoria.cs` as fábricas `ComprovanteCobranca` e
   `CobrancaPaga`, com os textos de [contracts/evento-cobranca-paga.md](contracts/evento-cobranca-paga.md)
-- [ ] T070 [US7] Criar `app/Abstracoes/INotificadorCobranca.cs`, `app/Notificacoes/NotificarCobrancaPaga.cs`,
+- [X] T070 [US7] Criar `app/Abstracoes/INotificadorCobranca.cs`, `app/Notificacoes/NotificarCobrancaPaga.cs`,
   `infra/Mensageria/LeitorCobrancaPaga.cs` e `ConsumidorNotificacoesCobranca.cs`; `ComFilasEspera: true` em
   `TopologiaMensageria.Cobrancas`; registrar em `AddNotificacoes` e `AddMensageria`
 
@@ -392,7 +392,7 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
   (`detalhePf`) e `Extrato.tsx` (mobile); conferir desktop e mobile; `npm run lint`, `typecheck` e `test`
 - [ ] T072 [P] `it/ExtratoTests.cs`: novos tipos com `contraparte` e `transferenciaId` nulos e filtro de
   direção (extrato 1.3.0)
-- [ ] T073 [P] `it/TelemetriaCartoesTests.cs`: instrumentos e tags da tabela do plan na API e no Worker, sem
+- [X] T073 [P] `it/TelemetriaCartoesTests.cs`: instrumentos e tags da tabela do plan na API e no Worker, sem
   dados pessoais nem de cartão (FR-037)
 - [ ] T074 [P] Atualizar `docs/desenvolvimento.md` (chave, configuração, endpoints, processamento diário,
   métricas) e o histórico de `specs/009-limite-transferencia/contracts/transferencias-api.md`,
