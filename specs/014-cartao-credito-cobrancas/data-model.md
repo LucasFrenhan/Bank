@@ -114,8 +114,8 @@ taxa de 2%). Constantes `PrazoDiasUteis = 30`, `TaxaPercentual = 2`.
 
 ### Alterações
 
-- `Lancamento`: `FaturaId?`, `RecebivelId?`; fábricas `DePagamentoFatura`, `DeLiquidacao`,
-  `DeAntecipacao`. `Descricao` truncada em 200.
+- `Lancamento`: `FaturaId?`, `RecebivelId?`; fábricas `DePagamentoFatura` e
+  `DeRecebivel` (liquidação ou antecipação, pela situação). `Descricao` truncada em 200.
 - `TipoLancamento`, `TipoNotificacao`, `Permissao`, `PermissoesPorPerfil` (R14–R16).
 
 ## Application

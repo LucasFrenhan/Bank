@@ -193,7 +193,7 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
 - [X] T035 [US1] Criar `app/Cartoes/SolicitarCartao.cs`, `ObterMeuCartao.cs` e `ExibirDadosCartao.cs`
   (FR-002 a FR-008; logs só com `CartaoId` e bandeira)
 - [X] T036 [US1] Criar `api/Endpoints/CartoesEndpoints.cs` (contrato; `no-store` em `/meu/dados`; resposta
-  com dados crus com `PrintMembers` mascarado) e mapear em `api/Program.cs`
+  com dados crus com `ToString` mascarado) e mapear em `api/Program.cs`
 
 **Checkpoint**: US1 funcional
 
@@ -259,7 +259,7 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
   bloquear cobrança e cartão, repetição de novo, ler o relógio, decidir, gravar aprovação ou recusa,
   confirmar; instante em microssegundos; métrica `bank.cobrancas.autorizacoes` e logs sem dados do cartão
 - [X] T049 [US3] Acrescentar `POST /{cobrancaId}/pagar` em `api/Endpoints/CobrancasEndpoints.cs` (requisição
-  com `PrintMembers` mascarado; 200 na primeira vez e na repetição)
+  com `ToString` mascarado; 200 na primeira vez e na repetição)
 - [X] T050 [US3] Medir p95 do pagamento com 100 pagamentos sequenciais em `it/PagamentoCobrancaTests.cs`
   (≤ 2 s, SC-002)
 
@@ -398,9 +398,9 @@ Backend em `src/backend/` (`back/`); comandos `dotnet` rodam ali. `dom/` = `back
   métricas) e o histórico de `specs/009-limite-transferencia/contracts/transferencias-api.md`,
   `specs/010-mensageria-rabbitmq/contracts/evento-cobranca-paga.md` e `topologia-e-mensagens.md` e
   `specs/011-notificacoes-auditoria/contracts/notificacoes-auditoria.md`, apontando para a 014
-- [ ] T075 Rodar `dotnet build` sem avisos e `dotnet test` completo; reler `spec.md`, `plan.md`,
+- [X] T075 Rodar `dotnet build` sem avisos e `dotnet test` completo; reler `spec.md`, `plan.md`,
   `data-model.md` e contratos e corrigir divergências com o código (Princípio I)
-- [ ] T076 Executar o [quickstart.md](quickstart.md) no Compose (cenários 1, 2, 3, 5 e 6, e a parte do 4 que
+- [X] T076 Executar o [quickstart.md](quickstart.md) no Compose (cenários 1, 2, 3, 5 e 6, e a parte do 4 que
   não depende da virada) e `npm run e2e`
 
 ---

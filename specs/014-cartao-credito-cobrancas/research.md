@@ -29,7 +29,7 @@
 
 - **Decision**: `NumeroCartao` e `Cvv` são value objects do Domain com `ToString()` mascarado
   (`**** **** **** 0366`, `***`). Os records que carregam dados crus (requisição de pagamento e
-  comando) sobrescrevem `PrintMembers`. O número nunca vai em URL; a resposta com os dados completos
+  comando) sobrescrevem `ToString`. O número nunca vai em URL; a resposta com os dados completos
   leva `Cache-Control: no-store`. Testes varrem banco, logs, spans, métricas, outbox e respostas de
   erro à procura do número e do CVV.
 - **Rationale**: FR-008 e SC-009; o `ToString` gerado por `record` é a fonte comum de vazamento.
