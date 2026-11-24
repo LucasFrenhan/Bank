@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { cpf, criarContaPelaApi, email, entrar, SENHA } from './apoio';
+import { contaBancariaPelaApi, cpf, criarContaPelaApi, email, entrar, SENHA } from './apoio';
 
 // Spec 007 FR-029 / SC-007 — transferência sem dados pessoais, valor, descrição nem chave de
 // idempotência na telemetria; a navegação do comprovante aparece pelo padrão da rota.
@@ -88,6 +88,38 @@ test.describe('Telemetria', () => {
     expect(traceparents[0]).toMatch(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/);
     for (const sensivel of [SENHA, dados.email, dados.documento, token.split('.')[1]!]) {
       expect(corpos.some((c) => c.includes(sensivel)), `telemetria contém "${sensivel.slice(0, 12)}…"`).toBe(false);
+    }
+  });
+});
+
+// Spec 013 FR-013 / SC-005 — exibir e copiar os dados da conta não os leva à telemetria.
+test.describe('Telemetria — dados da conta', () => {
+  test.skip(({ isMobile }) => isMobile, 'verificado no desktop');
+
+  test('número da conta e atributos da conta bancária fora dos sinais', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const corpos: string[] = [];
+    page.on('request', (requisicao) => {
+      if (new URL(requisicao.url()).pathname.startsWith('/otlp/')) {
+        corpos.push(requisicao.postDataBuffer()?.toString('latin1') ?? '');
+      }
+    });
+
+    const conta = await criarContaPelaApi(page);
+    const { numero, digito } = await contaBancariaPelaApi(page, conta);
+    await entrar(page, conta);
+    await page.getByRole('button', { name: 'Copiar dados da conta' }).click();
+    await expect(page.getByText('Dados da conta copiados')).toBeVisible();
+
+    // Espera o span da consulta da carteira (a origem dos dados) e, depois da cópia, mais um envio.
+    await expect.poll(() => corpos.some((c) => c.includes('/carteiras/minha')), { timeout: 15_000 }).toBe(true);
+    const enviados = corpos.length;
+    await expect.poll(() => corpos.length, { timeout: 15_000 }).toBeGreaterThan(enviados);
+
+    // Número delimitado por não dígitos: não confunde com trechos de timestamps.
+    const proibidos = [new RegExp(`(?<!\\d)${numero}(?!\\d)`), new RegExp(`${numero}-${digito}`), /ag[eê]ncia/i, /contaBancaria/i];
+    for (const proibido of proibidos) {
+      expect(corpos.some((c) => proibido.test(c)), `telemetria contém ${proibido}`).toBe(false);
     }
   });
 });

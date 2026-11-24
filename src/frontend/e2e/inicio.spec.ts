@@ -1,5 +1,16 @@
-import { expect, test } from '@playwright/test';
-import { criarContaPelaApi, entrar, mascararCnpj, SENHA, semViolacoesA11y, tokenPelaApi, transferirPelaApi } from './apoio';
+import { expect, test, type Locator } from '@playwright/test';
+import {
+  contaBancariaPelaApi,
+  criarContaPelaApi,
+  entrar,
+  mascararCnpj,
+  SENHA,
+  semRolagemHorizontal,
+  semViolacoesA11y,
+  tokenPelaApi,
+  transferirPelaApi,
+  type Tipo,
+} from './apoio';
 
 // Spec 004 US3 e spec 007 US5 — tela inicial PF e PJ com a carteira e as movimentações reais.
 test.describe('Início', () => {
@@ -19,6 +30,7 @@ test.describe('Início', () => {
     await expect(saldo.getByRole('link', { name: /Ver extrato/ })).toHaveAttribute('href', '/extrato');
     const movimentacoes = page.getByRole('region', { name: 'Últimas movimentações' });
     await expect(movimentacoes.getByText('Saldo inicial', { exact: true })).toBeVisible();
+    await expect(page).toHaveTitle('Início · One Bank');
     await expect(movimentacoes.getByText(/^Saldo inicial de demonstração · Hoje, \d{2}:\d{2}$/)).toBeVisible();
     await semViolacoesA11y(page);
   });
@@ -89,5 +101,108 @@ test.describe('Início — movimentações e navegação (spec 007, US5)', () =>
     await expect(page).toHaveURL(/\/extrato\?direcao=entradas$/);
     await expect(page.getByRole('button', { name: 'Entradas' })).toHaveAttribute('aria-pressed', 'true');
     await expect(menuPj.getByText('Cobranças')).toBeVisible();
+  });
+});
+
+// Spec 013 — dados bancários da própria conta, iguais aos da API, em desktop e mobile.
+test.describe('Início — dados da conta (spec 013)', () => {
+  async function caixa(alvo: Locator) {
+    const retangulo = await alvo.boundingBox();
+    expect(retangulo).not.toBeNull();
+    return retangulo!;
+  }
+
+  for (const tipo of ['PessoaFisica', 'PessoaJuridica'] as Tipo[]) {
+    test(`${tipo}: valores da API, posição do cartão e axe`, async ({ page, isMobile }) => {
+      const pj = tipo === 'PessoaJuridica';
+      const conta = await criarContaPelaApi(page, tipo);
+      const dados = await contaBancariaPelaApi(page, conta);
+      expect(dados.numero).toMatch(/^\d{8}$/);
+      await entrar(page, conta);
+
+      const cartao = page.getByRole('region', { name: 'Dados da conta' });
+      await expect(cartao.getByText(`${dados.banco.codigo} – ${dados.banco.nome}`, { exact: true })).toBeVisible();
+      await expect(cartao.getByText(dados.agencia, { exact: true })).toBeVisible();
+      await expect(cartao.getByText(`${dados.numero}-${dados.digito}`, { exact: true })).toBeVisible();
+      await expect(cartao.getByText('Conta corrente', { exact: true })).toBeVisible();
+      await expect(cartao.getByText(`Para receber de clientes One Bank, informe o seu ${pj ? 'CNPJ' : 'CPF'}.`)).toBeVisible();
+      if (pj) {
+        await expect(page.getByRole('button', { name: 'Copiar CNPJ' })).toBeVisible();
+      }
+
+      const saldo = await caixa(page.getByRole('region', { name: 'Saldo disponível' }));
+      const doCartao = await caixa(cartao);
+      const movimentacoes = await caixa(page.getByRole('region', { name: pj ? 'Últimos recebimentos' : 'Últimas movimentações' }));
+      expect(doCartao.y + doCartao.height).toBeLessThanOrEqual(movimentacoes.y);
+      if (isMobile) {
+        expect(doCartao.y).toBeGreaterThanOrEqual(saldo.y + saldo.height);
+      } else {
+        expect(doCartao.x).toBeGreaterThanOrEqual(saldo.x + saldo.width);
+      }
+      if (pj) {
+        const receber = await caixa(page.locator('section', { has: page.getByRole('heading', { name: 'Receber transferências' }) }));
+        expect(doCartao.y).toBeGreaterThanOrEqual(receber.y + receber.height);
+        expect(Math.abs(doCartao.x - receber.x)).toBeLessThan(1);
+      }
+
+      await semRolagemHorizontal(page);
+      await semViolacoesA11y(page);
+    });
+  }
+
+  test('"Copiar" grava as três linhas com os dados da API e confirma', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const conta = await criarContaPelaApi(page);
+    const dados = await contaBancariaPelaApi(page, conta);
+    await entrar(page, conta);
+
+    const cartao = page.getByRole('region', { name: 'Dados da conta' });
+    await cartao.getByRole('button', { name: 'Copiar dados da conta' }).click();
+
+    await expect(cartao.getByRole('status')).toHaveText('Dados da conta copiados');
+    const copiado = (await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, '\n');
+    expect(copiado).toBe(
+      `Banco ${dados.banco.codigo} – ${dados.banco.nome}\nAgência ${dados.agencia}\nConta corrente ${dados.numero}-${dados.digito}`,
+    );
+    await semViolacoesA11y(page);
+  });
+
+  test('cópia bloqueada: avisa, e a seleção manual não leva o texto só para leitores de tela', async ({ page }) => {
+    await page.addInitScript(() => {
+      navigator.clipboard.writeText = () => Promise.reject(new DOMException('negado', 'NotAllowedError'));
+    });
+    const conta = await criarContaPelaApi(page);
+    const dados = await contaBancariaPelaApi(page, conta);
+    await entrar(page, conta);
+
+    const cartao = page.getByRole('region', { name: 'Dados da conta' });
+    await cartao.getByRole('button', { name: 'Copiar dados da conta' }).click();
+    await expect(cartao.getByRole('status')).toHaveText('Não foi possível copiar. Selecione os dados e copie manualmente.');
+    await semViolacoesA11y(page);
+
+    const selecionado = await cartao.locator('dl').evaluate((lista) => {
+      const selecao = window.getSelection()!;
+      selecao.selectAllChildren(lista);
+      return selecao.toString();
+    });
+    expect(selecionado).toContain(`${dados.numero}-${dados.digito}`);
+    expect(selecionado).not.toContain('dígito');
+    expect(selecionado).not.toContain(dados.agencia.split('').join(' '));
+  });
+
+  test('nome de banco longo não causa rolagem horizontal em 320 px', async ({ page }) => {
+    const conta = await criarContaPelaApi(page);
+    const nome = `${'Banco'.repeat(12)} de Nome Comprido`;
+    await page.route('**/api/v1/carteiras/minha', async (rota) => {
+      const resposta = await rota.fetch();
+      const corpo = (await resposta.json()) as { contaBancaria: { banco: { nome: string } } };
+      corpo.contaBancaria.banco.nome = nome;
+      await rota.fulfill({ response: resposta, json: corpo });
+    });
+    await page.setViewportSize({ width: 320, height: 800 });
+    await entrar(page, conta);
+
+    await expect(page.getByRole('region', { name: 'Dados da conta' }).getByText(`001 – ${nome}`)).toBeVisible();
+    await semRolagemHorizontal(page);
   });
 });

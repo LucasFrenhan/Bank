@@ -80,7 +80,7 @@ test.describe('Recusas (US2)', () => {
     await campoDocumento(page).fill(cpf());
     await campoDocumento(page).blur();
 
-    await expect(page.getByText('Nenhuma conta Bank com esse documento.')).toBeVisible();
+    await expect(page.getByText('Nenhuma conta One Bank com esse documento.')).toBeVisible();
     await expect(campoDocumento(page)).toHaveAttribute('aria-invalid', 'true');
   });
 

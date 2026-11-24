@@ -91,7 +91,7 @@ referência para o time.
 | E-mail ou documento já cadastrado | 409 | "Este e-mail já tem conta", com link para o login |
 | Credenciais inválidas | 401 | "E-mail ou senha incorretos" (sem dizer qual) |
 | Conta PJ tenta transferir | 403 | "Indisponível para Pessoa Jurídica" |
-| Destinatário não encontrado | 404 | "Nenhuma conta Bank com esse documento." |
+| Destinatário não encontrado | 404 | "Nenhuma conta One Bank com esse documento." |
 | Saldo insuficiente | 422 | "Saldo insuficiente", com o saldo disponível |
 | Transferência para a própria carteira | 422 | "Esse documento é o seu" |
 | Chave de idempotência com dados diferentes | 409 | "Essa transferência mudou" |
@@ -108,3 +108,9 @@ referência para o time.
   confirmado pelo nome antes do envio e o saldo após a transferência na confirmação.
 - **Documentos mascarados** fora do formulário (ex.: `•••.456.789-••`).
 - **Dados de exemplo:** nomes, documentos e valores das telas são fictícios.
+- **Nome e ícone (spec 013):** o banco se chama **One Bank** e o ícone da marca é **1B** (branco
+  sobre a cor primária). As capturas e fontes, anteriores a essa decisão, ainda mostram "Bank" e
+  "B"; vale a [spec 013](../../specs/013-frontend-dados-bancarios/spec.md).
+- **Dados da conta (spec 013):** o início PF e PJ tem o cartão "Dados da conta" (banco, agência,
+  conta com dígito, tipo e "Copiar"), que não existe nas telas originais. No desktop fica ao lado
+  do saldo (na PJ, abaixo de "Receber transferências"); no celular, abaixo dele.

@@ -186,11 +186,11 @@ describe('Transferir — recusas na etapa Dados (US2)', () => {
     return resultado;
   }
 
-  it('404 → erro no campo "Nenhuma conta Bank com esse documento."', async () => {
+  it('404 → erro no campo "Nenhuma conta One Bank com esse documento."', async () => {
     servidor.use(falhaEm('post', '/api/v1/transferencias/destinatarios/consultar', 'destinatario-nao-encontrado', 404));
     await digitarCnpj();
 
-    expect(await screen.findByText('Nenhuma conta Bank com esse documento.')).toBeInTheDocument();
+    expect(await screen.findByText('Nenhuma conta One Bank com esse documento.')).toBeInTheDocument();
     expect(campoDocumento()).toHaveAttribute('aria-invalid', 'true');
   });
 

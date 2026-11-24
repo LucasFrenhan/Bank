@@ -183,6 +183,10 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        BancoResposta: {
+            codigo: string;
+            nome: string;
+        };
         ComprovanteResposta: {
             /** Format: uuid */
             transferenciaId: string;
@@ -199,6 +203,13 @@ export interface components {
         };
         ConsultaDestinatarioRequisicao: {
             documento: null | string;
+        };
+        ContaBancariaResposta: {
+            banco: components["schemas"]["BancoResposta"];
+            agencia: string;
+            numero: string;
+            digito: string;
+            tipo: string;
         };
         ContraparteResposta: {
             nome: string;
@@ -277,6 +288,7 @@ export interface components {
             moeda: string;
             /** Format: date-time */
             atualizadoEm: string;
+            contaBancaria: components["schemas"]["ContaBancariaResposta"];
         };
         PagadorResposta: {
             /** Format: uuid */

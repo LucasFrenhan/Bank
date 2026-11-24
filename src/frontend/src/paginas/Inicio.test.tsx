@@ -1,6 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { carteira, extratoDe, itemExtrato, problema, titular, TRACE_ID } from '../testes/handlers';
+import type { ContaBancaria } from '../api/cliente';
+import type { TipoConta } from '../sessao/claims';
+import { carteira, contaBancaria, extratoDe, itemExtrato, problema, titular, TRACE_ID } from '../testes/handlers';
 import { renderizarApp } from '../testes/renderizar';
 import { servidor } from '../testes/setup';
 
@@ -26,7 +28,7 @@ describe('Início (US3; FR-014 a FR-016)', () => {
 
     expect(await screen.findByRole('heading', { name: 'Empresa Exemplo Ltda' })).toBeInTheDocument();
     expect(screen.getByText(/R\$\s0,00/)).toBeInTheDocument();
-    expect(screen.getByText(/Contas Pessoa Jurídica não enviam transferências/)).toBeInTheDocument();
+    expect(screen.getByText(/^Clientes com conta One Bank transferem .*Contas Pessoa Jurídica não enviam transferências\.$/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Transferir/ })).not.toBeInTheDocument();
     expect(screen.queryByText('Transferir')).not.toBeInTheDocument();
   });
@@ -42,7 +44,7 @@ describe('Início (US3; FR-014 a FR-016)', () => {
     await usuario.click(screen.getByRole('button', { name: 'Copiar CNPJ' }));
 
     expect(await navigator.clipboard.readText()).toBe('12ABC34501DE35');
-    expect(screen.getByRole('status')).toHaveTextContent('CNPJ copiado');
+    expect(await screen.findByText('CNPJ copiado')).toHaveAttribute('role', 'status');
   });
 
   it('PF: não consulta nem exibe CNPJ', async () => {
@@ -179,5 +181,184 @@ describe('Início — movimentações reais (specs/007: US5; FR-022 a FR-024)', 
     const menuPj = await screen.findByRole('navigation', { name: 'Menu principal' });
     expect(within(menuPj).getByRole('link', { name: 'Recebimentos' })).toHaveAttribute('href', '/extrato?direcao=entradas');
     expect(within(menuPj).getByText('Cobranças').closest('[aria-disabled]')).toHaveAttribute('aria-disabled', 'true');
+  });
+});
+
+describe('Início — dados da conta (specs/013, US1)', () => {
+  function usarConta(tipoConta: TipoConta, alteracoes: Partial<ContaBancaria> = {}) {
+    servidor.use(
+      http.get('*/api/v1/carteiras/minha', () =>
+        HttpResponse.json({ ...carteira(tipoConta), contaBancaria: contaBancaria(alteracoes) }),
+      ),
+      http.get('*/api/v1/usuarios/me', () => HttpResponse.json(titular(tipoConta))),
+    );
+  }
+
+  /** Valor do campo: o `dd` do mesmo grupo do `dt`. */
+  function campo(regiao: HTMLElement, rotulo: string): HTMLElement {
+    const grupo = within(regiao).getByText(rotulo, { selector: 'dt' }).parentElement!;
+    return grupo.querySelector('dd')!;
+  }
+
+  it('PF: banco, agência, conta com dígito, tipo e texto de apoio', async () => {
+    usarConta('PessoaFisica');
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    expect(within(regiao).getByRole('heading', { level: 2, name: 'Dados da conta' })).toBeInTheDocument();
+    expect(Array.from(regiao.querySelectorAll('dt'), (dt) => dt.textContent)).toEqual(['Banco', 'Agência', 'Conta', 'Tipo']);
+    expect(campo(regiao, 'Banco')).toHaveTextContent('001 – One Bank');
+    expect(within(campo(regiao, 'Agência')).getByText('0001')).toBeInTheDocument();
+    expect(within(campo(regiao, 'Conta')).getByText('00000042-0')).toBeInTheDocument();
+    expect(campo(regiao, 'Tipo')).toHaveTextContent('Conta corrente');
+    expect(within(regiao).getByText('Para receber de clientes One Bank, informe o seu CPF.')).toBeInTheDocument();
+  });
+
+  it('agência e conta são lidas dígito a dígito por leitores de tela', async () => {
+    usarConta('PessoaFisica');
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    const agencia = campo(regiao, 'Agência');
+    expect(within(agencia).getByText('0001')).toHaveAttribute('aria-hidden', 'true');
+    expect(within(agencia).getByText('0 0 0 1')).toHaveClass('apenas-leitor-de-tela');
+    const conta = campo(regiao, 'Conta');
+    expect(within(conta).getByText('00000042-0')).toHaveAttribute('aria-hidden', 'true');
+    expect(within(conta).getByText('0 0 0 0 0 0 4 2, dígito 0')).toHaveClass('apenas-leitor-de-tela');
+  });
+
+  it('PJ: mesmos dados depois de "Receber transferências", sem o número do CNPJ', async () => {
+    usarConta('PessoaJuridica');
+    renderizarApp('/', { sessao: 'PessoaJuridica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    expect(campo(regiao, 'Banco')).toHaveTextContent('001 – One Bank');
+    expect(within(regiao).getByText('00000042-0')).toBeInTheDocument();
+    expect(within(regiao).getByText('Para receber de clientes One Bank, informe o seu CNPJ.')).toBeInTheDocument();
+
+    expect(await screen.findByText('12.ABC.345/01DE-35')).toBeInTheDocument();
+    expect(within(regiao).queryByText(/12\.?ABC/)).not.toBeInTheDocument();
+    const receber = screen.getByRole('heading', { name: 'Receber transferências' });
+    expect(receber.compareDocumentPosition(regiao) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it.each([
+    ['ContaPoupanca', 'Conta poupança'],
+    ['ContaSalario', 'Conta'],
+  ])('tipo %s é exibido como "%s"', async (tipo, nome) => {
+    usarConta('PessoaFisica', { tipo });
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    expect(campo(regiao, 'Tipo').textContent).toBe(nome);
+  });
+
+  it('o nome do banco vem da API (FR-002)', async () => {
+    usarConta('PessoaFisica', { banco: { codigo: '009', nome: 'Banco de Teste' } });
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    expect(campo(regiao, 'Banco')).toHaveTextContent('009 – Banco de Teste');
+  });
+
+  it('carregando ou com erro, não mostra o cartão', async () => {
+    servidor.use(http.get('*/api/v1/carteiras/minha', () => problema('qualquer', 500)));
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+
+    expect(screen.getByRole('status')).toHaveTextContent('Carregando sua carteira…');
+    expect(screen.queryByText('Dados da conta')).not.toBeInTheDocument();
+    await screen.findByRole('alert');
+    expect(screen.queryByText('Dados da conta')).not.toBeInTheDocument();
+  });
+});
+
+describe('Início — copiar dados da conta (specs/013, US3)', () => {
+  const TEXTO = 'Banco 001 – One Bank\nAgência 0001\nConta corrente 00000042-0';
+  const FALHA = 'Não foi possível copiar. Selecione os dados e copie manualmente.';
+
+  async function abrir(tipoConta: TipoConta = 'PessoaFisica') {
+    servidor.use(
+      http.get('*/api/v1/carteiras/minha', () => HttpResponse.json(carteira(tipoConta))),
+      http.get('*/api/v1/usuarios/me', () => HttpResponse.json(titular(tipoConta))),
+    );
+    const { usuario } = renderizarApp('/', { sessao: tipoConta });
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    const aviso = within(regiao).getByRole('status');
+    const copiar = () => usuario.click(within(regiao).getByRole('button', { name: 'Copiar dados da conta' }));
+    return { usuario, regiao, aviso, copiar };
+  }
+
+  it('copia exatamente as três linhas e confirma', async () => {
+    const { aviso, copiar } = await abrir();
+    expect(aviso).toBeEmptyDOMElement();
+    await copiar();
+
+    expect(await navigator.clipboard.readText()).toBe(TEXTO);
+    expect(aviso).toHaveTextContent('Dados da conta copiados');
+    expect(aviso).not.toHaveClass('avisoFalha');
+  });
+
+  it('cópia negada: avisa com o estilo de erro e mantém os dados visíveis', async () => {
+    const { regiao, aviso, copiar } = await abrir();
+    const negada = vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new DOMException('negado', 'NotAllowedError'));
+    try {
+      await copiar();
+
+      await waitFor(() => expect(aviso).toHaveTextContent(FALHA));
+      expect(aviso).toHaveClass('avisoFalha');
+      expect(within(regiao).getByText('00000042-0')).toBeInTheDocument();
+    } finally {
+      negada.mockRestore();
+    }
+  });
+
+  it('sem área de transferência no navegador: mesma mensagem', async () => {
+    const { aviso, copiar } = await abrir();
+    const original = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+    Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+    try {
+      await copiar();
+      await waitFor(() => expect(aviso).toHaveTextContent(FALHA));
+    } finally {
+      if (original) Object.defineProperty(navigator, 'clipboard', original);
+    }
+  });
+
+  it('copiar de novo limpa o aviso antes do novo resultado, para ser anunciado outra vez', async () => {
+    const { aviso, copiar } = await abrir();
+    await copiar();
+    expect(aviso).toHaveTextContent('Dados da conta copiados');
+
+    let concluir: () => void = () => undefined;
+    const pendente = vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => new Promise((r) => (concluir = r)));
+    try {
+      await copiar();
+      await waitFor(() => expect(aviso).toBeEmptyDOMElement());
+      concluir();
+      await waitFor(() => expect(aviso).toHaveTextContent('Dados da conta copiados'));
+    } finally {
+      pendente.mockRestore();
+    }
+  });
+
+  it('PJ: o aviso de um cartão não aparece no outro, e a falha do CNPJ usa o estilo de erro', async () => {
+    const { usuario, aviso, copiar } = await abrir('PessoaJuridica');
+    const copiarCnpj = await screen.findByRole('button', { name: 'Copiar CNPJ' });
+    await usuario.click(copiarCnpj);
+    expect(await screen.findByText('CNPJ copiado')).toBeInTheDocument();
+    expect(aviso).toBeEmptyDOMElement();
+
+    await copiar();
+    await waitFor(() => expect(aviso).toHaveTextContent('Dados da conta copiados'));
+    expect(screen.getByText('CNPJ copiado')).toBeInTheDocument();
+
+    const negada = vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new DOMException('negado', 'NotAllowedError'));
+    try {
+      await usuario.click(copiarCnpj);
+      expect(await screen.findByText('Não foi possível copiar. Selecione o CNPJ e copie manualmente.')).toHaveClass('avisoFalha');
+      expect(aviso).toHaveTextContent('Dados da conta copiados');
+    } finally {
+      negada.mockRestore();
+    }
   });
 });

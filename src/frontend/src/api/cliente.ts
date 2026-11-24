@@ -16,6 +16,8 @@ export type RegistrarRequisicao = Esquemas['RegistrarRequisicao'];
 export type UsuarioRegistrado = Esquemas['UsuarioRegistradoResposta'];
 export type TokenAcesso = Esquemas['LoginResposta'];
 export type MinhaCarteira = Esquemas['MinhaCarteiraResposta'];
+// Dados bancários da conta, todos como texto (specs/013-frontend-dados-bancarios).
+export type ContaBancaria = Esquemas['ContaBancariaResposta'];
 export type Titular = Esquemas['TitularResposta'];
 // Transferências (specs/006 e specs/007-frontend-transferencias).
 export type Destinatario = Esquemas['DestinatarioResposta'];

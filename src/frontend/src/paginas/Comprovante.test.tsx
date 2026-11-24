@@ -120,6 +120,7 @@ describe('Comprovante (US1)', () => {
 
       await waitFor(() => expect(compartilhar).toHaveBeenCalledTimes(1));
       const { text } = compartilhar.mock.calls[0]?.[0] as { text: string };
+      expect(text.split('\n')[0]).toBe('Comprovante de transferência — One Bank');
       expect(text).toContain('Padaria Boa Massa Ltda');
       expect(text).toContain('••.•••.345/01DE-••');
       expect(text).toContain(ID_TRANSFERENCIA);
@@ -135,6 +136,8 @@ describe('Comprovante (US1)', () => {
     await usuario.click(await screen.findByRole('button', { name: 'Compartilhar' }));
 
     expect(await screen.findByText('Comprovante copiado')).toBeInTheDocument();
-    expect(await navigator.clipboard.readText()).toContain(ID_TRANSFERENCIA);
+    const copiado = await navigator.clipboard.readText();
+    expect(copiado.split('\n')[0]).toBe('Comprovante de transferência — One Bank');
+    expect(copiado).toContain(ID_TRANSFERENCIA);
   });
 });

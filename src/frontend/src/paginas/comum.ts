@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
+import { NOME_BANCO } from '../marca';
 
 /** Título da página por rota (WCAG 2.4.2). */
 export function useTitulo(titulo: string): void {
   useEffect(() => {
-    document.title = `${titulo} · Bank`;
+    document.title = `${titulo} · ${NOME_BANCO}`;
   }, [titulo]);
 }
 

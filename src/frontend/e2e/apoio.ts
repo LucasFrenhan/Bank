@@ -103,6 +103,22 @@ export async function tokenPelaApi(page: Page, conta: Pick<Conta, 'email'>): Pro
   return ((await resposta.json()) as { tokenAcesso: string }).tokenAcesso;
 }
 
+export interface ContaBancaria {
+  banco: { codigo: string; nome: string };
+  agencia: string;
+  numero: string;
+  digito: string;
+  tipo: string;
+}
+
+/** Dados bancários da conta pela API (specs/013), para comparar com a tela. */
+export async function contaBancariaPelaApi(page: Page, conta: Pick<Conta, 'email'>): Promise<ContaBancaria> {
+  const token = await tokenPelaApi(page, conta);
+  const resposta = await page.request.get('/api/v1/carteiras/minha', { headers: { Authorization: `Bearer ${token}` } });
+  expect(resposta.status()).toBe(200);
+  return ((await resposta.json()) as { contaBancaria: ContaBancaria }).contaBancaria;
+}
+
 /** Transferência pela API com chave nova; devolve o comprovante. */
 export async function transferirPelaApi(page: Page, token: string, documento: string, valor: number, descricao?: string) {
   const resposta = await page.request.post('/api/v1/transferencias', {
