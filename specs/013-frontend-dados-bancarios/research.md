@@ -39,8 +39,9 @@ estão em Clarifications. As decisões abaixo são de desenho.
 ## R4 — Copiar
 
 - **Decision**: hook `useCopia` em `src/paginas/useCopia.ts`, com `copiar(texto, { sucesso, falha })` e
-  `aviso`; o cartão do CNPJ passa a usá-lo, sem mudar textos nem comportamento. O aviso é limpo antes
-  de cada cópia. Cada cartão tem a própria região `role="status"`.
+  `aviso` (`{ texto, falhou }`); o cartão do CNPJ passa a usá-lo, com os mesmos textos. O aviso é
+  limpo antes de cada cópia, e a falha usa a cor de erro (hoje a do CNPJ sai na cor de sucesso;
+  FR-007). Cada cartão tem a própria região `role="status"`.
 - **Rationale**: a segunda cópia da mesma lógica justifica o hook; limpar o aviso faz a cópia repetida
   ser anunciada de novo; avisos separados não se confundem (edge case da PJ). Sem
   `navigator.clipboard` (contexto inseguro) a chamada lança e cai na mensagem de falha.
@@ -65,7 +66,7 @@ estão em Clarifications. As decisões abaixo são de desenho.
 - **Decision**: constante `NOME_BANCO = 'One Bank'` em `src/marca.ts`, usada por marca, título,
   mensagens e resumo do comprovante; `index.html` (estático) recebe o texto direto. No cartão, o nome
   ao lado do código vem da API (FR-002); o texto de apoio usa `NOME_BANCO`. Um teste percorre os
-  arquivos de `src/` (exceto testes) e o `index.html` e falha se houver `Bank` como palavra sem
+  arquivos de `src/` (exceto testes e o `api/schema.d.ts` gerado) e o `index.html` e falha se houver `Bank` como palavra sem
   "One " antes.
 - **Rationale**: o nome está hoje repetido em 8 pontos; a constante e o teste garantem o SC-003
   também no futuro. Nomes técnicos (`bank.sessao`, `bank-frontend`, `BANK_API_URL`) são minúsculos
@@ -79,7 +80,7 @@ estão em Clarifications. As decisões abaixo são de desenho.
   28 px. `favicon.svg` ganha contornos de "1" e "B" (sem `<text>`), mesmo fundo `#1d4ed8` e raio;
   `apple-touch-icon.png` (180×180, fundo sem cantos, como hoje) é gerado a partir do mesmo desenho
   com o Chromium do Playwright, já disponível, por um comando avulso sem script versionado.
-  Legibilidade a 16 px conferida por captura.
+  Legibilidade conferida por captura de 16 × 16 px, com "1" e "B" distinguíveis (FR-009).
 - **Rationale**: o favicon é renderizado isolado, sem as fontes da página (motivo já registrado no
   arquivo); nenhuma dependência nova.
 - **Alternatives considered**: `<text>` no SVG (depende de fonte do sistema); biblioteca de conversão
@@ -101,7 +102,7 @@ estão em Clarifications. As decisões abaixo são de desenho.
 | --- | --- |
 | Vitest (unitário) | `contaBancaria.test.ts`: tipos, zeros, dígito 0, leitura, texto de cópia, tipo desconhecido; `marca.test.ts`: nome antigo ausente |
 | Vitest + MSW (componentes) | Início PF, PJ, poupança e tipo desconhecido; leitura acessível; texto de apoio; cópia com sucesso, repetida e com falha; erro/carregamento sem cartão; títulos e mensagens "One Bank"; comprovante compartilhado |
-| Playwright (API real, desktop e mobile) | Valores iguais aos da API em PF e PJ, ordem dos cartões, cópia lida da área de transferência, axe, 320–1920 px (suíte atual já percorre `/`), teclado, telemetria |
+| Playwright (API real, desktop e mobile) | Valores iguais aos da API em PF e PJ, ordem dos cartões, cópia lida da área de transferência, axe, 320–1920 px (suíte atual já percorre `/`), nome de banco longo a 320 px (resposta alterada por `page.route`), seleção manual sem o texto invisível, teclado, telemetria |
 | Manual (quickstart) | Conta poupança criada por script, favicon a 16 px, leitor de tela |
 
 A conta poupança não entra no e2e porque só nasce por script SQL, e o e2e não acessa a base

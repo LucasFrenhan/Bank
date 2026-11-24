@@ -17,10 +17,11 @@ mudam.
 | Texto de apoio | "Para receber de clientes One Bank, informe o seu CPF." (PF) / "…CNPJ." (PJ) |
 | Ação | botão "Copiar", nome acessível "Copiar dados da conta" |
 | Sucesso | "Dados da conta copiados" (`role="status"`) |
-| Falha | "Não foi possível copiar. Selecione os dados e copie manualmente." (`role="status"`) |
+| Falha | "Não foi possível copiar. Selecione os dados e copie manualmente." (`role="status"`, cor de erro) |
 | Carregando ou erro da carteira | o cartão não é exibido |
 
-O cartão do CNPJ (PJ) mantém textos, ação e avisos da v1.2.0, exceto o nome do banco.
+O cartão do CNPJ (PJ) mantém textos, ação e avisos da v1.2.0, exceto o nome do banco e a cor do aviso
+de falha, que passa a ser a de erro.
 
 ## Nome e ícone
 

@@ -143,10 +143,13 @@ confirmação; repetir com a cópia bloqueada pelo navegador.
   e nome), a agência, a conta no formato número-dígito e o tipo ("Conta corrente" ou "Conta
   poupança") da conta da pessoa autenticada.
 - **FR-001a**: O bloco MUST ser um cartão próprio, sempre visível (sem recolher nem ocultar valores),
-  entre o saldo e as movimentações: ao lado do saldo no desktop e abaixo dele no celular. Na PJ, vem logo abaixo do cartão "Receber
-  transferências", empilhado na mesma coluna no desktop e em seguida a ele no celular.
-- **FR-002**: Todos os valores MUST vir da consulta da própria carteira, inclusive o nome do banco;
-  nenhum MUST ser fixo na interface, calculado ou guardado no navegador.
+  entre o saldo e as movimentações: ao lado do saldo no desktop e abaixo dele no celular. Na PJ, vem
+  logo abaixo do cartão "Receber transferências", empilhado na mesma coluna no desktop e em seguida a
+  ele no celular.
+- **FR-002**: Os valores dos campos do cartão (Banco, Agência, Conta, Tipo) MUST vir da consulta da
+  própria carteira, inclusive o nome do banco; nenhum MUST ser fixo na interface, guardado no
+  navegador ou recalculado (em especial o dígito). Montar `número-dígito` e traduzir o tipo é
+  apresentação e é permitido. O texto de apoio do FR-011 usa o nome da marca (FR-008).
 - **FR-003**: Código do banco, agência, número e dígito MUST ser tratados como texto do início ao
   fim, preservando zeros.
 - **FR-004**: Cada valor MUST ter rótulo associado, e agência e conta MUST ter forma acessível lida
@@ -158,7 +161,8 @@ confirmação; repetir com a cópia bloqueada pelo navegador.
 - **FR-006**: O bloco MUST ter a ação "Copiar", com nome acessível "Copiar dados da conta", que
   copia exatamente as três linhas da US3 e nada além delas.
 - **FR-007**: O resultado da cópia MUST ser mostrado na tela e anunciado a leitores de tela, com as
-  mensagens da US3 para sucesso e falha.
+  mensagens da US3 para sucesso e falha, e a falha MUST usar o estilo de erro, não o de sucesso; o mesmo
+  vale para a cópia do CNPJ, cujos textos não mudam.
 
 **Marca**
 
@@ -166,7 +170,8 @@ confirmação; repetir com a cópia bloqueada pelo navegador.
   interface: marca, título e descrição da página, mensagens, textos das telas e resumo do
   comprovante.
 - **FR-009**: O ícone da marca, o ícone da aba e o ícone de atalho no celular MUST ser "1B", branco
-  sobre a cor primária, legível no menor tamanho em que aparece (16 px na aba).
+  sobre a cor primária, com "1" e "B" distinguíveis numa captura de 16 × 16 px (menor tamanho, na
+  aba).
 - **FR-010**: O ícone da marca MUST continuar decorativo: o nome acessível da marca é "One Bank".
 
 **Escopo, acessibilidade e qualidade**
@@ -202,7 +207,9 @@ confirmação; repetir com a cópia bloqueada pelo navegador.
   "B".
 - **SC-004**: Nenhuma violação de acessibilidade (WCAG 2.2 AA) na verificação automática das telas
   alteradas, em desktop e mobile.
-- **SC-005**: Nenhuma ocorrência de agência, número ou dígito da conta na telemetria do navegador.
+- **SC-005**: Depois de exibir e copiar os dados da conta, nenhum envio de telemetria do navegador
+  contém o número da conta (isolado ou como `número-dígito`) nem atributos que identifiquem a agência
+  ou a conta bancária.
 - **SC-006**: Todos os testes de componentes e ponta a ponta passam no CI.
 
 ## Assumptions

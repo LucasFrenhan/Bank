@@ -47,4 +47,4 @@ Conta corrente 00000042-0
 ## Aviso de cópia (estado da tela)
 
 `vazio` → (copiar) → `vazio` → `copiado` | `falhou`. Uma nova cópia volta a `vazio` antes do
-resultado. Cada cartão (CNPJ e dados da conta) tem o próprio estado.
+resultado. `falhou` usa a cor de erro. Cada cartão (CNPJ e dados da conta) tem o próprio estado.
