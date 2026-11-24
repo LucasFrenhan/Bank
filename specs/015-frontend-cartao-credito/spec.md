@@ -29,6 +29,12 @@ para deixar o link amigável; a issue previa não mudar a API.
 - Q: Como deixar o link da cobrança amigável? → A: Cada cobrança ganha um código curto de 8 caracteres
   fáceis de ler e ditar (ex.: `7K3F-9QXM`), usado no link (`/c/7K3F-9QXM`). Exige uma mudança pequena e
   aditiva na API, feita nesta spec, inclusive o código das cobranças já existentes.
+- Q: A PJ vê a cobrança mudar para "Paga" sozinha? → A: Sim. O detalhe de cobrança pendente se atualiza a
+  cada 5 segundos com a aba visível e anuncia o pagamento.
+- Q: O início da PF avisa sobre fatura para pagar? → A: Sim, só quando há fatura disponível (valor e
+  vencimento) ou vencida (valor do dia e cartão bloqueado), com link para a fatura.
+- Q: O que vai na mensagem ao copiar ou compartilhar a cobrança? → A: "Copiar link" copia só o link;
+  "Compartilhar" envia texto com lojista, valor, descrição e link.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -89,7 +95,8 @@ detalhe e cancelá-la.
 3. **Given** valor ou descrição inválidos, **When** a PJ envia, **Then** vê o erro em cada campo e o que
    digitou é mantido.
 4. **Given** uma cobrança pendente, **When** a PJ escolhe "Copiar link", **Then** o endereço curto de
-   pagamento é copiado; no celular com suporte, há também "Compartilhar".
+   pagamento é copiado; no celular com suporte, há também "Compartilhar", que envia um texto com lojista,
+   valor, descrição e link.
 5. **Given** cobranças de várias situações, **When** a PJ filtra por Pendentes, Pagas ou Canceladas,
    **Then** vê só as da situação, das mais novas para as mais antigas, em páginas (desktop) ou com
    "Carregar mais" (mobile).
@@ -103,6 +110,8 @@ detalhe e cancelá-la.
    tem código e link.
 10. **Given** uma cobrança que acabou de ser paga, **When** a PJ tenta cancelá-la, **Then** vê que não é
    mais possível e o detalhe mostra a situação atual.
+11. **Given** o detalhe de uma cobrança pendente aberto e visível, **When** o cliente paga, **Then** em até
+    10 segundos a tela mostra "Paga", sem ação da PJ, e a mudança é anunciada.
 
 ---
 
@@ -170,6 +179,9 @@ total, datas, situação e lançamentos.
 5. **Given** uma fatura vencida, **When** a abre, **Then** vê dias de atraso, juros e valor a pagar hoje,
    separados do total das compras, e o aviso de que o cartão está bloqueado.
 6. **Given** um mês sem fatura, **When** abre o endereço, **Then** vê "Fatura não encontrada".
+7. **Given** uma fatura disponível, **When** a PF abre o início, **Then** vê o aviso com valor, vencimento e
+   link para a fatura; se vencida, o aviso traz o valor do dia e que o cartão está bloqueado.
+8. **Given** nenhuma fatura a pagar ou uma PF sem cartão, **When** abre o início, **Then** não há aviso.
 
 ---
 
@@ -250,6 +262,8 @@ verificação automática de acessibilidade.
   mostra o valor pago de fato.
 - **Sessão expirada**: vai ao login e volta à tela; os dados do cartão digitados são descartados.
 - **Erro ao exibir os dados**: aparece a mensagem com o código de suporte e o cartão continua oculto.
+- **Falha na atualização automática do detalhe**: a tela mantém o que já mostrava e tenta de novo na próxima
+  vez, sem exibir erro; com a confirmação de cancelamento aberta, o pagamento recebido a substitui.
 - **Copiar ou compartilhar indisponível no navegador**: o link fica selecionável para cópia manual.
 - **Valor máximo e descrição de 200 caracteres**: quebram linha sem estourar o layout.
 - **Código com minúsculas, espaços, sem hífen ou endereço com barra no fim**: abre normalmente.
@@ -307,9 +321,9 @@ verificação automática de acessibilidade.
   campos, contador de 200 caracteres e valor no formato brasileiro.
 - **FR-011**: A lista MUST ter filtro por situação, refletido no endereço, e paginação.
 - **FR-012**: O detalhe MUST mostrar situação, valor, descrição, datas, pagamento (bandeira, final, código)
-  e última recusa; mostrar o
-  código e oferecer copiar ou compartilhar o link e cancelar, só enquanto pendente. O cancelamento
-  MUST pedir confirmação.
+  e última recusa. Só enquanto pendente, MUST mostrar o código e oferecer copiar o link, compartilhar (texto
+  com lojista, valor, descrição e link, só onde o aparelho permite) e cancelar, com confirmação; e, com a aba
+  visível, MUST se atualizar a cada 5 segundos e anunciar a mudança.
 
 **Pagamento (PF)**
 
@@ -330,6 +344,8 @@ verificação automática de acessibilidade.
 
 - **FR-019**: A PF MUST ver a lista de faturas por mês e o detalhe com período, fechamento, vencimento,
   situação, total, lançamentos e, se vencida, dias de atraso, juros e valor a pagar.
+- **FR-019a**: O início da PF MUST avisar da fatura disponível ou vencida, com link. Com mais de uma, mostra a
+  mais antiga. Sem cartão, sem fatura a pagar ou se a consulta falhar, o início fica como hoje.
 - **FR-020**: O pagamento MUST pedir confirmação com valor, saldo e saldo depois, usar chave de idempotência
   e atualizar fatura e limite ao concluir.
 
@@ -347,8 +363,8 @@ verificação automática de acessibilidade.
 - **FR-024**: Valores MUST ser calculados em centavos inteiros e datas de regra (fechamento, vencimento,
   data da compra, data prevista) exibidas como dia, sem conversão de fuso.
 - **FR-025**: As telas MUST corresponder ao protótipo aprovado e atender a WCAG 2.2 AA, de 320 a 1920 px.
-- **FR-026**: Fora o código da cobrança (FR-009a e FR-009b), nenhuma mudança na API; nenhuma mudança no
-  comportamento das telas existentes.
+- **FR-026**: Fora o código da cobrança (FR-009a e FR-009b), nenhuma mudança na API; fora o menu, o
+  aviso no início (FR-019a) e as permissões do perfil, nenhuma mudança nas telas existentes.
 
 ### Key Entities
 
@@ -386,7 +402,7 @@ verificação automática de acessibilidade.
 - **Link da cobrança**: gerado pelo próprio One Bank, sem encurtador externo, para não expor os links a
   terceiros; não há envio por e-mail, QR Code nem prazo.
 - **Contrato**: o da spec 014 passa a 1.1.0, aditivo.
-- **Início**: não ganha cartões novos; o acesso é pelo menu.
+- **Início**: só ganha o aviso de fatura da PF; o acesso às telas novas é pelo menu.
 - **Notificações e recibo em PDF**: fora do escopo.
 - **Perfil da empresa**: a PJ não vê quem pagou, como define a spec 014.
 - **Taxa de 2%**: o valor mostrado antes de confirmar é calculado na tela com a regra da spec 014; vale o
