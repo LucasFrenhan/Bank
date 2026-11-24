@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Botao, BotaoLink } from '../design/componentes/Botao';
 import { mascararCnpj } from '../formatacao/mascaras';
 import { useTitular } from './useTitular';
@@ -18,7 +18,9 @@ import { NOME_TIPO_CONTA } from '../sessao/permissoes';
 import estilos from './Autenticado.module.css';
 import { DadosDaConta } from './DadosDaConta';
 import { primeiroNome, useTitulo } from './comum';
+import { TextoAvisoCopia } from './TextoAvisoCopia';
 import { useCarteira } from './useCarteira';
+import { useCopia } from './useCopia';
 
 /** Tela inicial PF/PJ (spec 004 US3; specs/007 US5, FR-022 a FR-024; specs/013). */
 export function Inicio() {
@@ -124,7 +126,7 @@ function InicioPj({ carteira }: { carteira: MinhaCarteira }) {
  */
 function CnpjParaReceber() {
   const titular = useTitular();
-  const [aviso, definirAviso] = useState('');
+  const { aviso, copiar } = useCopia();
 
   if (titular.estado !== 'pronto') {
     return null;
@@ -132,14 +134,10 @@ function CnpjParaReceber() {
 
   const { documento } = titular.titular;
 
-  async function copiar() {
-    try {
-      await navigator.clipboard.writeText(documento);
-      definirAviso('CNPJ copiado');
-    } catch {
-      definirAviso('Não foi possível copiar. Selecione o CNPJ e copie manualmente.');
-    }
-  }
+  const mensagens = {
+    sucesso: 'CNPJ copiado',
+    falha: 'Não foi possível copiar. Selecione o CNPJ e copie manualmente.',
+  };
 
   return (
     <div className={estilos.cnpj}>
@@ -150,13 +148,11 @@ function CnpjParaReceber() {
         <span className={estilos.valorCnpj}>
           {mascararCnpj(documento)}
         </span>
-        <Botao variante="secundario" onClick={() => void copiar()} aria-label="Copiar CNPJ">
+        <Botao variante="secundario" onClick={() => void copiar(documento, mensagens)} aria-label="Copiar CNPJ">
           Copiar
         </Botao>
       </div>
-      <p className={estilos.avisoCopia} role="status" aria-live="polite">
-        {aviso}
-      </p>
+      <TextoAvisoCopia aviso={aviso} />
     </div>
   );
 }

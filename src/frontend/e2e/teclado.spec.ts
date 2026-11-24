@@ -103,3 +103,18 @@ test.describe('Teclado', () => {
     await expect(page.getByRole('heading', { name: 'Olá, Lucas' })).toBeVisible();
   });
 });
+
+// Spec 013 US3 — copiar os dados da conta só pelo teclado.
+test.describe('Teclado — dados da conta', () => {
+  test.skip(({ isMobile }) => isMobile, 'navegação por teclado verificada no desktop');
+
+  test('chega a "Copiar dados da conta" com Tab e copia com Enter', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await entrar(page, await criarContaPelaApi(page));
+
+    const cartao = page.getByRole('region', { name: 'Dados da conta' });
+    await tabAte(page, cartao.getByRole('button', { name: 'Copiar dados da conta' }));
+    await page.keyboard.press('Enter');
+    await expect(cartao.getByRole('status')).toHaveText('Dados da conta copiados');
+  });
+});

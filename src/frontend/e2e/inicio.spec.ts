@@ -150,6 +150,46 @@ test.describe('Início — dados da conta (spec 013)', () => {
     });
   }
 
+  test('"Copiar" grava as três linhas com os dados da API e confirma', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const conta = await criarContaPelaApi(page);
+    const dados = await contaBancariaPelaApi(page, conta);
+    await entrar(page, conta);
+
+    const cartao = page.getByRole('region', { name: 'Dados da conta' });
+    await cartao.getByRole('button', { name: 'Copiar dados da conta' }).click();
+
+    await expect(cartao.getByRole('status')).toHaveText('Dados da conta copiados');
+    const copiado = (await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, '\n');
+    expect(copiado).toBe(
+      `Banco ${dados.banco.codigo} – ${dados.banco.nome}\nAgência ${dados.agencia}\nConta corrente ${dados.numero}-${dados.digito}`,
+    );
+    await semViolacoesA11y(page);
+  });
+
+  test('cópia bloqueada: avisa, e a seleção manual não leva o texto só para leitores de tela', async ({ page }) => {
+    await page.addInitScript(() => {
+      navigator.clipboard.writeText = () => Promise.reject(new DOMException('negado', 'NotAllowedError'));
+    });
+    const conta = await criarContaPelaApi(page);
+    const dados = await contaBancariaPelaApi(page, conta);
+    await entrar(page, conta);
+
+    const cartao = page.getByRole('region', { name: 'Dados da conta' });
+    await cartao.getByRole('button', { name: 'Copiar dados da conta' }).click();
+    await expect(cartao.getByRole('status')).toHaveText('Não foi possível copiar. Selecione os dados e copie manualmente.');
+    await semViolacoesA11y(page);
+
+    const selecionado = await cartao.locator('dl').evaluate((lista) => {
+      const selecao = window.getSelection()!;
+      selecao.selectAllChildren(lista);
+      return selecao.toString();
+    });
+    expect(selecionado).toContain(`${dados.numero}-${dados.digito}`);
+    expect(selecionado).not.toContain('dígito');
+    expect(selecionado).not.toContain(dados.agencia.split('').join(' '));
+  });
+
   test('nome de banco longo não causa rolagem horizontal em 320 px', async ({ page }) => {
     const conta = await criarContaPelaApi(page);
     const nome = `${'Banco'.repeat(12)} de Nome Comprido`;

@@ -164,6 +164,10 @@
   font: var(--texto-corpo-m);
 }
 
+.avisoFalha {
+  color: var(--cor-erro);
+}
+
 /* ---------- Movimentações no início (specs/007) ---------- */
 .cabecalhoComAcao {
   display: flex;
@@ -218,8 +222,14 @@
   user-select: none;
 }
 
-.apoioConta {
+.rodapeConta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
   padding: 0 var(--espaco-6) var(--espaco-5);
+}
+
+.apoioConta {
   color: var(--cor-texto-suave);
   font: var(--texto-corpo-m);
 }

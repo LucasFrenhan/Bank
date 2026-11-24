@@ -44,7 +44,7 @@ describe('Início (US3; FR-014 a FR-016)', () => {
     await usuario.click(screen.getByRole('button', { name: 'Copiar CNPJ' }));
 
     expect(await navigator.clipboard.readText()).toBe('12ABC34501DE35');
-    expect(screen.getByRole('status')).toHaveTextContent('CNPJ copiado');
+    expect(await screen.findByText('CNPJ copiado')).toHaveAttribute('role', 'status');
   });
 
   it('PF: não consulta nem exibe CNPJ', async () => {
@@ -269,5 +269,96 @@ describe('Início — dados da conta (specs/013, US1)', () => {
     expect(screen.queryByText('Dados da conta')).not.toBeInTheDocument();
     await screen.findByRole('alert');
     expect(screen.queryByText('Dados da conta')).not.toBeInTheDocument();
+  });
+});
+
+describe('Início — copiar dados da conta (specs/013, US3)', () => {
+  const TEXTO = 'Banco 001 – One Bank\nAgência 0001\nConta corrente 00000042-0';
+  const FALHA = 'Não foi possível copiar. Selecione os dados e copie manualmente.';
+
+  async function abrir(tipoConta: TipoConta = 'PessoaFisica') {
+    servidor.use(
+      http.get('*/api/v1/carteiras/minha', () => HttpResponse.json(carteira(tipoConta))),
+      http.get('*/api/v1/usuarios/me', () => HttpResponse.json(titular(tipoConta))),
+    );
+    const { usuario } = renderizarApp('/', { sessao: tipoConta });
+    const regiao = await screen.findByRole('region', { name: 'Dados da conta' });
+    const aviso = within(regiao).getByRole('status');
+    const copiar = () => usuario.click(within(regiao).getByRole('button', { name: 'Copiar dados da conta' }));
+    return { usuario, regiao, aviso, copiar };
+  }
+
+  it('copia exatamente as três linhas e confirma', async () => {
+    const { aviso, copiar } = await abrir();
+    expect(aviso).toBeEmptyDOMElement();
+    await copiar();
+
+    expect(await navigator.clipboard.readText()).toBe(TEXTO);
+    expect(aviso).toHaveTextContent('Dados da conta copiados');
+    expect(aviso).not.toHaveClass('avisoFalha');
+  });
+
+  it('cópia negada: avisa com o estilo de erro e mantém os dados visíveis', async () => {
+    const { regiao, aviso, copiar } = await abrir();
+    const negada = vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new DOMException('negado', 'NotAllowedError'));
+    try {
+      await copiar();
+
+      await waitFor(() => expect(aviso).toHaveTextContent(FALHA));
+      expect(aviso).toHaveClass('avisoFalha');
+      expect(within(regiao).getByText('00000042-0')).toBeInTheDocument();
+    } finally {
+      negada.mockRestore();
+    }
+  });
+
+  it('sem área de transferência no navegador: mesma mensagem', async () => {
+    const { aviso, copiar } = await abrir();
+    const original = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+    Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+    try {
+      await copiar();
+      await waitFor(() => expect(aviso).toHaveTextContent(FALHA));
+    } finally {
+      if (original) Object.defineProperty(navigator, 'clipboard', original);
+    }
+  });
+
+  it('copiar de novo limpa o aviso antes do novo resultado, para ser anunciado outra vez', async () => {
+    const { aviso, copiar } = await abrir();
+    await copiar();
+    expect(aviso).toHaveTextContent('Dados da conta copiados');
+
+    let concluir: () => void = () => undefined;
+    const pendente = vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => new Promise((r) => (concluir = r)));
+    try {
+      await copiar();
+      await waitFor(() => expect(aviso).toBeEmptyDOMElement());
+      concluir();
+      await waitFor(() => expect(aviso).toHaveTextContent('Dados da conta copiados'));
+    } finally {
+      pendente.mockRestore();
+    }
+  });
+
+  it('PJ: o aviso de um cartão não aparece no outro, e a falha do CNPJ usa o estilo de erro', async () => {
+    const { usuario, aviso, copiar } = await abrir('PessoaJuridica');
+    const copiarCnpj = await screen.findByRole('button', { name: 'Copiar CNPJ' });
+    await usuario.click(copiarCnpj);
+    expect(await screen.findByText('CNPJ copiado')).toBeInTheDocument();
+    expect(aviso).toBeEmptyDOMElement();
+
+    await copiar();
+    await waitFor(() => expect(aviso).toHaveTextContent('Dados da conta copiados'));
+    expect(screen.getByText('CNPJ copiado')).toBeInTheDocument();
+
+    const negada = vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new DOMException('negado', 'NotAllowedError'));
+    try {
+      await usuario.click(copiarCnpj);
+      expect(await screen.findByText('Não foi possível copiar. Selecione o CNPJ e copie manualmente.')).toHaveClass('avisoFalha');
+      expect(aviso).toHaveTextContent('Dados da conta copiados');
+    } finally {
+      negada.mockRestore();
+    }
   });
 });

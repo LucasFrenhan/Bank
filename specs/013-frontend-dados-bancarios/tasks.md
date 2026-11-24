@@ -170,14 +170,14 @@ repetir com a cópia bloqueada
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T020 [P] [US3] Em `front/src/paginas/Inicio.test.tsx` (deve falhar): "Copiar dados da conta"
+- [X] T020 [P] [US3] Em `front/src/paginas/Inicio.test.tsx` (deve falhar): "Copiar dados da conta"
   grava exatamente as três linhas e mostra "Dados da conta copiados" no `status` do cartão; não contém
   nome, documento nem saldo; `writeText` rejeitando e `navigator.clipboard` ausente → "Não foi
   possível copiar. Selecione os dados e copie manualmente." com a classe de erro (idem na falha do
   CNPJ, com o texto atual); copiar de novo limpa o aviso antes de
   mostrá-lo; na PJ, o aviso de um cartão não aparece no outro. Trocar, no teste do CNPJ, o
   `getByRole('status')` único pela busca do aviso "CNPJ copiado" (R4)
-- [ ] T021 [P] [US3] Em `front/e2e/inicio.spec.ts`, com `grantPermissions(['clipboard-read',
+- [X] T021 [P] [US3] Em `front/e2e/inicio.spec.ts`, com `grantPermissions(['clipboard-read',
   'clipboard-write'])`, copiar em PF (desktop e mobile) e comparar a área de transferência com o
   texto montado a partir da API; em `front/e2e/teclado.spec.ts`, chegar a "Copiar dados da conta" com
   `tabAte`, acionar com Enter e ver o aviso; seleção manual do cartão com
@@ -185,12 +185,12 @@ repetir com a cópia bloqueada
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Criar `front/src/paginas/useCopia.ts`: `useCopia()` devolve `{ aviso, copiar(texto, {
+- [X] T022 [US3] Criar `front/src/paginas/useCopia.ts`: `useCopia()` devolve `{ aviso, copiar(texto, {
   sucesso, falha }) }`, com `aviso: { texto, falhou }`; limpa o aviso antes de copiar e trata rejeição e `navigator.clipboard` ausente
   como falha (R4)
-- [ ] T023 [US3] Em `front/src/paginas/Inicio.tsx`, `CnpjParaReceber` passa a usar `useCopia`, com os
+- [X] T023 [US3] Em `front/src/paginas/Inicio.tsx`, `CnpjParaReceber` passa a usar `useCopia`, com os
   mesmos textos e a cor de erro na falha (FR-007)
-- [ ] T024 [US3] Em `front/src/paginas/DadosDaConta.tsx`, botão "Copiar" (`variante="secundario"`,
+- [X] T024 [US3] Em `front/src/paginas/DadosDaConta.tsx`, botão "Copiar" (`variante="secundario"`,
   `aria-label="Copiar dados da conta"`) que copia `textoDadosDaConta(conta)` e `<p role="status"
   aria-live="polite">` próprio, com os textos do contrato; em
   `front/src/paginas/Autenticado.module.css`, estilos e variante de erro do aviso (FR-006, FR-007)
