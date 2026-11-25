@@ -11,6 +11,11 @@ const otlpUrl = process.env.BANK_OTLP_URL ?? 'http://localhost:4318';
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    // Fontes sempre como arquivo: a CSP do nginx (font-src 'self') não aceita data: (#41).
+    // undefined mantém o limite padrão do Vite para os demais assets.
+    assetsInlineLimit: (arquivo) => (/\.woff2?$/i.test(arquivo) ? false : undefined),
+  },
   server: {
     port: 5173,
     strictPort: true,
