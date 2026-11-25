@@ -140,13 +140,13 @@ describe('Pagar cobrança', () => {
     await usuario.dblClick(botaoPagar());
 
     const titulo = await screen.findByRole('heading', { level: 1, name: 'Pagamento aprovado' });
-    expect(titulo).toHaveFocus();
+    await waitFor(() => expect(titulo).toHaveFocus());
     const comprovante = screen.getByRole('region', { name: 'Comprovante' });
     for (const texto of ['Cafeteria Grão Especial LTDA', '98.765.432/0001-99', 'Kit 3 Pacotes', 'Visa final 7899', 'AUT84K']) {
       expect(comprovante).toHaveTextContent(texto);
     }
     expect(comprovante).toHaveTextContent(/24 nov 2026/);
-    expect(document.title).toBe('Pagamento aprovado · One Bank');
+    await waitFor(() => expect(document.title).toBe('Pagamento aprovado · One Bank'));
     expect(estado.envios).toHaveLength(1);
     expect(estado.envios[0]).toMatchObject({
       id: ID_COBRANCA,

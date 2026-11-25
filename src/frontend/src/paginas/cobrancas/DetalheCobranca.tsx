@@ -99,7 +99,6 @@ export function DetalheCobranca({ consulta }: { consulta: CobrancaPronta }) {
         {pendente ? <LinkDePagamento cobranca={cobranca} /> : null}
         <Cartao className={estilos.quadro} rotulo="Detalhes">
           <dl className={[estilos.linhas, estilos.semMargem].join(' ')}>
-            <Linha rotulo="Código" valor={formatarCodigo(cobranca.codigo)} />
             <Linha rotulo="Emitida em" valor={formatarDataHora(cobranca.criadoEm)} />
             {cobranca.pagaEm ? <Linha rotulo="Paga em" valor={formatarDataHora(cobranca.pagaEm)} /> : null}
             {cobranca.canceladaEm ? <Linha rotulo="Cancelada em" valor={formatarDataHora(cobranca.canceladaEm)} /> : null}

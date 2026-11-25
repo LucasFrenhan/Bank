@@ -323,11 +323,11 @@ O visual de cada tela segue a fonte correspondente em `docs/design/fontes/cartao
   telas prontas em `docs/design/telas/`, ligadas em `docs/design/prototipo.md`
 - [X] T057 [P] Marcar `specs/014-cartao-credito-cobrancas/contracts/cartoes-cobrancas-api.md` como sucedido pela
   versão 1.1.0 da spec 015
-- [ ] T058 Executar `dotnet test`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` e
+- [X] T058 Executar `dotnet test`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` e
   `npm run e2e`, conferir o SC-008 e o FR-026 com a contagem da T002 e medir SC-001 a SC-003 no Compose
 - [X] T059 Verificação por mutação: quebrar, um de cada vez, o ocultar em 60 s, a chave reaproveitada, o limpar do
   CVV, a visibilidade por código e o `CHECK` do código, e confirmar que algum teste falha
-- [ ] T060 Executar o [quickstart](quickstart.md) e atualizar os artefatos da spec que divergirem do código; a
+- [X] T060 Executar o [quickstart](quickstart.md) e atualizar os artefatos da spec que divergirem do código; a
   leitura com NVDA fica para o responsável se não puder ser feita aqui
 
 ---

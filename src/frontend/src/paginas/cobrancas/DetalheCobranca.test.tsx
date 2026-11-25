@@ -43,7 +43,7 @@ describe('Detalhe da cobrança', () => {
     const detalhes = screen.getByRole('region', { name: 'Detalhes' });
     expect(detalhes).toHaveTextContent('Última recusaLimite insuficiente ·');
     expect(screen.getByText('Kit 3 Pacotes')).toBeInTheDocument();
-    expect(document.title).toBe('Cobrança · One Bank');
+    await waitFor(() => expect(document.title).toBe('Cobrança · One Bank'));
   });
 
   it('motivo de recusa e situação desconhecidos não quebram a tela', async () => {
@@ -60,6 +60,7 @@ describe('Detalhe da cobrança', () => {
     abrir();
 
     const detalhes = await screen.findByRole('region', { name: 'Detalhes' });
+    expect(screen.queryByText(CODIGO)).not.toBeInTheDocument(); // só enquanto pendente (FR-012)
     expect(detalhes).toHaveTextContent('CartãoVisa final 7899');
     expect(detalhes).toHaveTextContent('Código de autorizaçãoAUT84K');
     expect(within(detalhes).getByRole('link', { name: 'Ver recebíveis' })).toHaveAttribute('href', '/cobrancas/recebiveis');

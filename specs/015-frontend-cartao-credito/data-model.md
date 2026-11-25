@@ -45,6 +45,7 @@ Ganha `Codigo` (imutável), recebido em `Emitir`; até 5 tentativas em colisão,
 - Formulário de pagamento: `nome`, `numero` (máscara em grupos de 4), `validade` (`MM/AA`), `cvv` (3 dígitos);
   só no estado do componente. Validação: titular preenchido; 16 dígitos e Luhn; formato e não vencida
   (Brasília); 3 dígitos. Após recusa, o CVV é limpo e o foco vai para ele; em `pagehide`, tudo é limpo.
+  Em falha de rede o CVV é mantido, para repetir com os mesmos dados. "Usar meu cartão" limpa o CVV no clique.
 
 ### Operação (`src/operacoes/`)
 

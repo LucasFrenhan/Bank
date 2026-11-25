@@ -114,7 +114,7 @@ describe('Ver o cartão', () => {
     expect(atual).toHaveTextContent('Fecha em 7 dez · Vence em 10 dez');
     expect(within(atual).getByRole('link', { name: 'Abrir fatura' })).toHaveAttribute('href', '/cartao/faturas/2026-12');
     expect(screen.getByRole('link', { name: 'Ver faturas' })).toHaveAttribute('href', '/cartao/faturas');
-    expect(document.title).toBe('Cartão · One Bank');
+    await waitFor(() => expect(document.title).toBe('Cartão · One Bank'));
   });
 
   it('erro na fatura atual fica só na região dela', async () => {

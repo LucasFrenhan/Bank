@@ -67,13 +67,14 @@ Campos "Nome impresso no cartão" (`cc-name`), "Número do cartão" (`cc-number`
 | --- | --- | --- | --- |
 | `cartao-nao-autorizado` | Cartão não autorizado | Confira os dados do cartão e digite o CVV de novo. | Ver os dados do meu cartão → `/cartao` |
 | `cartao-bloqueado-fatura-vencida` | Cartão bloqueado por fatura vencida | Pague a fatura para voltar a usar o cartão. | Ver faturas → `/cartao/faturas` |
-| `limite-cartao-insuficiente` | Limite insuficiente | Você tem R$ {disponível} de limite disponível. | Ver limite → `/cartao` |
+| `limite-cartao-insuficiente` | Limite insuficiente | Você tem R$ {disponível} de limite disponível. Se a consulta falhar: O valor passa do seu limite disponível. | Ver limite → `/cartao` |
 | `cobranca-nao-encontrada` | Cobrança não encontrada | Confira o link com quem enviou. | Ir para o início → `/` |
 | `cobranca-nao-pendente` | Esta cobrança não está mais disponível | Ela já foi paga ou cancelada. | Ir para o cartão → `/cartao` |
 | `cobranca-nao-pendente` (cancelar, paga) | Esta cobrança acabou de ser paga | Não é mais possível cancelar. | Ver pagamento → detalhe atualizado |
 | `cobranca-nao-pendente` (cancelar, cancelada) | Esta cobrança já foi cancelada | Veja a situação atualizada abaixo. | Ver cobranças → `/cobrancas` |
 | `rede` (emitir cobrança) | Não foi possível confirmar a emissão | Confira na lista se a cobrança foi criada antes de enviar de novo. | Ver cobranças → `/cobrancas` |
 | `cartao-nao-encontrado` | Você ainda não tem um cartão | Peça o seu para pagar esta cobrança. | Solicitar cartão → `/cartao` |
+| `cartao-nao-encontrado` (faturas) | Você ainda não tem um cartão | As faturas aparecem depois que você pedir o seu. | Solicitar cartão → `/cartao` |
 | `cartao-ja-existente` | Você já tem um cartão | Mostramos o seu cartão abaixo. | Ver cartão → o cartão na mesma tela |
 | `fatura-nao-encontrada` | Fatura não encontrada | Confira o mês na lista de faturas. | Ver faturas → `/cartao/faturas` |
 | `fatura-nao-disponivel` | Esta fatura não está disponível para pagamento | Veja a situação atualizada abaixo. | Ver faturas → `/cartao/faturas` |

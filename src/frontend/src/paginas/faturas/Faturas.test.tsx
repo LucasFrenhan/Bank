@@ -33,7 +33,7 @@ describe('Lista de faturas', () => {
     expect(links[1]).toHaveTextContent(/Dezembro de 2026Venceu em 10 dez · 10 dias de atrasoVencidaR\$\s1\.050,00/);
     expect(links[2]).toHaveTextContent(/Novembro de 2026Paga em 9 nov 2026PagaR\$\s742,30/);
     expect(links[1]).toHaveAttribute('href', '/cartao/faturas/2026-12');
-    expect(document.title).toBe('Faturas · One Bank');
+    await waitFor(() => expect(document.title).toBe('Faturas · One Bank'));
   });
 
   it('sem cartão leva à solicitação; erro e PJ', async () => {
@@ -160,7 +160,7 @@ describe('Pagar a fatura', () => {
     expect(await screen.findByText('Paga')).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Resumo' })).toHaveTextContent(/Valor pagoR\$\s1\.055,00/);
     expect(screen.getByText('Fatura paga')).toHaveAttribute('role', 'status');
-    expect(screen.getByRole('heading', { level: 1 })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1 })).toHaveFocus());
     expect(estado.chaves).toHaveLength(1);
   });
 

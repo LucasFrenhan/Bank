@@ -48,7 +48,7 @@ describe('Lista de recebíveis', () => {
     expect(within(lista).getAllByRole('button')).toHaveLength(1);
     const secoes = screen.getByRole('navigation', { name: 'Seções de cobranças' });
     expect(within(secoes).getByRole('link', { name: 'Recebíveis' })).toHaveAttribute('aria-current', 'page');
-    expect(document.title).toBe('Recebíveis · One Bank');
+    await waitFor(() => expect(document.title).toBe('Recebíveis · One Bank'));
   });
 
   it('filtro no endereço, páginas e vazio', async () => {

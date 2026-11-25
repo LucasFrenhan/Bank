@@ -31,7 +31,7 @@ describe('Lista de cobranças', () => {
     const secoes = screen.getByRole('navigation', { name: 'Seções de cobranças' });
     expect(within(secoes).getByRole('link', { name: 'Cobranças' })).toHaveAttribute('aria-current', 'page');
     expect(within(secoes).getByRole('link', { name: 'Recebíveis' })).toHaveAttribute('href', '/cobrancas/recebiveis');
-    expect(document.title).toBe('Cobranças · One Bank');
+    await waitFor(() => expect(document.title).toBe('Cobranças · One Bank'));
   });
 
   it('itens com descrição, situação, valor e link curto; filtro no endereço', async () => {
