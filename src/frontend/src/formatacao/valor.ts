@@ -88,3 +88,11 @@ export function centavosParaNumero(centavos: number): number {
 export function formatarCentavos(centavos: number): string {
   return formatarMoeda(centavos / 100);
 }
+
+export const TAXA_ANTECIPACAO_PERCENTUAL = 2;
+
+/** Taxa e líquido da antecipação, arredondando o meio centavo para cima, como a API (specs/015, research R8). */
+export function taxaAntecipacao(centavos: number): { taxa: number; liquido: number } {
+  const taxa = Math.floor((centavos * TAXA_ANTECIPACAO_PERCENTUAL + 50) / 100);
+  return { taxa, liquido: centavos - taxa };
+}

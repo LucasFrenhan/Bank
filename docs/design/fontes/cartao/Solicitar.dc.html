@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Solicitar cartão</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: {{dir}}; min-height: {{minH}}; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; box-sizing: border-box">
+<dc-import name="Menu" perfil="PF" ativo="Cartão" mobile="{{mobile}}" hint-size="240px,900px"></dc-import>
+<main style="flex: 1 1 auto; min-width: 0; padding: {{pad}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; max-width: 800px">
+<div><h1 style="margin: 0 0 8px; font-size: {{h1}}; line-height: 1.25; font-weight: 600">Peça o seu cartão de crédito</h1>
+<p style="margin: 0; font-size: 16px; line-height: 24px; color: #475569">Limite de R$ 5.000,00, pronto para usar na hora.</p></div>
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0">
+<legend style="padding: 0; margin-bottom: 12px; font-size: 14px; font-weight: 500">Escolha a bandeira</legend>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<sc-for list="{{opcoes}}" as="o" hint-placeholder-count="2">
+<button onClick="{{o.escolher}}" aria-pressed="{{o.marcado}}" style="flex: 1 1 240px; min-height: 96px; padding: 20px; border-radius: 16px; border: 2px solid {{o.borda}}; background: {{o.fundo}}; color: #0F172A; text-align: left; font: 600 18px Inter, sans-serif; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px"><span>{{o.nome}}</span><span style="font-size: 14px; color: #1D4ED8">{{o.selo}}</span></button>
+</sc-for>
+</div>
+</fieldset>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid #FEDF89; border-radius: 10px; background: #FFFAEB; font-size: 14px; line-height: 20px">
+<span style="color: #B54708; font-weight: 600">Escolha com calma</span>
+<span style="color: #475569">A bandeira não pode ser trocada depois, e cada CPF pode ter só um cartão.</span>
+</div>
+<a href="{{destino}}" style="display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 24px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; align-self: {{alinha}}">{{acao}}</a>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mobile":{"editor":null,"default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { b: 'Visa' }; }
+  renderVals() {
+    const m = this.props.mobile === true, b = this.state.b;
+    return {
+      mobile: m, dir: m ? 'column-reverse' : 'row', minH: m ? '1180px' : '900px', pad: m ? '24px 16px' : '40px 48px', h1: m ? '24px' : '32px', alinha: m ? 'stretch' : 'flex-start',
+      opcoes: ['Visa', 'Mastercard'].map((n) => ({ nome: n, marcado: n === b, borda: n === b ? '#1D4ED8' : '#E2E8F0', fundo: n === b ? '#EFF4FF' : '#FFFFFF', selo: n === b ? 'Selecionada' : '', escolher: () => this.setState({ b: n }) })),
+      acao: 'Solicitar cartão ' + b, destino: m ? 'M-Cartao.dc.html' : 'Main.dc.html',
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+.selo {
+  display: inline-block;
+  flex: none;
+  padding: 2px var(--espaco-2);
+  border-radius: var(--raio-pilula);
+  font: var(--texto-legenda);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.atencao {
+  background: var(--cor-atencao-suave);
+  color: var(--cor-atencao);
+}
+
+.entrada {
+  background: var(--cor-entrada-suave);
+  color: var(--cor-entrada);
+}
+
+.info {
+  background: var(--cor-primaria-suave);
+  color: var(--cor-primaria);
+}
+
+.erro {
+  background: var(--cor-erro-suave);
+  color: var(--cor-erro);
+}
+
+.neutro {
+  background: #f1f5f9;
+  color: var(--cor-texto-suave);
+}

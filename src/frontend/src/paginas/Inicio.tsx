@@ -17,6 +17,7 @@ import { useSessaoAtiva } from '../sessao/ContextoSessao';
 import { NOME_TIPO_CONTA } from '../sessao/permissoes';
 import estilos from './Autenticado.module.css';
 import { DadosDaConta } from './DadosDaConta';
+import { AvisoFatura } from './faturas/AvisoFatura';
 import { primeiroNome, useTitulo } from './comum';
 import { TextoAvisoCopia } from './TextoAvisoCopia';
 import { useCarteira } from './useCarteira';
@@ -65,6 +66,8 @@ function InicioPf({ carteira }: { carteira: MinhaCarteira }) {
         <h1>Olá, {primeiroNome(carteira.nomeTitular)}</h1>
         <Selo>{NOME_TIPO_CONTA.PessoaFisica}</Selo>
       </div>
+
+      <AvisoFatura />
 
       <div className={estilos.resumo}>
         <Saldo carteira={carteira}>

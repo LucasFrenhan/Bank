@@ -254,4 +254,5 @@ sem cartão: 404 `cartao-nao-encontrado`.
 
 ## Histórico
 
+- **1.1.0** (2026-11-24): código curto da cobrança; ver [spec 015](../../015-frontend-cartao-credito/contracts/cartoes-cobrancas-api.md).
 - **1.0.0** (2026-11-24): versão inicial (issue #22).

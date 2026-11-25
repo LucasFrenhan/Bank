@@ -1,0 +1,122 @@
+/* Faturas (specs/015; docs/design/fontes/cartao/Faturas e Fatura). */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-3);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--altura-alvo-minimo);
+  font: var(--texto-rotulo);
+  font-weight: 600;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--espaco-6);
+  align-items: start;
+}
+
+.quadro,
+.lancamentos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  min-width: 0;
+  padding: var(--espaco-6);
+}
+
+.lancamentos h2 {
+  font: var(--texto-h3);
+  font-weight: 600;
+}
+
+.apoio {
+  color: var(--cor-texto-suave);
+  font: var(--texto-corpo-m);
+}
+
+.valorGrande {
+  font: var(--texto-display);
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+.linhas {
+  margin: 0;
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espaco-1) var(--espaco-4);
+  padding: var(--espaco-3) 0;
+  border-top: 1px solid var(--cor-borda);
+  font: var(--texto-corpo-m);
+}
+
+.linha dt {
+  color: var(--cor-texto-suave);
+}
+
+.linha dd {
+  margin: 0;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.lancamentos ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lancamentos li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-1) var(--espaco-4);
+  padding: var(--espaco-3) 0;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.textoLancamento {
+  display: flex;
+  flex: 1 1 180px;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.forte {
+  font-weight: 500;
+}
+
+.legenda {
+  color: var(--cor-texto-suave);
+  font: var(--texto-legenda);
+}
+
+.valor {
+  margin-left: auto;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 1024px) {
+  .grade {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Recebíveis</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: {{dir}}; min-height: {{minH}}; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; box-sizing: border-box">
+<dc-import name="Menu" perfil="PJ" ativo="Cobranças" mobile="{{mobile}}" hint-size="240px,900px"></dc-import>
+<main style="flex: 1 1 auto; min-width: 0; padding: {{pad}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; max-width: 1200px">
+<h1 style="margin: 0; font-size: {{h1}}; line-height: 1.25; font-weight: 600">Cobranças</h1>
+<nav aria-label="Seções de cobranças" style="display: flex; gap: 24px; border-bottom: 1px solid #E2E8F0"><a href="{{lk.cobrancas}}" style="display: inline-flex; align-items: center; min-height: 44px; border-bottom: 2px solid transparent; color: #475569; font-size: 14px; font-weight: 500; text-decoration: none">Cobranças</a><a href="{{lk.eu}}" aria-current="page" style="display: inline-flex; align-items: center; min-height: 44px; border-bottom: 2px solid #1D4ED8; color: #1D4ED8; font-size: 14px; font-weight: 600; text-decoration: none">Recebíveis</a></nav>
+<div style="display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 10px; background: #E9EEF5; align-self: {{alinha}}"><sc-for list="{{filtros}}" as="f" hint-placeholder-count="4"><button onClick="{{f.escolher}}" aria-pressed="{{f.ativo}}" style="flex: 1 1 auto; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: {{f.fundo}}; color: {{f.cor}}; font: 500 14px Inter, sans-serif; cursor: pointer">{{f.nome}}</button></sc-for></div>
+<section aria-label="Lista de recebíveis" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden">
+<sc-for list="{{itens}}" as="i" hint-placeholder-count="4">
+<div style="border-top: {{i.borda}}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-height: 72px; padding: 12px 24px; box-sizing: border-box">
+<span style="flex: 1 1 180px; min-width: 0"><span style="display: block; font-size: 16px; line-height: 24px; font-weight: 500">{{i.descricao}}</span><span style="display: block; font-size: 12px; line-height: 16px; color: #475569">{{i.detalhe}}</span></span>
+<span style="padding: 2px 8px; border-radius: 999px; background: {{i.fundo}}; color: {{i.cor}}; font-size: 12px; line-height: 16px; font-weight: 600">{{i.situacao}}</span>
+<span style="min-width: 100px; text-align: right; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums">{{i.valor}}</span>
+<sc-if value="{{i.pode}}" hint-placeholder-val="{{ true }}"><button onClick="{{i.abrir}}" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #1D4ED8; font: 600 14px Inter, sans-serif; cursor: pointer">Antecipar</button></sc-if>
+</div>
+<sc-if value="{{i.aberto}}" hint-placeholder-val="{{ false }}"><div style="margin: 0 24px 20px; padding: 20px; border-radius: 10px; background: #F5F7FA; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 12px; max-width: 520px; box-sizing: border-box">
+<h2 style="margin: 0; font-size: 18px; line-height: 24px; font-weight: 600">Antecipar este recebível</h2>
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #475569">Valor</span><span style="font-weight: 500">{{i.valor}}</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #475569">Taxa (2%)</span><span style="font-weight: 500">− {{i.taxa}}</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 16px; padding-top: 12px; border-top: 1px solid #E2E8F0"><span style="font-weight: 600">Você recebe agora</span><span style="font-weight: 600; color: #047857">{{i.liquido}}</span></div>
+<p style="margin: 0; font-size: 12px; line-height: 16px; color: #475569">Sem antecipar, o valor integral cai em {{i.prevista}}. A antecipação não pode ser desfeita.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px"><button onClick="{{i.confirmar}}" style="flex: 1 1 180px; min-height: 48px; border-radius: 10px; border: 0; background: #1D4ED8; color: #FFFFFF; font: 600 16px Inter, sans-serif; cursor: pointer">Receber {{i.liquido}}</button><button onClick="{{i.fechar}}" style="flex: 1 1 100px; min-height: 48px; border-radius: 10px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #0F172A; font: 600 16px Inter, sans-serif; cursor: pointer">Voltar</button></div>
+</div></sc-if>
+</div>
+</sc-for>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mobile":{"editor":null,"default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { f: 'Todos', aberto: null, ant: {} }; }
+  renderVals() {
+    const m = this.props.mobile === true, at = this.state.f;
+    const c = { Pendente: ['#FFFAEB', '#B54708'], Antecipado: ['#EFF4FF', '#1D4ED8'], Liquidado: ['#ECFDF5', '#047857'] };
+    const l = [['Curso de barista', 'Pendente', 'R$ 480,00', 'R$ 9,60', 'R$ 470,40', '7 jan 2027'], ['Assinatura Mensal Café Especial', 'Pendente', 'R$ 299,90', 'R$ 6,00', 'R$ 293,90', '7 jan 2027'], ['Moedor manual', 'Antecipado', 'R$ 189,00', 'R$ 3,78', 'R$ 185,22', '6 jan 2027'], ['Kit 3 Pacotes', 'Liquidado', 'R$ 112,00', 'R$ 0,00', 'R$ 112,00', '20 nov 2026']];
+    const filtro = { Pendentes: 'Pendente', Antecipados: 'Antecipado', Liquidados: 'Liquidado' }[at];
+    const itens = l.map(([descricao, s0, valor, taxa, liquido, prevista]) => {
+      const situacao = this.state.ant[descricao] ? 'Antecipado' : s0;
+      return {
+        descricao, situacao, valor: situacao === 'Antecipado' ? liquido : valor, taxa, liquido, prevista, fundo: c[situacao][0], cor: c[situacao][1],
+        detalhe: situacao === 'Pendente' ? 'Previsto para ' + prevista : situacao === 'Antecipado' ? valor + ' menos taxa de ' + taxa : 'Recebido em ' + prevista,
+        pode: situacao === 'Pendente' && this.state.aberto !== descricao, aberto: situacao === 'Pendente' && this.state.aberto === descricao,
+        abrir: () => this.setState({ aberto: descricao }), fechar: () => this.setState({ aberto: null }),
+        confirmar: () => this.setState({ aberto: null, ant: { ...this.state.ant, [descricao]: true } }),
+      };
+    }).filter((i) => !filtro || i.situacao === filtro).map((i, n) => ({ ...i, borda: n ? '1px solid #E2E8F0' : '0' }));
+    return {
+      mobile: m, dir: m ? 'column-reverse' : 'row', minH: m ? '1180px' : '900px', pad: m ? '24px 16px' : '40px 48px', h1: m ? '24px' : '32px', alinha: m ? 'stretch' : 'flex-start', itens,
+      filtros: ['Todos', 'Pendentes', 'Antecipados', 'Liquidados'].map((nome) => ({ nome, ativo: nome === at, fundo: nome === at ? '#FFFFFF' : 'transparent', cor: nome === at ? '#0F172A' : '#475569', escolher: () => this.setState({ f: nome }) })),
+      lk: { cobrancas: m ? 'M-Cobrancas.dc.html' : 'Cobrancas.dc.html', eu: m ? 'M-Recebiveis.dc.html' : 'Recebiveis.dc.html' },
+    };
+  }
+}
+</script>
+</body>
+</html>

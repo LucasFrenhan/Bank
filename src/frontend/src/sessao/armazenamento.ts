@@ -1,3 +1,4 @@
+import { limparOperacoes } from '../operacoes/chaves';
 import { limparDadosDeTransferencia } from '../transferencia/armazenamento';
 import { decodificarClaims, type ClaimsSessao } from './claims';
 
@@ -65,4 +66,6 @@ export function removerSessao(): void {
 
   // A transferência em andamento e os comprovantes vivem no escopo da sessão (specs/007, FR-010).
   limparDadosDeTransferencia();
+  // Chaves de idempotência de pagamentos e antecipações (specs/015, research R6).
+  limparOperacoes();
 }

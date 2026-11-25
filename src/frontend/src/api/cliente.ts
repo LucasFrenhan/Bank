@@ -26,6 +26,30 @@ export type ExtratoPagina = Esquemas['ExtratoResposta'];
 export type ItemExtrato = Esquemas['ItemExtratoResposta'];
 export type Limites = Esquemas['LimitesResposta'];
 export type DirecaoExtrato = 'Entrada' | 'Saida';
+// Cartão, cobranças, faturas e recebíveis (specs/014 e specs/015-frontend-cartao-credito; contrato 1.1.0).
+export type CartaoCredito = Esquemas['CartaoResposta'];
+export type DadosCartao = Esquemas['DadosCartaoResposta'];
+export type Cobranca = Esquemas['CobrancaResposta'];
+export type PaginaCobrancas = Esquemas['PaginaCobrancasResposta'];
+export type PagamentoCobranca = Esquemas['PagamentoResposta'];
+export type Fatura = Esquemas['FaturaResposta'];
+export type FaturaDetalhada = Esquemas['FaturaDetalhadaResposta'];
+export type PaginaFaturas = Esquemas['PaginaFaturasResposta'];
+export type Recebivel = Esquemas['RecebivelResposta'];
+export type PaginaRecebiveis = Esquemas['PaginaRecebiveisResposta'];
+
+/** Dados digitados no pagamento: nunca guardados (specs/015, FR-008). */
+export interface CartaoDigitado {
+  nome: string;
+  numero: string;
+  validade: string;
+  cvv: string;
+}
+
+export interface ConsultaPagina {
+  pagina?: number;
+  tamanhoPagina?: number;
+}
 
 export interface NovaTransferencia {
   documentoDestino: string;
@@ -82,9 +106,16 @@ const cliente = createClient<paths>({
 });
 cliente.use(middlewareSessao);
 
+interface OpcoesChamada {
+  contexto?: ContextoErro;
+  sinal?: AbortSignal;
+  /** Códigos que fazem parte do fluxo e não geram log de falha (specs/015, research R10). */
+  esperados?: readonly string[] | 'todos';
+}
+
 async function chamar<T>(
   requisicao: () => Promise<{ data?: T; error?: unknown; response: Response }>,
-  opcoes: { contexto?: ContextoErro; sinal?: AbortSignal } = {},
+  opcoes: OpcoesChamada = {},
 ): Promise<Resultado<T>> {
   try {
     const { data, error, response } = await requisicao();
@@ -92,17 +123,28 @@ async function chamar<T>(
       return { ok: true, dados: data, status: response.status };
     }
 
-    return falhar(traduzirErro(response.status, error, opcoes.contexto));
+    return falhar(traduzirErro(response.status, error, opcoes.contexto), opcoes.esperados);
   } catch {
     if (opcoes.sinal?.aborted) {
       return { ok: false, erro: { codigo: CODIGO_CANCELADA, mensagem: '' } };
     }
 
-    return falhar(traduzirErro(null, null, opcoes.contexto));
+    return falhar(traduzirErro(null, null, opcoes.contexto), opcoes.esperados);
   }
 }
 
-function falhar<T>(erro: MensagemErro): Resultado<T> {
+function paginacao({ pagina, tamanhoPagina }: ConsultaPagina) {
+  return {
+    ...(pagina !== undefined ? { pagina: String(pagina) } : {}),
+    ...(tamanhoPagina !== undefined ? { tamanhoPagina: String(tamanhoPagina) } : {}),
+  };
+}
+
+function falhar<T>(erro: MensagemErro, esperados: OpcoesChamada['esperados'] = []): Resultado<T> {
+  if (esperados === 'todos' || esperados.includes(erro.codigo)) {
+    return { ok: false, erro };
+  }
+
   registrarFalhaApi({
     codigo: erro.codigo,
     ...(erro.status !== undefined ? { status: erro.status } : {}),
@@ -176,5 +218,96 @@ export const api = {
   obterTransferencia: (transferenciaId: string) =>
     chamar<Comprovante>(() =>
       cliente.GET('/api/v1/transferencias/{transferenciaId}', { params: { path: { transferenciaId } } }),
+    ),
+
+  /* ---------- Cartão (PF) ---------- */
+
+  solicitarCartao: (bandeira: string) =>
+    chamar<CartaoCredito>(() => cliente.POST('/api/v1/cartoes', { body: { bandeira } }), {
+      contexto: 'cartao',
+      esperados: ['cartao-ja-existente'],
+    }),
+
+  /** PF sem cartão: 404 `cartao-nao-encontrado`, que faz parte do fluxo. */
+  obterMeuCartao: () =>
+    chamar<CartaoCredito>(() => cliente.GET('/api/v1/cartoes/meu'), { contexto: 'cartao', esperados: ['cartao-nao-encontrado'] }),
+
+  /** Número e CVV: só em memória, no momento do pedido (specs/015, FR-007 e FR-008). */
+  obterDadosCartao: (sinal?: AbortSignal) =>
+    chamar<DadosCartao>(() => cliente.GET('/api/v1/cartoes/meu/dados', { cache: 'no-store', ...(sinal ? { signal: sinal } : {}) }), {
+      contexto: 'cartao',
+      ...(sinal ? { sinal } : {}),
+    }),
+
+  /* ---------- Cobranças ---------- */
+
+  emitirCobranca: (valor: number, descricao: string) =>
+    chamar<Cobranca>(() => cliente.POST('/api/v1/cobrancas', { body: { valor, descricao } }), { contexto: 'emissao' }),
+
+  listarCobrancas: ({ status, ...pagina }: ConsultaPagina & { status?: string }) =>
+    chamar<PaginaCobrancas>(
+      () => cliente.GET('/api/v1/cobrancas/minhas', { params: { query: { ...paginacao(pagina), ...(status ? { status } : {}) } } }),
+      { contexto: 'cobranca' },
+    ),
+
+  /** `silenciosa`: atualização automática, cujas falhas não geram log. */
+  consultarCobranca: (codigo: string, opcoes: { silenciosa?: boolean } = {}) =>
+    chamar<Cobranca>(() => cliente.GET('/api/v1/cobrancas/codigo/{codigo}', { params: { path: { codigo } } }), {
+      contexto: 'cobranca',
+      ...(opcoes.silenciosa ? { esperados: 'todos' as const } : {}),
+    }),
+
+  cancelarCobranca: (cobrancaId: string) =>
+    chamar<Cobranca>(() => cliente.POST('/api/v1/cobrancas/{cobrancaId}/cancelar', { params: { path: { cobrancaId } } }), {
+      contexto: 'cobranca',
+    }),
+
+  pagarCobranca: (cobrancaId: string, cartao: CartaoDigitado, chave: string) =>
+    chamar<PagamentoCobranca>(
+      () =>
+        cliente.POST('/api/v1/cobrancas/{cobrancaId}/pagar', {
+          params: { path: { cobrancaId }, header: { 'Idempotency-Key': chave } },
+          body: { nomeTitularCartao: cartao.nome, numeroCartao: cartao.numero, validade: cartao.validade, cvv: cartao.cvv },
+        }),
+      { contexto: 'pagamento' },
+    ),
+
+  /* ---------- Faturas (PF) ---------- */
+
+  listarFaturas: (pagina: ConsultaPagina = {}) =>
+    chamar<PaginaFaturas>(() => cliente.GET('/api/v1/faturas', { params: { query: paginacao(pagina) } }), {
+      contexto: 'fatura',
+      esperados: ['cartao-nao-encontrado'],
+    }),
+
+  obterFatura: (competencia: string) =>
+    chamar<FaturaDetalhada>(() => cliente.GET('/api/v1/faturas/{competencia}', { params: { path: { competencia } } }), {
+      contexto: 'fatura',
+    }),
+
+  pagarFatura: (competencia: string, chave: string) =>
+    chamar<FaturaDetalhada>(
+      () =>
+        cliente.POST('/api/v1/faturas/{competencia}/pagar', {
+          params: { path: { competencia }, header: { 'Idempotency-Key': chave } },
+        }),
+      { contexto: 'fatura' },
+    ),
+
+  /* ---------- Recebíveis (PJ) ---------- */
+
+  listarRecebiveis: ({ situacao, ...pagina }: ConsultaPagina & { situacao?: string }) =>
+    chamar<PaginaRecebiveis>(
+      () => cliente.GET('/api/v1/recebiveis', { params: { query: { ...paginacao(pagina), ...(situacao ? { situacao } : {}) } } }),
+      { contexto: 'recebivel' },
+    ),
+
+  anteciparRecebivel: (recebivelId: string, chave: string) =>
+    chamar<Recebivel>(
+      () =>
+        cliente.POST('/api/v1/recebiveis/{recebivelId}/antecipar', {
+          params: { path: { recebivelId }, header: { 'Idempotency-Key': chave } },
+        }),
+      { contexto: 'recebivel' },
     ),
 };

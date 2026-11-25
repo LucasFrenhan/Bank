@@ -1,4 +1,4 @@
-import { useId, useState, type InputHTMLAttributes, type ReactNode, type Ref } from 'react';
+import { useId, useState, type InputHTMLAttributes, type ReactNode, type Ref, type TextareaHTMLAttributes } from 'react';
 import { mascararDocumento } from '../../formatacao/mascaras';
 import type { TipoConta } from '../../sessao/claims';
 import estilos from './componentes.module.css';
@@ -49,6 +49,45 @@ export function CampoTexto({ rotulo, erros, dica, acessorioRotulo, acao, classNa
       ) : null}
       {dica ? (
         <div id={idDica} className={estilos.dica}>
+          {dica}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Texto de várias linhas, com o mesmo contrato de erros e dica do {@link CampoTexto} (specs/015, FR-010). */
+export function CampoTextoLongo({
+  rotulo,
+  erros,
+  dica,
+  ...props
+}: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'> & Pick<CampoTextoProps, 'rotulo' | 'erros' | 'dica'>) {
+  const id = useId();
+  const temErro = !!erros && erros.length > 0;
+  const descritores = [temErro ? `${id}-erro` : '', dica ? `${id}-dica` : ''].filter(Boolean).join(' ') || undefined;
+
+  return (
+    <div className={estilos.campo}>
+      <label htmlFor={id} className={estilos.rotulo}>
+        {rotulo}
+      </label>
+      <textarea
+        {...props}
+        id={id}
+        className={[estilos.entrada, estilos.entradaLonga].join(' ')}
+        aria-invalid={temErro || undefined}
+        aria-describedby={descritores}
+      />
+      {temErro ? (
+        <div id={`${id}-erro`} className={estilos.erroCampo}>
+          {erros.map((erro) => (
+            <span key={erro}>{erro}</span>
+          ))}
+        </div>
+      ) : null}
+      {dica ? (
+        <div id={`${id}-dica`} className={estilos.dica}>
           {dica}
         </div>
       ) : null}

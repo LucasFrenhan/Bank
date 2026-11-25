@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { Link } from 'react-router';
 import estilos from './componentes.module.css';
 
@@ -9,6 +9,7 @@ export interface BotaoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   largo?: boolean;
   /** Mostra progresso e bloqueia novos cliques (evita envio duplicado). */
   carregando?: boolean;
+  ref?: Ref<HTMLButtonElement>;
 }
 
 export function Botao({ variante = 'primario', largo, carregando, disabled, className, children, type = 'button', ...props }: BotaoProps) {

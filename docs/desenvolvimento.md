@@ -364,3 +364,12 @@ branch `<tipo>/<issue>-nome-curto`, por exemplo `docs/1-constituicao`.
 [Conventional Commits](https://www.conventionalcommits.org/):
 `tipo(escopo): descrição`, com `tipo` em `feat`, `fix`, `docs`, `test`, `refactor`,
 `build`, `ci` ou `chore`.
+
+## Cartão, cobranças, faturas e recebíveis no frontend (spec 015)
+
+- **Rotas:** PF em `/cartao`, `/cartao/faturas` e `/cartao/faturas/AAAA-MM`; PJ em `/cobrancas`, `/cobrancas/nova` e
+  `/cobrancas/recebiveis`; a cobrança, para todos, em `/c/XXXX-XXXX`.
+- **Código curto:** gerado pela API; a migration `AdicionarCodigoCobranca` preenche as cobranças antigas.
+- **Dados do cartão:** só em memória. `bank.operacoes` guarda apenas chaves de idempotência.
+- **e2e de faturas:** `prepararFatura` (`e2e/apoioCartao.ts`) antedata a fatura por `docker compose exec postgres psql`;
+  precisa do Compose da raiz em execução.

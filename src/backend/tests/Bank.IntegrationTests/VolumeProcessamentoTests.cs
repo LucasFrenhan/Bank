@@ -27,8 +27,8 @@ public class VolumeProcessamentoTests(CartoesApiFactory factory) : IClassFixture
             INSERT INTO faturas (id, cartao_id, competencia, inicio, fechamento, vencimento, total)
             SELECT uuidv7(), id, '2027-03-01', '2027-02-08', '2027-03-07', '2027-03-10', 0 FROM cartoes;
 
-            INSERT INTO cobrancas (id, lojista_usuario_id, carteira_destino_id, valor, descricao, status, pagador_usuario_id, codigo_bandeira, ultimos_digitos_cartao, codigo_autorizacao, paga_em, criado_em)
-            SELECT uuidv7(), {0}, {1}, 1, 'Volume', 'Paga', c.usuario_id, '001', '0000', 'ABC123', '2027-03-01T12:00:00Z', '2027-03-01T12:00:00Z' FROM cartoes c CROSS JOIN generate_series(1, 10);
+            INSERT INTO cobrancas (id, codigo, lojista_usuario_id, carteira_destino_id, valor, descricao, status, pagador_usuario_id, codigo_bandeira, ultimos_digitos_cartao, codigo_autorizacao, paga_em, criado_em)
+            SELECT uuidv7(), 'VVV' || translate(lpad((row_number() OVER ())::text, 5, '0'), '01', 'AB'), {0}, {1}, 1, 'Volume', 'Paga', c.usuario_id, '001', '0000', 'ABC123', '2027-03-01T12:00:00Z', '2027-03-01T12:00:00Z' FROM cartoes c CROSS JOIN generate_series(1, 10);
 
             INSERT INTO autorizacoes_cartao (id, cobranca_id, pagador_usuario_id, cartao_id, codigo_bandeira, ultimos_digitos, valor, resultado, codigo_autorizacao, chave_idempotencia, criado_em)
             SELECT uuidv7(), b.id, b.pagador_usuario_id, c.id, '001', '0000', 1, 'Aprovada', 'ABC123', gen_random_uuid(), b.paga_em FROM cobrancas b JOIN cartoes c ON c.usuario_id = b.pagador_usuario_id;

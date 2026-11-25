@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import type { ContaBancaria } from '../api/cliente';
 import type { TipoConta } from '../sessao/claims';
-import { carteira, contaBancaria, extratoDe, itemExtrato, problema, titular, TRACE_ID } from '../testes/handlers';
+import { carteira, contaBancaria, extratoDe, fatura, itemExtrato, paginado, problema, titular, TRACE_ID } from '../testes/handlers';
 import { renderizarApp } from '../testes/renderizar';
 import { servidor } from '../testes/setup';
 
@@ -165,7 +165,7 @@ describe('Início — movimentações reais (specs/007: US5; FR-022 a FR-024)', 
     expect(within(secao).getByRole('link', { name: 'Ver tudo' })).toHaveAttribute('href', '/extrato?direcao=entradas');
   });
 
-  it('navegação PF: Transferir e Extrato ativos; PJ: Recebimentos leva ao extrato filtrado e Cobranças continua "Em breve"', async () => {
+  it('navegação PF: Transferir e Extrato ativos; PJ: Recebimentos leva ao extrato filtrado e Cobranças está ativa', async () => {
     const pf = renderizarApp('/', { sessao: 'PessoaFisica' });
     const menuPf = await screen.findByRole('navigation', { name: 'Menu principal' });
     expect(within(menuPf).getByRole('link', { name: 'Transferir' })).toHaveAttribute('href', '/transferir');
@@ -180,7 +180,69 @@ describe('Início — movimentações reais (specs/007: US5; FR-022 a FR-024)', 
     renderizarApp('/', { sessao: 'PessoaJuridica' });
     const menuPj = await screen.findByRole('navigation', { name: 'Menu principal' });
     expect(within(menuPj).getByRole('link', { name: 'Recebimentos' })).toHaveAttribute('href', '/extrato?direcao=entradas');
-    expect(within(menuPj).getByText('Cobranças').closest('[aria-disabled]')).toHaveAttribute('aria-disabled', 'true');
+    expect(within(menuPj).getByRole('link', { name: 'Cobranças' })).toHaveAttribute('href', '/cobrancas');
+    expect(within(menuPj).queryByText(/Em breve/)).not.toBeInTheDocument();
+  });
+});
+
+/** Aviso de fatura (specs/015, FR-019a). */
+describe('Início — aviso de fatura', () => {
+  const VENCIDA = { situacao: 'Vencida', total: 1000, diasAtraso: 10, juros: 50, valorAPagar: 1050 };
+  const DISPONIVEL = { situacao: 'Disponivel', total: 299.9, valorAPagar: 299.9 };
+
+  async function aviso(faturas: object[]) {
+    servidor.use(paginado('/api/v1/faturas', faturas));
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+    return screen.findByRole('region', { name: 'Aviso de fatura' });
+  }
+
+  it('disponível: valor, vencimento e link', async () => {
+    const regiao = await aviso([fatura({ competencia: '2027-01' }), fatura(DISPONIVEL)]);
+    expect(regiao).toHaveTextContent(/Fatura de dezembro — R\$\s299,90, vence em 10 dez\./);
+    expect(within(regiao).getByRole('link', { name: 'Ver fatura' })).toHaveAttribute('href', '/cartao/faturas/2026-12');
+  });
+
+  it('vencida: valor de hoje e cartão bloqueado', async () => {
+    const regiao = await aviso([fatura(VENCIDA)]);
+    expect(regiao).toHaveTextContent(/Fatura vencida — R\$\s1\.050,00 hoje\./);
+    expect(regiao).toHaveTextContent('O cartão está bloqueado.');
+  });
+
+  it('mais de uma: a mais antiga', async () => {
+    const regiao = await aviso([fatura({ ...DISPONIVEL, competencia: '2027-01' }), fatura({ ...VENCIDA, competencia: '2026-12' }), fatura({ ...VENCIDA, competencia: '2026-11' })]);
+    expect(within(regiao).getByRole('link', { name: 'Ver fatura' })).toHaveAttribute('href', '/cartao/faturas/2026-11');
+  });
+
+  it.each([
+    ['nada a pagar', () => paginado('/api/v1/faturas', [fatura(), fatura({ competencia: '2026-11', situacao: 'Paga' }), fatura({ competencia: '2026-10', situacao: 'Fechada' })])],
+    ['sem cartão', () => http.get('*/api/v1/faturas', () => problema('cartao-nao-encontrado', 404))],
+    ['erro', () => http.get('*/api/v1/faturas', () => problema('x', 500))],
+    ['rede', () => http.get('*/api/v1/faturas', () => HttpResponse.error())],
+  ])('%s: início como antes', async (_, handler) => {
+    let respondida = false;
+    servidor.use(handler());
+    servidor.events.on('request:start', ({ request }) => {
+      if (request.url.includes('/api/v1/faturas')) respondida = true;
+    });
+    renderizarApp('/', { sessao: 'PessoaFisica' });
+    await screen.findByRole('heading', { level: 1, name: 'Olá, Lucas' });
+    await waitFor(() => expect(respondida).toBe(true));
+    await screen.findByText('Saldo inicial');
+
+    expect(screen.queryByRole('region', { name: 'Aviso de fatura' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    servidor.events.removeAllListeners();
+  });
+
+  it('PJ não consulta faturas', async () => {
+    let consultas = 0;
+    servidor.use(
+      http.get('*/api/v1/carteiras/minha', () => HttpResponse.json(carteira('PessoaJuridica'))),
+      http.get('*/api/v1/faturas', () => { consultas++; return problema('acesso-negado', 403); }),
+    );
+    renderizarApp('/', { sessao: 'PessoaJuridica' });
+    await screen.findByRole('heading', { level: 1, name: 'Empresa Exemplo Ltda' });
+    expect(consultas).toBe(0);
   });
 });
 

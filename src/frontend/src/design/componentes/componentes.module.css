@@ -128,6 +128,11 @@
   border-width: 2px;
 }
 
+.entradaLonga {
+  padding: var(--espaco-3) var(--espaco-4);
+  resize: vertical;
+}
+
 .entradaComAcao {
   padding-right: 56px;
 }

@@ -45,8 +45,21 @@ describe('configuração da telemetria (FR-019a–d; research R7)', () => {
     registrarNavegacao('/transferencias/019a8f55-2222-7890-abcd-ef1234567890');
     registrarNavegacao('/extrato?direcao=entradas&pagina=2');
     registrarNavegacao('/transferir/confirmar');
+    // Código da cobrança e mês da fatura fora da rota registrada (specs/015, research R10).
+    registrarNavegacao('/c/7K3F-9QXM');
+    registrarNavegacao('/c/7k3f9qxm/');
+    registrarNavegacao('/cartao/faturas/2026-12');
+    registrarNavegacao('/cartao/faturas');
     definirTelemetria(null);
 
-    expect(eventos).toEqual(['/transferencias/:id', '/extrato', '/transferir/confirmar']);
+    expect(eventos).toEqual([
+      '/transferencias/:id',
+      '/extrato',
+      '/transferir/confirmar',
+      '/c/:codigo',
+      '/c/:codigo',
+      '/cartao/faturas/:competencia',
+      '/cartao/faturas',
+    ]);
   });
 });

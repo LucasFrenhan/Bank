@@ -4,6 +4,7 @@ import { api, type DirecaoExtrato, type ItemExtrato } from '../api/cliente';
 import type { MensagemErro } from '../api/erros';
 import { Botao } from '../design/componentes/Botao';
 import { AvisoErro, Cartao, Carregando, EstadoVazio } from '../design/componentes/Feedback';
+import { Filtros } from '../design/componentes/Filtros';
 import { IconeEntrada, IconeSaida } from '../design/componentes/Icones';
 import { ListaLancamentos } from '../design/componentes/ListaLancamentos';
 import { chaveDia, formatarDataCurta, formatarHora, rotuloDia } from '../formatacao/data';
@@ -70,19 +71,7 @@ export function Extrato() {
           <h1>Extrato</h1>
           {carteira.estado === 'pronta' ? <p className={estilos.saldo}>Saldo atual {formatarMoeda(carteira.carteira.saldo)}</p> : null}
         </div>
-        <div className={estilos.filtros} role="group" aria-label="Filtrar lançamentos">
-          {FILTROS.map(({ rotulo, valor }) => (
-            <button
-              key={rotulo}
-              type="button"
-              className={estilos.filtro}
-              aria-pressed={filtro === valor}
-              onClick={() => irPara(valor, 1)}
-            >
-              {rotulo}
-            </button>
-          ))}
-        </div>
+        <Filtros rotulo="Filtrar lançamentos" opcoes={FILTROS} atual={filtro} aoEscolher={(valor) => irPara(valor, 1)} />
       </div>
 
       {desktop ? (

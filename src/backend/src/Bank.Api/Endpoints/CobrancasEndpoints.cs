@@ -11,7 +11,7 @@ namespace Bank.Api.Endpoints;
 
 /// <summary>
 /// Cobranças da PJ e pagamento com cartão da PF (specs/014-cartao-credito-cobrancas, US2 e US3;
-/// contracts/cartoes-cobrancas-api.md). Só transporte.
+/// contracts/cartoes-cobrancas-api.md) e código curto (specs/015, contrato 1.1.0). Só transporte.
 /// </summary>
 public static class CobrancasEndpoints
 {
@@ -41,6 +41,16 @@ public static class CobrancasEndpoints
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden);
+
+        grupo.MapGet("/codigo/{codigo}", ConsultarPorCodigoAsync)
+            .RequireAuthorization(AutenticacaoExtensions.PoliticaUsuarioAutenticado)
+            .WithName("ConsultarCobrancaPorCodigo")
+            .WithSummary("Dados de uma cobrança pelo código curto do link (XXXX-XXXX).")
+            .WithDescription("Aceita minúsculas, espaços e o código sem hífen. Mesma resposta e visibilidade da consulta pelo identificador; código malformado ou inexistente = 404.")
+            .Produces<CobrancaResposta>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         grupo.MapGet("/{cobrancaId}", ConsultarAsync)
             .RequireAuthorization(AutenticacaoExtensions.PoliticaUsuarioAutenticado)
@@ -125,6 +135,17 @@ public static class CobrancasEndpoints
         return resultado.Sucesso ? TypedResults.Ok(CobrancaResposta.De(resultado.Valor)) : resultado.ParaProblema();
     }
 
+    private static async Task<IResult> ConsultarPorCodigoAsync(string codigo, ClaimsPrincipal usuario, ConsultarCobrancaPorCodigo casoDeUso, CancellationToken cancellationToken)
+    {
+        if (!usuario.TentarObterUsuarioId(out var usuarioId))
+        {
+            return TypedResults.Forbid();
+        }
+
+        var resultado = await casoDeUso.ExecutarAsync(new ConsultarCobrancaPorCodigoConsulta(usuarioId, codigo), cancellationToken);
+        return resultado.Sucesso ? TypedResults.Ok(CobrancaResposta.De(resultado.Valor)) : resultado.ParaProblema();
+    }
+
     private static async Task<IResult> CancelarAsync(string cobrancaId, ClaimsPrincipal usuario, CancelarCobranca casoDeUso, CancellationToken cancellationToken)
     {
         if (!usuario.TentarObterUsuarioId(out var usuarioId))
@@ -172,6 +193,7 @@ public static class CobrancasEndpoints
 
     public sealed record CobrancaResposta(
         Guid CobrancaId,
+        string Codigo,
         LojistaResposta Lojista,
         decimal Valor,
         string Descricao,
@@ -189,6 +211,7 @@ public static class CobrancasEndpoints
             var dados = detalhe.Dados;
             return new CobrancaResposta(
                 dados.CobrancaId.Valor,
+                dados.Codigo.ToString(),
                 new LojistaResposta(dados.LojistaUsuarioId.Valor, dados.LojistaNome, dados.LojistaDocumento),
                 dados.Valor,
                 dados.Descricao,

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Cobranças</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: {{dir}}; min-height: {{minH}}; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; box-sizing: border-box">
+<dc-import name="Menu" perfil="PJ" ativo="Cobranças" mobile="{{mobile}}" hint-size="240px,900px"></dc-import>
+<main style="flex: 1 1 auto; min-width: 0; padding: {{pad}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; max-width: 1200px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px"><h1 style="margin: 0; font-size: {{h1}}; line-height: 1.25; font-weight: 600">Cobranças</h1><a href="{{lk.nova}}" style="display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none">Nova cobrança</a></div>
+<nav aria-label="Seções de cobranças" style="display: flex; gap: 24px; border-bottom: 1px solid #E2E8F0"><a href="{{lk.eu}}" aria-current="page" style="display: inline-flex; align-items: center; min-height: 44px; border-bottom: 2px solid #1D4ED8; color: #1D4ED8; font-size: 14px; font-weight: 600; text-decoration: none">Cobranças</a><a href="{{lk.recebiveis}}" style="display: inline-flex; align-items: center; min-height: 44px; border-bottom: 2px solid transparent; color: #475569; font-size: 14px; font-weight: 500; text-decoration: none">Recebíveis</a></nav>
+<div style="display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 10px; background: #E9EEF5; align-self: {{alinha}}"><sc-for list="{{filtros}}" as="f" hint-placeholder-count="4"><button onClick="{{f.escolher}}" aria-pressed="{{f.ativo}}" style="flex: 1 1 auto; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: {{f.fundo}}; color: {{f.cor}}; font: 500 14px Inter, sans-serif; cursor: pointer">{{f.nome}}</button></sc-for></div>
+<section aria-label="Lista de cobranças" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden">
+<sc-for list="{{itens}}" as="i" hint-placeholder-count="5">
+<a href="{{lk.detalhe}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-height: 72px; padding: 12px 24px; box-sizing: border-box; border-top: {{i.borda}}; color: #0F172A; text-decoration: none">
+<span style="flex: 1 1 180px; min-width: 0"><span style="display: block; font-size: 16px; line-height: 24px; font-weight: 500">{{i.descricao}}</span><span style="display: block; font-size: 12px; line-height: 16px; color: #475569">{{i.data}}</span></span>
+<span style="padding: 2px 8px; border-radius: 999px; background: {{i.fundo}}; color: {{i.cor}}; font-size: 12px; line-height: 16px; font-weight: 600">{{i.status}}</span>
+<span style="min-width: 100px; text-align: right; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums">{{i.valor}}</span>
+</a>
+</sc-for>
+</section>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; color: #475569"><span>Página 1 de 1 · 20 por página</span></div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mobile":{"editor":null,"default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { f: 'Todas' }; }
+  renderVals() {
+    const m = this.props.mobile === true, at = this.state.f;
+    const k = (n) => (m ? 'M-' : '') + n + '.dc.html';
+    const c = { Pendente: ['#FFFAEB', '#B54708'], Paga: ['#ECFDF5', '#047857'], Cancelada: ['#F1F5F9', '#475569'] };
+    const l = [['Assinatura Mensal Café Especial', 'Hoje, 13:30', 'Pendente', 'R$ 299,90'], ['Curso de barista', 'Hoje, 09:12', 'Paga', 'R$ 480,00'], ['Moedor manual', 'Ontem, 17:45', 'Paga', 'R$ 189,00'], ['Encomenda 218', '21 nov, 10:02', 'Cancelada', 'R$ 72,50'], ['Kit 3 Pacotes', '20 nov, 15:20', 'Paga', 'R$ 112,00']];
+    const filtro = { Pendentes: 'Pendente', Pagas: 'Paga', Canceladas: 'Cancelada' }[at];
+    return {
+      mobile: m, dir: m ? 'column-reverse' : 'row', minH: m ? '1180px' : '900px', pad: m ? '24px 16px' : '40px 48px', h1: m ? '24px' : '32px', alinha: m ? 'stretch' : 'flex-start',
+      filtros: ['Todas', 'Pendentes', 'Pagas', 'Canceladas'].map((nome) => ({ nome, ativo: nome === at, fundo: nome === at ? '#FFFFFF' : 'transparent', cor: nome === at ? '#0F172A' : '#475569', escolher: () => this.setState({ f: nome }) })),
+      itens: l.filter((x) => !filtro || x[2] === filtro).map(([descricao, data, status, valor], i) => ({ descricao, data, status, valor, fundo: c[status][0], cor: c[status][1], borda: i ? '1px solid #E2E8F0' : '0' })),
+      lk: { nova: k('NovaCobranca'), detalhe: k('Cobranca'), recebiveis: k('Recebiveis'), eu: k('Cobrancas') },
+    };
+  }
+}
+</script>
+</body>
+</html>

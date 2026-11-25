@@ -1,4 +1,4 @@
-import { centavosParaNumero, ERROS_VALOR, formatarCentavos, interpretarValor, saldoEmCentavos } from './valor';
+import { centavosParaNumero, ERROS_VALOR, formatarCentavos, interpretarValor, saldoEmCentavos, taxaAntecipacao } from './valor';
 
 /** specs/007-frontend-transferencias, data-model "Interpretação de valor" (research R3). */
 describe('interpretarValor', () => {
@@ -55,5 +55,17 @@ describe('centavos', () => {
     expect(centavosParaNumero(4590)).toBe(45.9);
     expect(centavosParaNumero(1)).toBe(0.01);
     expect(JSON.stringify(centavosParaNumero(123456))).toBe('1234.56');
+  });
+});
+
+describe('taxaAntecipacao (specs/015, research R8)', () => {
+  it.each([
+    [29990, 600, 29390],
+    [1, 0, 1],
+    [10000, 200, 9800],
+    [25, 1, 24],
+    [24, 0, 24],
+  ])('%i centavos', (centavos, taxa, liquido) => {
+    expect(taxaAntecipacao(centavos)).toEqual({ taxa, liquido });
   });
 });

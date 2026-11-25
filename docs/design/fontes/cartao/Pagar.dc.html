@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Pagar cobrança</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="min-height: {{minH}}; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; box-sizing: border-box; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 0 {{lado}}; background: #FFFFFF; border-bottom: 1px solid #E2E8F0">
+<a href="{{lk.cartao}}" aria-label="Voltar ao cartão" style="display: grid; place-items: center; width: 44px; height: 44px; color: #0F172A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a>
+<h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Pagar cobrança</h1>
+</header>
+<main style="width: 100%; max-width: 1040px; margin: 0 auto; padding: {{pad}}; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<section aria-label="Cobrança" style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div><div style="font-size: 14px; color: #475569">Valor</div><div style="font-size: 40px; line-height: 48px; font-weight: 600; font-variant-numeric: tabular-nums">R$ 299,90</div></div>
+<div style="border-top: 1px solid #E2E8F0; padding-top: 16px"><div style="font-size: 14px; color: #475569">Para</div><div style="font-size: 16px; font-weight: 500">Cafeteria Grão Especial Ltda</div><div style="font-size: 14px; color: #475569">CNPJ 98.765.432/0001-99</div></div>
+<div style="border-top: 1px solid #E2E8F0; padding-top: 16px"><div style="font-size: 14px; color: #475569">Descrição</div><div style="font-size: 16px; line-height: 24px">Assinatura Mensal Café Especial - Kit 3 Pacotes</div></div>
+</section>
+<section aria-label="Dados do cartão" style="flex: 1 1 360px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px"><h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Cartão One Bank</h2><button onClick="{{usar}}" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #1D4ED8; font: 600 14px Inter, sans-serif; cursor: pointer">Usar meu cartão</button></div>
+<sc-if value="{{temAviso}}" hint-placeholder-val="{{ false }}"><div role="alert" style="display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid #FEDF89; border-radius: 10px; background: #FFFAEB; font-size: 14px; line-height: 20px"><span style="color: #B54708; font-weight: 600">{{aviso.titulo}}</span><span style="color: #475569">{{aviso.texto}}</span><a href="{{aviso.href}}" style="font-weight: 600; text-decoration: none; min-height: 24px">{{aviso.link}}</a></div></sc-if>
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="nome" style="font-size: 14px; font-weight: 500">Nome impresso no cartão</label><input id="nome" readonly value="{{f.nome}}" style="min-height: 48px; padding: 0 16px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px Inter, sans-serif; box-sizing: border-box; width: 100%"></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="numero" style="font-size: 14px; font-weight: 500">Número do cartão</label><input id="numero" readonly value="{{f.numero}}" style="min-height: 48px; padding: 0 16px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px 'JetBrains Mono', monospace; box-sizing: border-box; width: 100%"></div>
+<div style="display: flex; gap: 16px">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px"><label for="validade" style="font-size: 14px; font-weight: 500">Validade</label><input id="validade" readonly value="{{f.validade}}" placeholder="MM/AA" style="min-height: 48px; padding: 0 16px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px 'JetBrains Mono', monospace; box-sizing: border-box; width: 100%"></div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px"><label for="cvv" style="font-size: 14px; font-weight: 500">CVV</label><input id="cvv" readonly placeholder="3 dígitos" style="min-height: 48px; padding: 0 16px; border: {{f.bordaCvv}}; border-radius: 10px; font: 400 16px 'JetBrains Mono', monospace; box-sizing: border-box; width: 100%"></div>
+</div>
+<a href="{{lk.comprovante}}" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none">Pagar R$ 299,90</a>
+<p style="margin: 0; font-size: 12px; line-height: 16px; color: #475569">Os dados do cartão não ficam guardados. Se a conexão cair, pode tentar de novo: a cobrança não é paga duas vezes.</p>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"recusa":{"editor":"enum","options":["nenhuma","não autorizado","fatura vencida","limite"],"default":"nenhuma","section":"Estado"},"mobile":{"editor":null,"default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { u: false }; }
+  renderVals() {
+    const m = this.props.mobile === true, u = this.state.u, r = this.props.recusa ?? 'nenhuma';
+    const k = (n) => (m ? 'M-' : '') + n + '.dc.html';
+    const cartao = m ? 'M-Cartao.dc.html' : 'Main.dc.html';
+    const avisos = {
+      'não autorizado': { titulo: 'Cartão não autorizado', texto: 'Confira os dados do cartão e digite o CVV de novo.', link: 'Ver os dados do meu cartão', href: cartao },
+      'fatura vencida': { titulo: 'Cartão bloqueado por fatura vencida', texto: 'Pague a fatura para voltar a usar o cartão.', link: 'Ver faturas', href: k('Faturas') },
+      'limite': { titulo: 'Limite insuficiente', texto: 'Você tem R$ 150,00 de limite disponível.', link: 'Ver limite', href: cartao },
+    };
+    return {
+      minH: m ? '1180px' : '900px', lado: m ? '8px' : '32px', pad: m ? '24px 16px' : '48px 32px',
+      usar: () => this.setState({ u: true }),
+      f: { nome: u ? 'LUCAS SILVA' : '', numero: u ? '4000 0012 3456 7899' : '', validade: u ? '11/31' : '', bordaCvv: u ? '2px solid #1D4ED8' : '1px solid #CBD5E1' },
+      temAviso: r !== 'nenhuma', aviso: avisos[r] ?? { titulo: '', texto: '', link: '', href: cartao },
+      lk: { cartao, comprovante: k('Comprovante') },
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -7,6 +7,7 @@ namespace Bank.Application.Abstracoes;
 /// <summary>Cobrança com o lojista; a Application decide o que cada pessoa pode ver (FR-011).</summary>
 public sealed record DadosCobranca(
     CobrancaId CobrancaId,
+    CodigoCobranca Codigo,
     UsuarioId LojistaUsuarioId,
     string LojistaNome,
     string LojistaDocumento,
@@ -30,6 +31,8 @@ public sealed record Pagina<T>(IReadOnlyList<T> Itens, int TotalItens);
 public interface ICobrancaConsultas
 {
     Task<DadosCobranca?> ObterAsync(CobrancaId cobrancaId, CancellationToken cancellationToken);
+
+    Task<DadosCobranca?> ObterPorCodigoAsync(CodigoCobranca codigo, CancellationToken cancellationToken);
 
     /// <summary>Emitidas pelo lojista, das mais novas para as mais antigas.</summary>
     Task<Pagina<DadosCobranca>> ListarDoLojistaAsync(UsuarioId lojista, StatusCobranca? status, int deslocamento, int quantidade, CancellationToken cancellationToken);

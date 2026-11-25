@@ -19,35 +19,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.filtros {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  gap: var(--espaco-1);
-  width: 100%;
-  padding: var(--espaco-1);
-  border-radius: var(--raio-controle);
-  background: #e9eef5;
-}
-
-.filtro {
-  min-height: var(--altura-alvo-minimo);
-  padding: 0 var(--espaco-4);
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--cor-texto-suave);
-  font: var(--texto-rotulo);
-  cursor: pointer;
-}
-
-.filtro[aria-pressed='true'] {
-  background: var(--cor-superficie);
-  color: var(--cor-texto);
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12);
-}
-
 .cartao {
   overflow: hidden;
 }
@@ -207,10 +178,4 @@
   display: flex;
   justify-content: center;
   padding: var(--espaco-6) var(--espaco-4);
-}
-
-@media (min-width: 1024px) {
-  .filtros {
-    width: auto;
-  }
 }

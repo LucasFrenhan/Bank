@@ -12,6 +12,9 @@ public enum ResultadoGravacao
 
     /// <summary>O número derivado já pertence a outro cartão.</summary>
     NumeroDeCartaoDuplicado,
+
+    /// <summary>O código sorteado já pertence a outra cobrança (specs/015-frontend-cartao-credito, research R1).</summary>
+    CodigoDeCobrancaDuplicado,
 }
 
 /// <summary>

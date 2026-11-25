@@ -1,0 +1,22 @@
+/* Recebíveis (specs/015; docs/design/fontes/cartao/Recebiveis). */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.confirmacao {
+  max-width: 568px;
+  padding: 0 var(--espaco-6) var(--espaco-5);
+}
+
+.nota {
+  color: var(--cor-texto-suave);
+  font: var(--texto-legenda);
+}
+
+@media (max-width: 479px) {
+  .confirmacao {
+    padding: 0 var(--espaco-4) var(--espaco-4);
+  }
+}

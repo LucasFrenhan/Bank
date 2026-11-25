@@ -64,6 +64,7 @@ public static class DependencyInjection
         services.AddScoped<ExibirDadosCartao>();
         services.AddScoped<EmitirCobranca>();
         services.AddScoped<ConsultarCobranca>();
+        services.AddScoped<ConsultarCobrancaPorCodigo>();
         services.AddScoped<ListarMinhasCobrancas>();
         services.AddScoped<CancelarCobranca>();
         services.AddScoped<PagarCobranca>();

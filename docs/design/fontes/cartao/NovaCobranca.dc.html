@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Nova cobrança</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="min-height: {{minH}}; background: #F5F7FA; font-family: Inter, system-ui, sans-serif; color: #0F172A; box-sizing: border-box; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 0 {{lado}}; background: #FFFFFF; border-bottom: 1px solid #E2E8F0">
+<a href="{{lk.lista}}" aria-label="Voltar às cobranças" style="display: grid; place-items: center; width: 44px; height: 44px; color: #0F172A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a>
+<h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Nova cobrança</h1>
+</header>
+<main style="width: 100%; max-width: 640px; margin: 0 auto; padding: {{pad}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<section aria-label="Dados da cobrança" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="valor" style="font-size: 14px; font-weight: 500">Valor</label><input id="valor" readonly value="R$ 299,90" style="min-height: 56px; padding: 0 16px; border: 1px solid #CBD5E1; border-radius: 10px; font: 600 24px Inter, sans-serif; box-sizing: border-box; width: 100%"><span style="font-size: 12px; line-height: 16px; color: #475569">Mínimo de R$ 0,01.</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="display: flex; justify-content: space-between; font-size: 14px"><label for="desc" style="font-weight: 500">Descrição</label><span style="font-size: 12px; color: #475569">47/200</span></div><textarea id="desc" readonly rows="3" style="padding: 12px 16px; border: 1px solid #CBD5E1; border-radius: 10px; font: 400 16px/24px Inter, sans-serif; box-sizing: border-box; width: 100%; resize: none">Assinatura Mensal Café Especial - Kit 3 Pacotes</textarea></div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid #C7D7FE; border-radius: 10px; background: #EFF4FF; font-size: 14px; line-height: 20px"><span style="font-weight: 600">Quando você recebe</span><span style="color: #475569">O valor integral cai em 30 dias úteis depois do pagamento. Para receber antes, a taxa é de 2%.</span></div>
+</section>
+<a href="{{lk.detalhe}}" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none">Emitir cobrança</a>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mobile":{"editor":null,"default":false},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const m = this.props.mobile === true;
+    const k = (n) => (m ? 'M-' : '') + n + '.dc.html';
+    return { minH: m ? '1180px' : '900px', lado: m ? '8px' : '32px', pad: m ? '24px 16px' : '48px 32px', lk: { lista: k('Cobrancas'), detalhe: k('Cobranca') } };
+  }
+}
+</script>
+</body>
+</html>
