@@ -1,4 +1,4 @@
-import { CHAVE_SESSAO, removerSessao } from '../sessao/armazenamento';
+import { removerSessao } from '../sessao/armazenamento';
 import { assinatura, gerarChave, prepararConfirmacao } from './chave';
 import {
   CHAVE_COMPROVANTES,
@@ -103,7 +103,6 @@ describe('armazenamento da transferência (research R4)', () => {
   });
 
   it('removerSessao() apaga a transferência e os comprovantes (FR-010)', () => {
-    sessionStorage.setItem(CHAVE_SESSAO, '{}');
     salvarTransferencia({ ...TRANSFERENCIA_VAZIA, documento: 'x' });
     guardarComprovante(comprovante('t1'));
 

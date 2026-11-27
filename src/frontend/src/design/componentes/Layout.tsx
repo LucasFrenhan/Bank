@@ -90,7 +90,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </li>
           ))}
         </ul>
-        <button type="button" className={[estilos.itemLateral, estilos.sairLateral].join(' ')} onClick={sair}>
+        <button type="button" className={[estilos.itemLateral, estilos.sairLateral].join(' ')} onClick={() => void sair()}>
           <IconeSair />
           Sair
         </button>

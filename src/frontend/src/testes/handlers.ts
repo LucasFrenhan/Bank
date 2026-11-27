@@ -20,6 +20,14 @@ function base64Url(valor: object): string {
     .replace(/=+$/, '');
 }
 
+/** Prazos da sessão na resposta do login e da renovação (specs/016, contrato 1.1.0): 15 min e 8 h. */
+export const PRAZOS_SESSAO = { sessaoExpiraPorInatividadeEmSegundos: 900, sessaoExpiraEmSegundos: 28800 };
+
+/** Corpo do login e da renovação. */
+export function sessaoEmitida(tipoConta: TipoConta = 'PessoaFisica', prazos: Partial<typeof PRAZOS_SESSAO> = {}) {
+  return { tokenAcesso: tokenFalso(tipoConta), tipoToken: 'Bearer', expiraEmSegundos: 300, ...PRAZOS_SESSAO, ...prazos };
+}
+
 /** JWT falso (assinatura irrelevante para o frontend) com as claims do contrato. */
 export function tokenFalso(tipoConta: TipoConta = 'PessoaFisica', email = 'lucas@exemplo.com.br'): string {
   return [
@@ -258,8 +266,11 @@ export function paginado(caminho: string, itens: object[], filtro?: { parametro:
 
 export const handlersPadrao = [
   http.post('*/api/v1/autenticacao/login', () =>
-    HttpResponse.json({ tokenAcesso: tokenFalso(), tipoToken: 'Bearer', expiraEmSegundos: 3600 }),
+    HttpResponse.json({ tokenAcesso: tokenFalso(), tipoToken: 'Bearer', expiraEmSegundos: 300, ...PRAZOS_SESSAO }),
   ),
+  // Sem sessão no servidor por padrão: a renovação na carga leva ao login (specs/016, FR-017).
+  http.post('*/api/v1/autenticacao/renovar', () => problema('nao-autenticado', 401)),
+  http.post('*/api/v1/autenticacao/sair', () => new HttpResponse(null, { status: 204 })),
   http.post('*/api/v1/autenticacao/registrar', () =>
     HttpResponse.json(
       {
