@@ -43,8 +43,51 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Valida as credenciais e emite o token de acesso (JWT). */
+        /**
+         * Valida as credenciais, inicia a sessão e emite o token de acesso (JWT).
+         * @description Grava a credencial de renovação no cookie `bank_renovacao` (HttpOnly, Secure, SameSite=Strict, Path=/api/v1/autenticacao). Um cookie de sessão anterior é revogado.
+         */
         post: operations["Login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/autenticacao/renovar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Troca a credencial de renovação do cookie por uma nova e emite um novo token de acesso.
+         * @description Lê e regrava o cookie `bank_renovacao`. Qualquer recusa (cookie ausente, vencido, revogado, sessão inativa, limite absoluto ou reuso) responde 401 `nao-autenticado` e remove o cookie.
+         */
+        post: operations["RenovarSessao"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/autenticacao/sair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Encerra a sessão do cookie no servidor e remove o cookie.
+         * @description Idempotente: responde 204 com ou sem cookie. O token de acesso já emitido vale até expirar.
+         */
+        post: operations["Sair"];
         delete?: never;
         options?: never;
         head?: never;
@@ -654,6 +697,10 @@ export interface components {
             tipoToken: string;
             /** Format: int32 */
             expiraEmSegundos: number | string;
+            /** Format: int32 */
+            sessaoExpiraPorInatividadeEmSegundos: number | string;
+            /** Format: int32 */
+            sessaoExpiraEmSegundos: number | string;
         };
         LojistaResposta: {
             /** Format: uuid */
@@ -930,6 +977,53 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
+            };
+        };
+    };
+    RenovarSessao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResposta"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    Sair: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -1,5 +1,5 @@
 import createClient, { type Middleware } from 'openapi-fetch';
-import { lerSessao } from '../sessao/armazenamento';
+import { obterToken } from '../sessao/armazenamento';
 import { registrarFalhaApi } from '../telemetria/ponte';
 import { traduzirErro, type ContextoErro, type MensagemErro } from './erros';
 import type { components, paths } from './schema';
@@ -15,6 +15,8 @@ export type Resultado<T> = { ok: true; dados: T; status: number } | { ok: false;
 export type RegistrarRequisicao = Esquemas['RegistrarRequisicao'];
 export type UsuarioRegistrado = Esquemas['UsuarioRegistradoResposta'];
 export type TokenAcesso = Esquemas['LoginResposta'];
+// Login e renovação têm o mesmo corpo (specs/016-sessao-refresh-token, contrato 1.1.0).
+export type SessaoEmitida = Esquemas['LoginResposta'];
 export type MinhaCarteira = Esquemas['MinhaCarteiraResposta'];
 // Dados bancários da conta, todos como texto (specs/013-frontend-dados-bancarios).
 export type ContaBancaria = Esquemas['ContaBancariaResposta'];
@@ -67,42 +69,67 @@ export interface ConsultaExtrato {
 export const CODIGO_CANCELADA = 'cancelada';
 
 interface IntegracaoSessao {
-  obterToken?: () => string | null;
-  /** Chamado quando a API recusa o token (401 com `Authorization` enviado). */
+  obterToken: () => string | null;
+  /** Renova a sessão (uma por vez); `true` se há token novo para repetir a chamada (specs/016, FR-014). */
+  renovar: () => Promise<boolean>;
+  /** Chamado quando a renovação falha ou a repetição também é recusada (401). */
   aoNaoAutenticado: () => void;
 }
 
-// O token vem direto do armazenamento: as telas podem chamar a API antes de os efeitos do
-// provedor de sessão rodarem (efeitos dos filhos rodam antes dos do pai).
-let sessao: IntegracaoSessao = { obterToken: () => lerSessao()?.token ?? null, aoNaoAutenticado: () => undefined };
+// O token vem da memória (specs/016, FR-005): as telas podem chamar a API antes de os efeitos do provedor de
+// sessão rodarem (efeitos dos filhos rodam antes dos do pai).
+let sessao: IntegracaoSessao = { obterToken, renovar: () => Promise.resolve(false), aoNaoAutenticado: () => undefined };
 
-export function integrarSessao(integracao: IntegracaoSessao): void {
+export function integrarSessao(integracao: Partial<IntegracaoSessao>): void {
   sessao = { ...sessao, ...integracao };
 }
 
+const PREFIXO_AUTENTICACAO = '/api/v1/autenticacao/';
+
 const middlewareSessao: Middleware = {
   onRequest({ request }) {
-    const token = sessao.obterToken?.() ?? null;
-    if (token) {
+    const token = sessao.obterToken();
+    if (token && !new URL(request.url).pathname.startsWith(PREFIXO_AUTENTICACAO)) {
       request.headers.set('Authorization', `Bearer ${token}`);
     }
 
     return request;
   },
-  onResponse({ request, response }) {
-    if (response.status === 401 && request.headers.has('Authorization')) {
-      sessao.aoNaoAutenticado();
-    }
-
-    return response;
-  },
 };
+
+/**
+ * Um 401 numa chamada autenticada renova a sessão e repete a mesma requisição uma única vez, com o mesmo corpo e
+ * o mesmo `Idempotency-Key` (specs/016-sessao-refresh-token, FR-014, FR-018; research R9). Chamadas a
+ * `/autenticacao/*` nunca disparam renovação (sem laço).
+ */
+async function buscarComRenovacao(requisicao: Request): Promise<Response> {
+  const autenticada = requisicao.headers.has('Authorization');
+  const copia = autenticada ? requisicao.clone() : null;
+  // Resolve o fetch a cada chamada: a instrumentação do OpenTelemetry (carregada depois) e os
+  // testes substituem o fetch global; capturá-lo na criação ignoraria essas substituições.
+  const resposta = await globalThis.fetch(requisicao);
+  if (resposta.status !== 401 || !copia) {
+    return resposta;
+  }
+
+  if (!(await sessao.renovar())) {
+    sessao.aoNaoAutenticado();
+    return resposta;
+  }
+
+  const token = sessao.obterToken();
+  if (token) copia.headers.set('Authorization', `Bearer ${token}`);
+  const repetida = await globalThis.fetch(copia);
+  if (repetida.status === 401) {
+    sessao.aoNaoAutenticado();
+  }
+
+  return repetida;
+}
 
 const cliente = createClient<paths>({
   baseUrl: typeof window === 'undefined' ? '' : window.location.origin,
-  // Resolve o fetch a cada chamada: a instrumentação do OpenTelemetry (carregada depois) e os
-  // testes substituem o fetch global; capturá-lo na criação ignoraria essas substituições.
-  fetch: (requisicao) => globalThis.fetch(requisicao),
+  fetch: buscarComRenovacao,
 });
 cliente.use(middlewareSessao);
 
@@ -159,6 +186,13 @@ export const api = {
 
   entrar: (email: string, senha: string) =>
     chamar<TokenAcesso>(() => cliente.POST('/api/v1/autenticacao/login', { body: { email, senha } })),
+
+  /** Troca a credencial do cookie e devolve um token novo; 401 é o fim da sessão, não uma falha (specs/016). */
+  renovar: () =>
+    chamar<SessaoEmitida>(() => cliente.POST('/api/v1/autenticacao/renovar'), { esperados: ['nao-autenticado'] }),
+
+  /** Encerra a sessão no servidor e remove o cookie (specs/016, FR-019). */
+  sair: () => chamar<unknown>(() => cliente.POST('/api/v1/autenticacao/sair'), { esperados: 'todos' }),
 
   obterMinhaCarteira: () => chamar<MinhaCarteira>(() => cliente.GET('/api/v1/carteiras/minha')),
 

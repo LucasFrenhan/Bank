@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { entrar } from './apoio';
+import { encerrarSessaoDoNavegador, entrar } from './apoio';
 import { criarPf, criarPfComCartao, emitirCobranca, criarPj } from './apoioCartao';
 
 // Spec 015 US1 — solicitar e ver o cartão.
@@ -46,9 +46,7 @@ test.describe('Cartão', () => {
     await entrar(page, pf);
     await page.goto('/cartao');
     await page.getByRole('radio', { name: 'Visa' }).check();
-    const sessao = await page.evaluate(() => sessionStorage.getItem('bank.sessao'));
-    const outra = await context.newPage();
-    await outra.addInitScript((s) => sessionStorage.setItem('bank.sessao', s!), sessao);
+    const outra = await context.newPage(); // a sessão é compartilhada entre as abas (specs/016, FR-016)
     await outra.goto('/cartao');
     await outra.getByRole('radio', { name: 'Visa' }).check();
     await outra.getByRole('button', { name: 'Solicitar cartão Visa' }).click();
@@ -82,7 +80,7 @@ test.describe('Cartão', () => {
     await expect(page).toHaveURL(new RegExp(`/c/${codigo}$`));
     await expect(page.getByRole('heading', { name: 'Pagar cobrança' })).toBeVisible();
 
-    await page.evaluate(() => sessionStorage.clear());
+    await encerrarSessaoDoNavegador(page);
     await entrar(page, pj);
     await page.goto('/cartao');
     await expect(page.getByText('Área indisponível para o seu tipo de conta')).toBeVisible();

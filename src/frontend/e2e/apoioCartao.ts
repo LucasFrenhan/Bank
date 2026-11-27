@@ -14,23 +14,42 @@ export interface CartaoPf {
   dados: { nomeImpresso: string; numero: string; validade: string; cvv: string };
 }
 
+/**
+ * E-mail de cada token pego pela API: o e2e usa token de 10 s (specs/016-sessao-refresh-token, .env.e2e.example),
+ * então uma chamada com token vencido entra de novo e repete.
+ */
+const emailDoToken = new Map<string, string>();
+
+async function tokenRegistrado(page: Page, conta: Conta): Promise<string> {
+  const token = await tokenPelaApi(page, conta);
+  emailDoToken.set(token, conta.email);
+  return token;
+}
+
 async function chamar<T>(page: Page, metodo: 'get' | 'post', caminho: string, token: string, corpo?: unknown, chave?: string): Promise<T> {
-  const resposta = await page.request[metodo](`/api/v1${caminho}`, {
-    headers: { Authorization: `Bearer ${token}`, ...(chave ? { 'Idempotency-Key': chave } : {}) },
-    ...(corpo !== undefined ? { data: corpo } : {}),
-  });
+  const enviar = (comToken: string) =>
+    page.request[metodo](`/api/v1${caminho}`, {
+      headers: { Authorization: `Bearer ${comToken}`, ...(chave ? { 'Idempotency-Key': chave } : {}) },
+      ...(corpo !== undefined ? { data: corpo } : {}),
+    });
+  let resposta = await enviar(token);
+  const email = emailDoToken.get(token);
+  if (resposta.status() === 401 && email) {
+    resposta = await enviar(await tokenPelaApi(page, { email }));
+  }
+
   expect(resposta.ok(), `${metodo} ${caminho}: ${resposta.status()} ${await resposta.text()}`).toBe(true);
   return (await resposta.json()) as T;
 }
 
 export async function criarPj(page: Page, nome = 'Cafeteria Grão Ltda'): Promise<ContaComToken> {
   const conta = await criarContaPelaApi(page, 'PessoaJuridica', nome);
-  return { ...conta, token: await tokenPelaApi(page, conta) };
+  return { ...conta, token: await tokenRegistrado(page, conta) };
 }
 
 export async function criarPf(page: Page, nome = 'Lucas Cartão'): Promise<ContaComToken> {
   const conta = await criarContaPelaApi(page, 'PessoaFisica', nome);
-  return { ...conta, token: await tokenPelaApi(page, conta) };
+  return { ...conta, token: await tokenRegistrado(page, conta) };
 }
 
 export async function criarPfComCartao(page: Page, nome?: string, bandeira = '001'): Promise<CartaoPf> {

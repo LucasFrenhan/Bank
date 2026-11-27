@@ -8,7 +8,7 @@ namespace Bank.Worker;
 
 /// <summary>
 /// Raiz de composição do Worker de mensageria (specs/010-mensageria-rabbitmq, research R1):
-/// despachante do outbox, consumidores e processamento diário (specs/014-cartao-credito-cobrancas). Classe explícita (sem top-level statements) para não
+/// despachante do outbox, consumidores e processamento diário (specs/014-cartao-credito-cobrancas) e limpeza das sessões (specs/016-sessao-refresh-token). Classe explícita (sem top-level statements) para não
 /// gerar um segundo <c>Program</c> público, que conflitaria com o da API nos testes.
 /// </summary>
 public static class ProgramaWorker
@@ -22,9 +22,11 @@ public static class ProgramaWorker
         builder.Services
             .AddNotificacoes()
             .AddProcessamento()
+            .AddLimpezaSessoesAplicacao()
             .AddPersistencia(builder.Configuration)
             .AddMensageria()
-            .AddProcessamentoDiario();
+            .AddProcessamentoDiario()
+            .AddLimpezaSessoes();
 
         var app = builder.Build();
 

@@ -19,6 +19,9 @@ public interface IUsuarioRepositorio
 
     Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancellationToken);
 
+    /// <summary>Usuário com a carteira, para emitir o token na renovação (specs/016-sessao-refresh-token).</summary>
+    Task<Usuario?> ObterPorIdAsync(UsuarioId usuarioId, CancellationToken cancellationToken);
+
     /// <summary>Persiste usuário e carteira em uma única transação (RN-04).</summary>
     Task<ResultadoPersistencia> AdicionarAsync(Usuario usuario, CancellationToken cancellationToken);
 

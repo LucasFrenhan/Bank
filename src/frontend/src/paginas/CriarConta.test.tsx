@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { problema } from '../testes/handlers';
-import { renderizarApp } from '../testes/renderizar';
+import { renderizarApp, renderizarAppPronto } from '../testes/renderizar';
 import { servidor } from '../testes/setup';
 import { avaliarSenha } from './CriarConta';
 
@@ -14,7 +14,7 @@ async function preencherPf(usuario: ReturnType<typeof renderizarApp>['usuario'],
 
 describe('Criar conta (US1; FR-004 a FR-008)', () => {
   it('alternar PF/PJ muda rótulos, máscara e saldo, e limpa o documento', async () => {
-    const { usuario } = renderizarApp('/criar-conta');
+    const { usuario } = await renderizarAppPronto('/criar-conta');
     await usuario.type(screen.getByLabelText('CPF'), '52998224725');
     expect(screen.getByLabelText('CPF')).toHaveValue('529.982.247-25');
     expect(screen.getByText(/começam com R\$ 10,00/)).toBeInTheDocument();
@@ -28,7 +28,7 @@ describe('Criar conta (US1; FR-004 a FR-008)', () => {
   });
 
   it('CNPJ alfanumérico digitado em minúsculas aparece em maiúsculas com máscara', async () => {
-    const { usuario } = renderizarApp('/criar-conta');
+    const { usuario } = await renderizarAppPronto('/criar-conta');
     await usuario.click(screen.getByRole('radio', { name: /Pessoa Jurídica/ }));
 
     await usuario.type(screen.getByLabelText('CNPJ'), '12abc34501de35');
@@ -37,7 +37,7 @@ describe('Criar conta (US1; FR-004 a FR-008)', () => {
   });
 
   it('valida obrigatoriedade localmente e foca o primeiro campo inválido', async () => {
-    const { usuario } = renderizarApp('/criar-conta');
+    const { usuario } = await renderizarAppPronto('/criar-conta');
 
     await usuario.click(screen.getByRole('button', { name: 'Criar conta' }));
 
@@ -53,7 +53,7 @@ describe('Criar conta (US1; FR-004 a FR-008)', () => {
         problema('validacao', 400, { errors: { documento: ['CPF inválido.'], senha: ['A senha deve conter ao menos um dígito.'], extra: ['Campo inesperado.'] } }),
       ),
     );
-    const { usuario } = renderizarApp('/criar-conta');
+    const { usuario } = await renderizarAppPronto('/criar-conta');
     await preencherPf(usuario, { documento: '52998224724' });
 
     await usuario.click(screen.getByRole('button', { name: 'Criar conta' }));
@@ -72,7 +72,7 @@ describe('Criar conta (US1; FR-004 a FR-008)', () => {
     ['documento-ja-cadastrado', 'Este documento já tem conta. Entre com ela ou confira o documento.'],
   ])('conflito %s mostra mensagem com link para o login', async (codigo, mensagem) => {
     servidor.use(http.post('*/api/v1/autenticacao/registrar', () => problema(codigo, 409)));
-    const { usuario } = renderizarApp('/criar-conta');
+    const { usuario } = await renderizarAppPronto('/criar-conta');
     await preencherPf(usuario);
 
     await usuario.click(screen.getByRole('button', { name: 'Criar conta' }));
@@ -91,7 +91,7 @@ describe('Criar conta (US1; FR-004 a FR-008)', () => {
         return problema('email-ja-cadastrado', 409);
       }),
     );
-    const { usuario } = renderizarApp('/criar-conta');
+    const { usuario } = await renderizarAppPronto('/criar-conta');
     await preencherPf(usuario);
 
     await usuario.dblClick(screen.getByRole('button', { name: 'Criar conta' }));
@@ -105,10 +105,10 @@ describe('Criar conta (US1; FR-004 a FR-008)', () => {
     servidor.use(
       http.post('*/api/v1/autenticacao/login', async ({ request }) => {
         login = await request.json();
-        return HttpResponse.json({ tokenAcesso: (await import('../testes/handlers')).tokenFalso(), tipoToken: 'Bearer', expiraEmSegundos: 3600 });
+        return HttpResponse.json({ tokenAcesso: (await import('../testes/handlers')).tokenFalso(), tipoToken: 'Bearer', expiraEmSegundos: 300, sessaoExpiraPorInatividadeEmSegundos: 900, sessaoExpiraEmSegundos: 28800 });
       }),
     );
-    const { usuario } = renderizarApp('/criar-conta');
+    const { usuario } = await renderizarAppPronto('/criar-conta');
     await preencherPf(usuario);
 
     await usuario.click(screen.getByRole('button', { name: 'Criar conta' }));

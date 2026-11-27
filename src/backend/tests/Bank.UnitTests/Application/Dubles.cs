@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Metrics;
 using Bank.Application.Abstracoes;
 using Bank.Application.Observabilidade;
+using Bank.Domain.Sessoes;
 using Bank.Domain.Usuarios;
 
 namespace Bank.UnitTests.Application;
@@ -24,6 +25,9 @@ internal sealed class RepositorioFalso : IUsuarioRepositorio
 
     public Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancellationToken) =>
         Task.FromResult(Usuarios.Find(u => u.Email == email));
+
+    public Task<Usuario?> ObterPorIdAsync(UsuarioId usuarioId, CancellationToken cancellationToken) =>
+        Task.FromResult(Usuarios.Find(u => u.Id == usuarioId));
 
     public Task<ResultadoPersistencia> AdicionarAsync(Usuario usuario, CancellationToken cancellationToken)
     {
@@ -61,7 +65,7 @@ internal sealed class HasherFalso : IHasherSenha
 
 internal sealed class EmissorFalso : IEmissorToken
 {
-    public TokenEmitido Emitir(Usuario usuario) => new("token-de:" + usuario.Id, 3600);
+    public TokenEmitido Emitir(Usuario usuario, SessaoId sessaoId) => new("token-de:" + usuario.Id + ":" + sessaoId, 300);
 }
 
 internal sealed class RelogioFixo(DateTimeOffset agora) : TimeProvider

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { criarContaPelaApi, entrar, semRolagemHorizontal, semViolacoesA11y } from './apoio';
+import { criarContaPelaApi, encerrarSessaoDoNavegador, entrar, semRolagemHorizontal, semViolacoesA11y } from './apoio';
 
 // US5 — larguras de 320 a 1920 px sem rolagem horizontal e alvos ≥ 44 px (SC-002, SC-006).
 const LARGURAS = [320, 390, 768, 1440, 1920];
@@ -40,7 +40,7 @@ test.describe('Responsividade', () => {
         await expect(page.getByRole('navigation', { name: menuVisivel, exact: true })).toBeVisible();
       }
 
-      await page.evaluate(() => sessionStorage.clear());
+      await encerrarSessaoDoNavegador(page);
     }
   });
 });
@@ -113,7 +113,7 @@ test.describe('Responsividade e acessibilidade — transferências e extrato', (
     await semViolacoesA11y(page);
 
     // PJ: aviso de indisponível e extrato com nome longo de contraparte.
-    await page.evaluate(() => sessionStorage.clear());
+    await encerrarSessaoDoNavegador(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await entrar(page, pj);
     for (const largura of [320, 1440]) {

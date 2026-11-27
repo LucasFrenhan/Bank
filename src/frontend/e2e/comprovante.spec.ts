@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { criarContaPelaApi, entrar, tokenPelaApi, transferirPelaApi } from './apoio';
+import { criarContaPelaApi, encerrarSessaoDoNavegador, entrar, tokenPelaApi, transferirPelaApi } from './apoio';
 
 /**
  * Reabrir o comprovante (specs/007-frontend-transferencias: FR-014, US4 cenário 9; consulta da
@@ -24,7 +24,7 @@ test.describe('Comprovante reaberto (fase 10)', () => {
     await expect(page.getByText(transferenciaId)).toBeVisible();
 
     // 2. Pelo endereço em outra sessão: o login leva de volta ao comprovante.
-    await page.evaluate(() => sessionStorage.clear());
+    await encerrarSessaoDoNavegador(page);
     await page.goto(endereco);
     await expect(page).toHaveURL(/\/entrar$/);
     await page.getByLabel('E-mail').fill(pagador.email);
@@ -34,7 +34,7 @@ test.describe('Comprovante reaberto (fase 10)', () => {
     await expect(page.getByRole('heading', { name: 'Transferência concluída' })).toBeVisible();
 
     // 3. Recebedor (PJ): "Transferência recebida", com o CPF do pagador mascarado.
-    await page.evaluate(() => sessionStorage.clear());
+    await encerrarSessaoDoNavegador(page);
     await entrar(page, recebedor);
     await page.goto('/extrato?direcao=entradas');
     await page.getByRole('link', { name: /Lucas Reabre/ }).click();
@@ -43,7 +43,7 @@ test.describe('Comprovante reaberto (fase 10)', () => {
     await expect(page.getByText(/^Lucas Reabre · CPF •••\.\d{3}\.\d{3}-••$/)).toBeVisible();
 
     // 4. Terceiro: "Comprovante não encontrado", sem revelar a transferência.
-    await page.evaluate(() => sessionStorage.clear());
+    await encerrarSessaoDoNavegador(page);
     await entrar(page, terceiro);
     await page.goto(endereco);
     await expect(page.getByText('Comprovante não encontrado')).toBeVisible();

@@ -38,7 +38,8 @@ public static class TelemetriaWorker
                 .AddMeter("System.Runtime")
                 .AddMeter(TelemetriaMensageria.Nome)
                 .AddMeter(MeterNotificacoes)
-                .AddMeter(Bank.Application.Observabilidade.MetricasProcessamento.NomeMeter))
+                .AddMeter(Bank.Application.Observabilidade.MetricasProcessamento.NomeMeter)
+                .AddMeter(Bank.Application.Observabilidade.MetricasUsuarios.NomeMeter)) // limpeza das sessões (spec 016)
             .WithLogging();
 
         if (!builder.Environment.IsEnvironment("Testing"))

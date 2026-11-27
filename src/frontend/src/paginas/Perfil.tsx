@@ -84,7 +84,7 @@ export function Perfil() {
       </Cartao>
 
       <div>
-        <Botao variante="secundario" onClick={sair}>
+        <Botao variante="secundario" onClick={() => void sair()}>
           Sair
         </Botao>
       </div>

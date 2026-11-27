@@ -5,6 +5,7 @@ using Bank.Domain.Cobrancas;
 using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
 using Bank.Domain.Recebiveis;
+using Bank.Domain.Sessoes;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Mensageria;
@@ -53,6 +54,11 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
 
     public DbSet<Recebivel> Recebiveis => Set<Recebivel>();
 
+    // Sessão renovável (specs/016-sessao-refresh-token)
+    public DbSet<Sessao> Sessoes => Set<Sessao>();
+
+    public DbSet<CredencialRenovacao> CredenciaisRenovacao => Set<CredencialRenovacao>();
+
     /// <summary>Sequence dos números de conta do banco 001 (specs/012-dados-bancarios-carteira, research R2).</summary>
     public const string SequenceNumeroConta = "seq_numero_conta_one_bank";
 
@@ -74,6 +80,8 @@ public sealed class BankDbContext(DbContextOptions<BankDbContext> options) : DbC
         configurationBuilder.Properties<CompraCartaoId>().HaveConversion<IdentificadorConverter<CompraCartaoId>>();
         configurationBuilder.Properties<LancamentoFaturaId>().HaveConversion<IdentificadorConverter<LancamentoFaturaId>>();
         configurationBuilder.Properties<RecebivelId>().HaveConversion<IdentificadorConverter<RecebivelId>>();
+        configurationBuilder.Properties<SessaoId>().HaveConversion<IdentificadorConverter<SessaoId>>();
+        configurationBuilder.Properties<CredencialRenovacaoId>().HaveConversion<IdentificadorConverter<CredencialRenovacaoId>>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -18,7 +18,7 @@ public sealed class JwtOptions
 
     public string Audiencia { get; set; } = string.Empty;
 
-    public int ExpiracaoSegundos { get; set; } = 3600;
+    public int ExpiracaoSegundos { get; set; } = 300;
 
     public string ChaveAssinatura { get; set; } = string.Empty;
 

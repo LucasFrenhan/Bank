@@ -104,6 +104,12 @@ services:
       Cartoes__ChaveDerivacao: ${CARTOES_CHAVE_DERIVACAO:-bank-dev-only-card-derivation-key-change-me-0123456789}
       Cartoes__LimitePadrao: ${LIMITE_CARTAO_PADRAO:-5000.00}
       Cartoes__JurosAtrasoMensalPercentual: ${JUROS_ATRASO_MENSAL:-15.00}
+      # Sessão renovável (specs/016-sessao-refresh-token): token de acesso curto, inatividade, tolerância de
+      # reuso e limite absoluto. O e2e usa prazos curtos (.env.e2e.example).
+      Jwt__ExpiracaoSegundos: ${JWT_EXPIRACAO_SEGUNDOS:-300}
+      Sessao__InatividadeSegundos: ${SESSAO_INATIVIDADE_SEGUNDOS:-900}
+      Sessao__ToleranciaReusoSegundos: ${SESSAO_TOLERANCIA_REUSO_SEGUNDOS:-30}
+      Sessao__LimiteAbsolutoHoras: ${SESSAO_LIMITE_ABSOLUTO_HORAS:-8}
     ports:
       - "127.0.0.1:${API_PORT:-8080}:8080"
     depends_on:
@@ -137,6 +143,10 @@ services:
       Mensageria__VirtualHost: ${RABBITMQ_VHOST:-bank}
       Mensageria__Usuario: ${RABBITMQ_USER:-bank}
       Mensageria__Senha: ${RABBITMQ_PASSWORD:-bank_dev_password}
+      # Limpeza das sessões encerradas (specs/016-sessao-refresh-token, research R8)
+      Sessao__InatividadeSegundos: ${SESSAO_INATIVIDADE_SEGUNDOS:-900}
+      Sessao__ToleranciaReusoSegundos: ${SESSAO_TOLERANCIA_REUSO_SEGUNDOS:-30}
+      Sessao__LimiteAbsolutoHoras: ${SESSAO_LIMITE_ABSOLUTO_HORAS:-8}
     depends_on:
       # A API aplica as migrations na partida (research R9)
       api:

@@ -886,6 +886,105 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bank.Domain.Sessoes.CredencialRenovacao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("EmitidaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("emitida_em");
+
+                    b.Property<DateTimeOffset>("ExpiraEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expira_em");
+
+                    b.Property<byte[]>("Hash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("hash");
+
+                    b.Property<DateTimeOffset?>("RotacionadaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("rotacionada_em");
+
+                    b.Property<Guid>("SessaoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("sessao_id");
+
+                    b.Property<Guid?>("SubstitutaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("substituta_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_credenciais_renovacao");
+
+                    b.HasIndex("Hash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_credenciais_renovacao_hash");
+
+                    b.HasIndex("SessaoId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_credenciais_renovacao_ativa")
+                        .HasFilter("rotacionada_em IS NULL");
+
+                    b.ToTable("credenciais_renovacao", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_credenciais_renovacao_hash", "octet_length(hash) = 32");
+                        });
+                });
+
+            modelBuilder.Entity("Bank.Domain.Sessoes.Sessao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("ExpiraEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expira_em");
+
+                    b.Property<DateTimeOffset>("IniciadaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("iniciada_em");
+
+                    b.Property<string>("MotivoRevogacao")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("motivo_revogacao");
+
+                    b.Property<DateTimeOffset?>("RevogadaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revogada_em");
+
+                    b.Property<DateTimeOffset>("UltimaRenovacaoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ultima_renovacao_em");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sessoes");
+
+                    b.HasIndex("ExpiraEm")
+                        .HasDatabaseName("ix_sessoes_expira_em");
+
+                    b.HasIndex("RevogadaEm")
+                        .HasDatabaseName("ix_sessoes_revogada_em")
+                        .HasFilter("revogada_em IS NOT NULL");
+
+                    b.HasIndex("UsuarioId")
+                        .HasDatabaseName("ix_sessoes_usuario_id");
+
+                    b.ToTable("sessoes", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_sessoes_revogacao", "(revogada_em IS NULL) = (motivo_revogacao IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("Bank.Domain.Transferencias.Lancamento", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1350,6 +1449,26 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .HasConstraintName("fk_recebiveis_usuarios");
                 });
 
+            modelBuilder.Entity("Bank.Domain.Sessoes.CredencialRenovacao", b =>
+                {
+                    b.HasOne("Bank.Domain.Sessoes.Sessao", null)
+                        .WithMany("Credenciais")
+                        .HasForeignKey("SessaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_credenciais_renovacao_sessoes");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Sessoes.Sessao", b =>
+                {
+                    b.HasOne("Bank.Domain.Usuarios.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sessoes_usuarios");
+                });
+
             modelBuilder.Entity("Bank.Domain.Transferencias.Lancamento", b =>
                 {
                     b.HasOne("Bank.Domain.Carteiras.Carteira", null)
@@ -1393,6 +1512,11 @@ namespace Bank.Infrastructure.Persistencia.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_transferencias_carteira_origem");
+                });
+
+            modelBuilder.Entity("Bank.Domain.Sessoes.Sessao", b =>
+                {
+                    b.Navigation("Credenciais");
                 });
 
             modelBuilder.Entity("Bank.Domain.Usuarios.Usuario", b =>

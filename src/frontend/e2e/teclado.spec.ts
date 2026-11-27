@@ -20,6 +20,8 @@ test.describe('Teclado — transferências e extrato', () => {
     const pj = await criarContaPelaApi(page, 'PessoaJuridica', 'Padaria Teclado Ltda');
     await entrar(page, pf);
     await page.goto('/transferir');
+    // A tela só aparece depois de a sessão ser recuperada (specs/016, FR-017).
+    await expect(page.getByRole('heading', { level: 1, name: 'Transferir dinheiro' })).toBeVisible();
 
     await page.keyboard.press('Tab');
     await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toBeFocused();

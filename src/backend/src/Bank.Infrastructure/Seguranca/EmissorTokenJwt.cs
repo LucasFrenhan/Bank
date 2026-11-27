@@ -1,4 +1,5 @@
 using Bank.Application.Abstracoes;
+using Bank.Domain.Sessoes;
 using Bank.Domain.Usuarios;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -13,14 +14,17 @@ public static class ClaimsToken
     public const string Email = JwtRegisteredClaimNames.Email;
     public const string TipoConta = "tipo_conta";
     public const string CarteiraId = "carteira_id";
+
+    /// <summary>Sessão de origem do token (specs/016-sessao-refresh-token, research R5).</summary>
+    public const string Sessao = JwtRegisteredClaimNames.Sid;
 }
 
-/// <summary>Emite o JWT HS256 com as claims do contrato (FR-017, FR-018; research R4).</summary>
+/// <summary>Emite o JWT HS256 com as claims do contrato (FR-017, FR-018; research R4) e a sessão (spec 016).</summary>
 internal sealed class EmissorTokenJwt(IOptions<JwtOptions> opcoes, TimeProvider relogio) : IEmissorToken
 {
     private readonly JsonWebTokenHandler _handler = new();
 
-    public TokenEmitido Emitir(Usuario usuario)
+    public TokenEmitido Emitir(Usuario usuario, SessaoId sessaoId)
     {
         ArgumentNullException.ThrowIfNull(usuario);
 
@@ -42,6 +46,7 @@ internal sealed class EmissorTokenJwt(IOptions<JwtOptions> opcoes, TimeProvider 
                 [ClaimsToken.TipoConta] = usuario.TipoConta.ToString(),
                 [ClaimsToken.CarteiraId] = usuario.Carteira.Id.ToString(),
                 [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString(),
+                [ClaimsToken.Sessao] = sessaoId.ToString(),
             },
         };
 

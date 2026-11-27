@@ -1,3 +1,4 @@
+using Bank.Domain.Sessoes;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Seguranca;
 using Bank.UnitTests.Application;
@@ -9,6 +10,8 @@ namespace Bank.UnitTests.Infrastructure;
 public class EmissorTokenJwtTests
 {
     private static readonly DateTimeOffset Agora = new(2026, 11, 17, 18, 0, 0, TimeSpan.Zero);
+
+    private static readonly Guid IdSessao = Guid.CreateVersion7();
 
     private static readonly JwtOptions Opcoes = new()
     {
@@ -30,7 +33,7 @@ public class EmissorTokenJwtTests
             10m,
             Agora);
 
-        var emitido = new EmissorTokenJwt(Options.Create(Opcoes), new RelogioFixo(Agora)).Emitir(usuario);
+        var emitido = new EmissorTokenJwt(Options.Create(Opcoes), new RelogioFixo(Agora)).Emitir(usuario, SessaoId.De(IdSessao));
 
         Assert.Equal(3600, emitido.ExpiraEmSegundos);
         var token = new JsonWebToken(emitido.Token);
@@ -40,6 +43,7 @@ public class EmissorTokenJwtTests
         Assert.Equal("PessoaFisica", token.GetClaim("tipo_conta").Value);
         Assert.Equal(usuario.Carteira.Id.ToString(), token.GetClaim("carteira_id").Value);
         Assert.False(string.IsNullOrEmpty(token.Id));
+        Assert.Equal(IdSessao.ToString(), token.GetClaim("sid").Value);
         Assert.Equal("bank-api", token.Issuer);
         Assert.Contains("bank-api", token.Audiences);
         Assert.Equal(Agora.UtcDateTime, token.IssuedAt);

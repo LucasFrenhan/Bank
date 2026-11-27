@@ -21,7 +21,9 @@ public class LoginTests(BankApiFactory factory) : IClassFixture<BankApiFactory>
         Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
         var json = await ApiBank.LerJsonAsync(resposta);
         Assert.Equal("Bearer", json.GetProperty("tipoToken").GetString());
-        Assert.Equal(3600, json.GetProperty("expiraEmSegundos").GetInt32());
+        Assert.Equal(300, json.GetProperty("expiraEmSegundos").GetInt32());
+        Assert.Equal(900, json.GetProperty("sessaoExpiraPorInatividadeEmSegundos").GetInt32());
+        Assert.Equal(28800, json.GetProperty("sessaoExpiraEmSegundos").GetInt32());
 
         var token = new JsonWebToken(json.GetProperty("tokenAcesso").GetString());
         Assert.Equal("HS256", token.Alg);
@@ -29,7 +31,8 @@ public class LoginTests(BankApiFactory factory) : IClassFixture<BankApiFactory>
         Assert.Equal(email, token.GetClaim("email").Value);
         Assert.Equal("PessoaJuridica", token.GetClaim("tipo_conta").Value);
         Assert.Equal(cadastro.GetProperty("carteiraId").GetString(), token.GetClaim("carteira_id").Value);
-        Assert.Equal(TimeSpan.FromSeconds(3600), token.ValidTo - token.IssuedAt);
+        Assert.Equal(TimeSpan.FromSeconds(300), token.ValidTo - token.IssuedAt);
+        Assert.True(Guid.TryParse(token.GetClaim("sid").Value, out _));
     }
 
     [Fact]

@@ -17,6 +17,7 @@ public static class ResultadoHttpExtensions
         ["email-ja-cadastrado"] = "E-mail já cadastrado",
         ["documento-ja-cadastrado"] = "Documento já cadastrado",
         ["credenciais-invalidas"] = "Credenciais inválidas",
+        ["nao-autenticado"] = "Não autenticado", // renovação recusada (specs/016-sessao-refresh-token, FR-010)
         ["carteira-nao-encontrada"] = "Carteira não encontrada",
         ["usuario-nao-encontrado"] = "Usuário não encontrado",
         ["destinatario-nao-encontrado"] = "Destinatário não encontrado",
