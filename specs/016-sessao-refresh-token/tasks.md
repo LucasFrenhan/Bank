@@ -332,7 +332,7 @@ deixar chegar a zero e cair no login
   016); `docs/desenvolvimento.md` com os prazos e como encurtá-los
 - [X] T063 Rodar o [quickstart.md](quickstart.md) (cenários 1 a 9) e a suíte completa; comparar a contagem com
   o T001
-- [ ] T064 Marcar na issue #57 os itens efetivamente entregues
+- [X] T064 Marcar na issue #57 os itens efetivamente entregues
 
 ---
 
