@@ -21,6 +21,11 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
+- **Bank backend (monólito modular)**: `src/backend/src/Modulos/<Nome>/` para o código do
+  contexto, `src/backend/src/Bank.Api/` e `src/backend/src/Bank.Worker/` para endpoints e
+  consumidores, `src/backend/tests/` para os testes; tarefas que tocam outro módulo usam só
+  o contrato público dele (constituição, Princípio VIII)
+- **Bank frontend**: `src/frontend/src/`, `src/frontend/e2e/`
 - **Single project**: `src/`, `tests/` at repository root
 - **Web app**: `backend/src/`, `frontend/src/`
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`
