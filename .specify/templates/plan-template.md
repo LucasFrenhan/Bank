@@ -42,6 +42,21 @@
 
 [Gates determined based on constitution file]
 
+<!--
+  Princípio VIII (monólito modular), sempre verificar no backend:
+  - módulo(s) dono(s) da feature e se o código novo fica no módulo ou no núcleo antigo
+    (núcleo antigo só recebe correções quando o contexto já tem módulo);
+  - dependências entre módulos apenas pelo contrato público (listar o que é usado ou
+    acrescentado ao contrato);
+  - dados no schema do próprio módulo, sem FK, join ou navegação entre módulos;
+  - comunicação síncrona na mesma transação quando o Princípio IV exigir atomicidade,
+    eventos de domínio para efeitos posteriores;
+  - nada novo no Shared Kernel sem justificativa;
+  - nenhuma exceção nova nos testes de arquitetura.
+-->
+
+## Project Structure
+
 ## Project Structure
 
 ### Documentation (this feature)
@@ -65,6 +80,19 @@ specs/[###-feature]/
 -->
 
 ```text
+# [REMOVE IF UNUSED] Option 0: Bank (monólito modular, constituição Princípio VIII)
+src/backend/
+├── src/
+│   ├── Bank.Api/                  # endpoints (raiz de composição)
+│   ├── Bank.Worker/               # processos em segundo plano (raiz de composição)
+│   ├── Modulos/[Nome]/            # Domain, Application, Infrastructure e contrato público
+│   └── SharedKernel/
+└── tests/                         # unitários, integração e arquitetura
+
+src/frontend/
+├── src/
+└── e2e/
+
 # [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
 ├── models/

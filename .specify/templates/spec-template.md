@@ -100,8 +100,14 @@
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+<!--
+  Indique o contexto de negócio (módulo) dono de cada entidade (constituição, Princípio
+  VIII). Relação com entidade de outro contexto é só por identificador; diga se a feature
+  precisa consultar ou alterar dados de outro contexto.
+-->
+
+- **[Entity 1]** ([Contexto dono]): [What it represents, key attributes without implementation]
+- **[Entity 2]** ([Contexto dono]): [What it represents, relationships to other entities]
 
 ## Success Criteria *(mandatory)*
 
