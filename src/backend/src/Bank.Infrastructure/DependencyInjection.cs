@@ -3,6 +3,7 @@ using Bank.Infrastructure.Mensageria;
 using Bank.Infrastructure.Persistencia;
 using Bank.Infrastructure.Processamento;
 using Bank.Infrastructure.Seguranca;
+using Bank.Infrastructure.Sessoes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +32,7 @@ public static class DependencyInjection
         services.AddSingleton<IValidateOptions<JwtOptions>, ValidadorJwtOptions>();
         services.AddSingleton<IHasherSenha, HasherSenhaIdentity>();
         services.AddSingleton<IEmissorToken, EmissorTokenJwt>();
+        services.AddSingleton<IGeradorCredencial, GeradorCredencialAleatoria>(); // spec 016, R1
 
         // Dados do cartão derivados, nunca gravados (specs/014-cartao-credito-cobrancas, research R1)
         services.AddOptions<ChaveCartoesOptions>().BindConfiguration(ChaveCartoesOptions.Secao).ValidateOnStart();
@@ -70,6 +72,11 @@ public static class DependencyInjection
         services.AddScoped<IRecebivelRepositorio, RecebivelRepositorio>();
         services.AddScoped<IRecebivelConsultas, RecebivelConsultas>();
 
+        // Sessão renovável (specs/016-sessao-refresh-token, research R2, R8)
+        services.AddScoped<SessaoRepositorio>();
+        services.AddScoped<ISessaoRepositorio>(sp => sp.GetRequiredService<SessaoRepositorio>());
+        services.AddScoped<ILimpezaSessoes>(sp => sp.GetRequiredService<SessaoRepositorio>());
+
         return services;
     }
 
@@ -92,6 +99,18 @@ public static class DependencyInjection
         services.AddHostedService<DespachanteOutbox>();
         services.AddHostedService<ConsumidorNotificacoesTransferencia>();
         services.AddHostedService<ConsumidorNotificacoesCobranca>(); // spec 014, US7
+
+        return services;
+    }
+
+    /// <summary>Agendamento da limpeza das sessões encerradas no Worker (specs/016-sessao-refresh-token, research R8).</summary>
+    public static IServiceCollection AddLimpezaSessoes(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddOptions<LimpezaSessoesOptions>().BindConfiguration(LimpezaSessoesOptions.Secao).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<LimpezaSessoesOptions>, ValidadorLimpezaSessoesOptions>();
+        services.AddHostedService<LimpezaSessoesHospedado>();
 
         return services;
     }

@@ -41,6 +41,8 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<IValidateOptions<CartoesOptions>, ValidadorCartoesOptions>();
 
+        AdicionarOpcoesSessao(services);
+
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<CalendarioBrasilia>();
         services.AddSingleton<MetricasCartoes>();
@@ -49,6 +51,8 @@ public static class DependencyInjection
 
         services.AddScoped<RegistrarUsuario>();
         services.AddScoped<Autenticar>();
+        services.AddScoped<RenovarSessao>(); // specs/016-sessao-refresh-token
+        services.AddScoped<EncerrarSessao>();
         services.AddScoped<ObterMinhaCarteira>();
         services.AddScoped<ObterTitular>();
         services.AddSingleton<MetricasTransferencias>();
@@ -93,6 +97,27 @@ public static class DependencyInjection
         services.AddScoped<INotificadorCobranca, NotificarCobrancaPaga>();
 
         return services;
+    }
+
+    /// <summary>Limpeza das sessões encerradas, hospedada pelo Worker (specs/016-sessao-refresh-token, research R8).</summary>
+    public static IServiceCollection AddLimpezaSessoesAplicacao(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        AdicionarOpcoesSessao(services);
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<MetricasUsuarios>();
+        services.AddScoped<LimparSessoes>();
+
+        return services;
+    }
+
+    private static void AdicionarOpcoesSessao(IServiceCollection services)
+    {
+        services.AddOptions<SessaoOptions>()
+            .BindConfiguration(SessaoOptions.Secao)
+            .ValidateOnStart();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<SessaoOptions>, ValidadorSessaoOptions>());
     }
 
     /// <summary>Processamento diário, hospedado pelo Worker (specs/014-cartao-credito-cobrancas, research R7).</summary>

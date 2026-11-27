@@ -18,6 +18,9 @@ internal sealed class UsuarioRepositorio(BankDbContext contexto) : IUsuarioRepos
     public Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancellationToken) =>
         contexto.Usuarios.Include(u => u.Carteira).SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
 
+    public Task<Usuario?> ObterPorIdAsync(UsuarioId usuarioId, CancellationToken cancellationToken) =>
+        contexto.Usuarios.Include(u => u.Carteira).SingleOrDefaultAsync(u => u.Id == usuarioId, cancellationToken);
+
     public async Task<ResultadoPersistencia> AdicionarAsync(Usuario usuario, CancellationToken cancellationToken)
     {
         // Usuário, carteira (navegação) e lançamento de abertura no mesmo SaveChanges: uma
