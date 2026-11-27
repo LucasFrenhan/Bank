@@ -88,6 +88,11 @@ jobs:
 
       - name: Subir o ambiente completo (Compose)
         run: docker compose up -d --build --wait --wait-timeout 300
+        env:
+          # Prazos curtos da sessão (specs/016-sessao-refresh-token, .env.e2e.example)
+          JWT_EXPIRACAO_SEGUNDOS: "10"
+          SESSAO_INATIVIDADE_SEGUNDOS: "25"
+          SESSAO_TOLERANCIA_REUSO_SEGUNDOS: "5"
 
       - name: Dependências e navegador
         working-directory: src/frontend
