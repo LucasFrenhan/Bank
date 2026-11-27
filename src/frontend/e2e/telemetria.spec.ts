@@ -75,9 +75,12 @@ test.describe('Telemetria', () => {
     await page.getByLabel('CPF', { exact: true }).fill(dados.documento);
     await page.getByLabel('E-mail').fill(dados.email);
     await page.getByLabel('Senha', { exact: true }).fill(SENHA);
+    const login = page.waitForResponse('**/api/v1/autenticacao/login');
     await page.getByRole('button', { name: 'Criar conta' }).click();
     await expect(page.getByRole('heading', { name: 'Olá, Lucas' })).toBeVisible();
-    const token = await page.evaluate(() => (JSON.parse(sessionStorage.getItem('bank.sessao')!) as { token: string }).token);
+    const token = ((await (await login).json()) as { tokenAcesso: string }).tokenAcesso;
+    // specs/016-sessao-refresh-token (FR-020): a credencial de renovação também não vai para a telemetria.
+    const credencial = (await page.context().cookies()).find((c) => c.name === 'bank_renovacao')!.value;
 
     // Exportação periódica de métricas a cada 5 s; traces em lote.
     await expect.poll(() => respostasOtlp.filter((r) => r.startsWith('/otlp/v1/metrics')).length, { timeout: 15_000 }).toBeGreaterThan(0);
@@ -86,7 +89,7 @@ test.describe('Telemetria', () => {
     expect(respostasOtlp.every((r) => r.endsWith(' 200')), respostasOtlp.join(', ')).toBe(true);
     expect(corpos.some((c) => c.includes('bank.frontend.carregamento'))).toBe(true);
     expect(traceparents[0]).toMatch(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/);
-    for (const sensivel of [SENHA, dados.email, dados.documento, token.split('.')[1]!]) {
+    for (const sensivel of [SENHA, dados.email, dados.documento, token.split('.')[1]!, credencial]) {
       expect(corpos.some((c) => c.includes(sensivel)), `telemetria contém "${sensivel.slice(0, 12)}…"`).toBe(false);
     }
   });

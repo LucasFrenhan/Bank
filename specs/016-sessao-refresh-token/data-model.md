@@ -126,7 +126,7 @@ credenciais_renovacao
 
 | Item | Onde | Conteúdo |
 | --- | --- | --- |
-| Token de acesso | memória do módulo `tokenMemoria.ts` | JWT; some ao recarregar |
+| Token de acesso | memória do módulo `sessao/armazenamento.ts` (com claims e prazos) | JWT; some ao recarregar |
 | `Sessao` (React) | `ContextoSessao` | claims, `estado` (`verificando` \| `ativa` \| `ausente`), prazos de inatividade e absoluto (instantes locais calculados a partir dos segundos recebidos) |
 | Mensagens entre abas | `BroadcastChannel('bank.sessao')` | `entrou {sub}`, `renovou {inatividadeSeg, absolutoSeg}`, `saiu`, `expirou` — nunca o token |
 | Dados da operação | `sessionStorage` (inalterado) | `bank.operacoes`, transferência em andamento; apagados só no fim da sessão |

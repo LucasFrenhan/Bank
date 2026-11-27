@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page } from '@playwright/test';
+import { expect, request, type Page } from '@playwright/test';
 import { randomInt, randomUUID } from 'node:crypto';
 
 /**
@@ -96,11 +96,29 @@ export async function semViolacoesA11y(page: Page): Promise<void> {
 
 /* ---------- Transferências (specs/007-frontend-transferencias, research R11) ---------- */
 
-/** Token de acesso pela API (para preparar dados sem passar pela tela). */
+/** Endereço da aplicação nos testes (o mesmo do `baseURL` do Playwright). */
+export const URL_BASE = process.env.E2E_BASE_URL ?? 'http://localhost:3000';
+
+/**
+ * Token de acesso pela API (para preparar dados sem passar pela tela). O login roda num contexto de requisição
+ * próprio: o cookie de renovação que ele recebe não entra no navegador do teste, que tem a sua própria sessão
+ * (specs/016-sessao-refresh-token).
+ */
 export async function tokenPelaApi(page: Page, conta: Pick<Conta, 'email'>): Promise<string> {
-  const resposta = await page.request.post('/api/v1/autenticacao/login', { data: { email: conta.email, senha: SENHA } });
-  expect(resposta.status()).toBe(200);
-  return ((await resposta.json()) as { tokenAcesso: string }).tokenAcesso;
+  const separado = await request.newContext({ baseURL: new URL(page.url() === 'about:blank' ? URL_BASE : page.url()).origin });
+  try {
+    const resposta = await separado.post('/api/v1/autenticacao/login', { data: { email: conta.email, senha: SENHA } });
+    expect(resposta.status()).toBe(200);
+    return ((await resposta.json()) as { tokenAcesso: string }).tokenAcesso;
+  } finally {
+    await separado.dispose();
+  }
+}
+
+/** Encerra a sessão do navegador (troca de conta nos testes): sem o cookie, a próxima página vai ao login. */
+export async function encerrarSessaoDoNavegador(page: Page): Promise<void> {
+  await page.context().clearCookies();
+  if (page.url() !== 'about:blank') await page.evaluate(() => sessionStorage.clear());
 }
 
 export interface ContaBancaria {

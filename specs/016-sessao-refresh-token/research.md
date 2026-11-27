@@ -115,7 +115,7 @@ clarificações estão na seção Clarifications.
 ## R9. Frontend: token só em memória e renovação única
 
 - **Decisão**:
-  - `sessao/tokenMemoria.ts` guarda o token de acesso em variável de módulo; `armazenamento.ts` deixa de usar
+  - `sessao/armazenamento.ts` guarda a sessão (token, claims e prazos) em variável de módulo e deixa de usar
     `sessionStorage` para a sessão e remove a chave antiga `bank.sessao` na primeira carga (limpeza de quem já
     tinha sessão gravada).
   - `sessao/renovador.ts` faz a renovação em voo único: chamadas concorrentes na mesma aba aguardam a mesma

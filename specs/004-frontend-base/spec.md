@@ -245,6 +245,12 @@ horizontal e alvos de toque adequados.
 
 **Sessão**
 
+> **Atualizado pela [spec 016](../016-sessao-refresh-token/spec.md)** (issue #57): FR-009, FR-011, FR-012 e FR-013
+> foram substituídos — token de acesso de 5 min renovado sob demanda, renovação e repetição no 401, "Sair"
+> no servidor e sessão compartilhada entre as abas
+> ([contrato do frontend](../016-sessao-refresh-token/contracts/frontend-sessao.md)). O texto abaixo é o
+> histórico desta spec.
+
 - **FR-009**: O login MUST usar e-mail e senha e, em caso de sucesso, iniciar a sessão com o
   token emitido pela API; a sessão MUST expirar no prazo informado pela API (3600 s).
 - **FR-010**: Telas da carteira e do perfil MUST exigir sessão; sem sessão, a pessoa vai ao

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { SENHA } from './apoio';
+import { encerrarSessaoDoNavegador, SENHA } from './apoio';
 import { comprar, criarPf, criarPfComCartao, criarPj, emitirCobranca, limiteDisponivel, type CartaoPf } from './apoioCartao';
 
 // Spec 015 US3 — pagar uma cobrança com o cartão.
@@ -110,7 +110,7 @@ test.describe('Pagamento com cartão', () => {
     await page.goto('/c/2222-2222');
     await expect(page.getByText('Cobrança não encontrada')).toBeVisible();
 
-    await page.evaluate(() => sessionStorage.clear());
+    await encerrarSessaoDoNavegador(page);
     const outra = await criarPj(page, 'Outra Loja Ltda');
     await abrirPeloLink(page, { pf: outra }, `/c/${pendente.codigo}`);
     await expect(page.getByText('Só contas Pessoa Física pagam cobranças')).toBeVisible();

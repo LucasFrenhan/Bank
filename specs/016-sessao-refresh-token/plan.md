@@ -145,7 +145,7 @@ src/frontend/
 ├── src/
 │   ├── api/cliente.ts                 # invólucro de fetch: renova e repete uma vez; renovar(), sair()
 │   ├── api/schema.d.ts                # regenerado
-│   ├── sessao/                        # tokenMemoria.ts, renovador.ts, canalAbas.ts, armazenamento.ts (sem token),
+│   ├── sessao/                        # armazenamento.ts (sessão só em memória), renovador.ts, canalAbas.ts,
 │   │                                  # ContextoSessao.tsx (verificando/ativa/ausente; prazos), Rotas.tsx,
 │   │                                  # AvisoExpiracao.tsx + testes
 │   └── paginas/                       # Entrar, Cadastro, Perfil/Layout ("Sair" assíncrono)

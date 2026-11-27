@@ -281,7 +281,8 @@ BANK_API_URL=http://localhost:8080 npm run dev
 # qualidade
 npm run lint && npm run typecheck && npm test && npm run build
 
-# ponta a ponta (desktop e mobile, API real): Compose no ar
+# ponta a ponta (desktop e mobile, API real): Compose no ar com os prazos curtos da sessão
+# (na raiz: docker compose --env-file .env.e2e.example up -d --build --wait)
 npx playwright install chromium   # uma vez
 npm run e2e                        # contra http://localhost:3000 (E2E_BASE_URL muda o alvo)
 
@@ -291,7 +292,16 @@ npm run api:tipos
 
 - A API e o coletor são acessados pela mesma origem: o proxy do Vite (desenvolvimento) e o
   nginx (Compose) encaminham `/api` e `/otlp`. A API não tem CORS.
-- A sessão fica só na aba (`sessionStorage`) e expira com o token (1 hora).
+- **Sessão** ([spec 016](../specs/016-sessao-refresh-token/spec.md)): o token de acesso (5 min) fica só em
+  memória; a credencial de renovação vai no cookie `bank_renovacao` (`HttpOnly; Secure; SameSite=Strict`,
+  só em `/api/v1/autenticacao`), e o banco guarda apenas o SHA-256 dela. Um 401 renova a sessão e repete a
+  chamada uma vez; recarregar a página renova antes de mostrar a tela. A sessão vale para todas as abas,
+  vence após 15 min sem renovação ou 8 h após o login, e "Sair" a revoga no servidor. O aviso "Sua sessão
+  vai expirar" aparece 60 s antes (ou na metade do prazo, se ele for menor que 2 min).
+- **Prazos da sessão** (`.env`): `JWT_EXPIRACAO_SEGUNDOS`, `SESSAO_INATIVIDADE_SEGUNDOS`,
+  `SESSAO_TOLERANCIA_REUSO_SEGUNDOS` e `SESSAO_LIMITE_ABSOLUTO_HORAS`. Para ver a renovação e o aviso sem
+  esperar, e para rodar o e2e, use os valores de `.env.e2e.example` (token de 10 s, inatividade de 25 s,
+  tolerância de 5 s), os mesmos do CI. O Worker remove as sessões encerradas há mais de 7 dias.
 - No Compose a telemetria do navegador está ligada: o frontend aparece no Aspire Dashboard
   como `bank-frontend`, no mesmo trace das chamadas à `bank-api`. Em produção ela vem
   desligada (`VITE_TELEMETRIA_HABILITADA`).

@@ -34,9 +34,7 @@ test.describe('Recebíveis', () => {
     await page.goto('/cobrancas/recebiveis');
     await page.getByRole('button', { name: 'Antecipar Moedor' }).click();
 
-    const sessao = await page.evaluate(() => sessionStorage.getItem('bank.sessao'));
-    const outra = await context.newPage();
-    await outra.addInitScript((s) => sessionStorage.setItem('bank.sessao', s!), sessao);
+    const outra = await context.newPage(); // a sessão é compartilhada entre as abas (specs/016, FR-016)
     await outra.goto('/cobrancas/recebiveis');
     await outra.getByRole('button', { name: 'Antecipar Moedor' }).click();
     await outra.getByRole('button', { name: /^Receber R\$/ }).click();

@@ -8,6 +8,7 @@ import {
   semRolagemHorizontal,
   semViolacoesA11y,
   tokenPelaApi,
+  encerrarSessaoDoNavegador,
   transferirPelaApi,
   type Tipo,
 } from './apoio';
@@ -62,7 +63,7 @@ test.describe('Início', () => {
     await entrar(page, conta);
     await expect(page.getByRole('heading', { name: 'Olá, Lucas' })).toBeVisible();
 
-    const token = await page.evaluate(() => (JSON.parse(sessionStorage.getItem('bank.sessao')!) as { token: string }).token);
+    const token = await tokenPelaApi(page, conta);
     const carteira = (await (await page.request.get('/api/v1/carteiras/minha', { headers: { Authorization: `Bearer ${token}` } })).json()) as { saldo: number };
     await page.reload();
 
@@ -90,7 +91,7 @@ test.describe('Início — movimentações e navegação (spec 007, US5)', () =>
     await ultimas.getByRole('link', { name: 'Ver tudo' }).click();
     await expect(page).toHaveURL(/\/extrato$/);
 
-    await page.evaluate(() => sessionStorage.clear()); // troca de conta sem depender do menu de cada layout
+    await encerrarSessaoDoNavegador(page); // troca de conta sem depender do menu de cada layout
     await entrar(page, pj);
     const recebimentos = page.getByRole('region', { name: 'Últimos recebimentos' });
     await expect(recebimentos.getByText('Lucas Inicio')).toBeVisible();

@@ -56,6 +56,9 @@ ou `documento-ja-cadastrado`).
 
 ## `POST /api/v1/autenticacao/login`
 
+> **Versão 1.1.0 na [spec 016](../../016-sessao-refresh-token/contracts/autenticacao-sessao-api.md)**: o login
+> passa a emitir o cookie de renovação e os prazos da sessão, e surgem `renovar` e `sair` (mudança aditiva).
+
 **Acesso**: público.
 
 ```json
