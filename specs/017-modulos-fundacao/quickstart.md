@@ -18,10 +18,11 @@ Esperado: tudo verde, com a mesma contagem de testes anteriores mais os testes n
 dotnet test --project src/backend/tests/Bank.ArchitectureTests -c Release
 ```
 
-Esperado: verde. Para ver a regra falhar, acrescente temporariamente em `Bank.Domain` um uso de um
-tipo de `Bank.SharedKernel.Infrastructure` (por exemplo, `IdentificadorConverter<UsuarioId>`): a falha
-lista `MOD-07 … → Bank.SharedKernel.Infrastructure.Persistencia.IdentificadorConverter…`. Desfaça a
-alteração.
+Esperado: verde. Na arquitetura real, a maioria das violações nem compila (o núcleo antigo não referencia
+`Bank.SharedKernel.Infrastructure` no Domain/Application; tipos de módulo são `internal`). Para ver uma regra
+falhar, comente temporariamente um tipo em `tests/Bank.ArchitectureTests.Exemplos/Violacoes/Gama.cs` (por
+exemplo `UsaInfraComum`): `Exemplos_GeramExatamenteAsViolacoesPlantadas` falha listando
+`MOD-07 … → Bank.SharedKernel.Infrastructure.Exemplo.ConversorDeExemplo` como faltando. Desfaça a alteração.
 
 ## 3. Sem mudança de comportamento
 

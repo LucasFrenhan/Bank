@@ -16,7 +16,7 @@ de arquitetura.
 | `IIdentificador<TSelf>` | `Bank.SharedKernel` | `Bank.Domain.Comum` |
 | `EventoId` | `Bank.SharedKernel` | `Bank.Domain.Comum` |
 | `CalendarioBancario` | `Bank.SharedKernel.Calendario` | `Bank.Domain.Calendario` |
-| `Paginacao`, `PaginaDe<T>`, `Entradas`, `ErrosIdempotencia` | `Bank.SharedKernel.Aplicacao` | `Bank.Application.Comum` |
+| `Paginacao`, `PaginaDe<T>`, `Entradas`, `ErrosIdempotencia` (com a constante `CodigoDivergente`, usada também por `ErrosTransferencia`) | `Bank.SharedKernel.Aplicacao` | `Bank.Application.Comum` |
 
 Regras: depende só da BCL; nenhum tipo de contexto (FR-001, FR-002, MOD-05).
 

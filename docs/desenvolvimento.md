@@ -54,8 +54,9 @@ docker compose down -v
 
 Solução .NET 10 em `src/backend/Bank.slnx`, definida em
 [`specs/002-setup-api`](../specs/002-setup-api/spec.md): camadas `Bank.Api`,
-`Bank.Application`, `Bank.Domain` e `Bank.Infrastructure`, além dos projetos de teste
-unitário, de integração e de arquitetura.
+`Bank.Application`, `Bank.Domain` e `Bank.Infrastructure` (núcleo antigo), o Shared Kernel
+(`src/backend/src/SharedKernel/`, spec 017) e os projetos de teste unitário, de integração e de
+arquitetura.
 
 **Pré-requisito:** SDK do .NET 10 (`dotnet --version` na raiz deve mostrar `10.0.4xx`; o
 `global.json` fixa a versão).
@@ -87,6 +88,53 @@ dotnet run --project src/backend/src/Bank.Api
 - Outra porta pelo SDK: `dotnet run --project src/backend/src/Bank.Api --urls http://localhost:5090`.
 - Garantias de erro, endpoints e telemetria:
   [contrato da API base](../specs/002-setup-api/contracts/api-base.md).
+
+### Módulos e fronteiras
+
+O backend está migrando do monólito em camadas para o **monólito modular** (constituição v1.3.0,
+Princípio VIII; issue #58). A fundação está em
+[`specs/017-modulos-fundacao`](../specs/017-modulos-fundacao/spec.md). Enquanto a migração não termina,
+os projetos `Bank.Domain`, `Bank.Application` e `Bank.Infrastructure` formam o **núcleo antigo** e
+convivem com os módulos.
+
+- **Shared Kernel** (`src/backend/src/SharedKernel/`):
+  - `Bank.SharedKernel` não tem nenhuma dependência e contém:
+    - `Dinheiro`, `Erro`, `Resultado`, `IIdentificador` e `EventoId`;
+    - `CalendarioBancario` (namespace `.Calendario`);
+    - `Paginacao`, `PaginaDe`, `Entradas` e `ErrosIdempotencia` (namespace `.Aplicacao`).
+  - `Bank.SharedKernel.Infrastructure` contém só o `IdentificadorConverter` e só pode ser usado por
+    Infrastructure.
+  - Não entram no kernel:
+    - os identificadores de cada contexto (`UsuarioId`, `CarteiraId`…), que ficam no contexto dono;
+    - `IUnidadeDeTrabalho`, cujo resultado tem casos de cartão e cobrança.
+  - Para incluir algo no kernel, a justificativa vai no `plan.md` da spec que o inclui.
+- **Formato de módulo**: em `src/backend/src/Modulos/<Nome>/`, cada módulo tem dois projetos:
+  - `Bank.Modulos.<Nome>`, com Domain, Application, Infrastructure e Endpoints. Tudo é `internal`, exceto
+    a classe de registro `Modulo<Nome>`.
+  - `Bank.Modulos.<Nome>.Contratos`, público.
+
+  Para incluir um módulo, adicione uma linha no `Modulos/RegistroModulos.cs` da API e outra no do Worker,
+  e siga o [contrato do formato de módulo](../specs/017-modulos-fundacao/contracts/formato-modulo.md).
+  O módulo de exemplo `Alfa`, em `tests/Bank.ArchitectureTests.Exemplos`, mostra o formato completo.
+- **Regras de fronteira (MOD-01 a MOD-07)** ficam em `tests/Bank.ArchitectureTests/Modulos/` e valem
+  para todo namespace `Bank.Modulos.<Nome>`, sem configuração por módulo. As regras proíbem:
+  - módulo usar algo de outro fora do contrato público, ou a persistência de outro;
+  - módulo depender do núcleo antigo;
+  - módulo ferir as camadas do Princípio II;
+  - Shared Kernel depender de módulos ou frameworks;
+  - host ou núcleo antigo usar o interno de um módulo;
+  - domínio usar a infraestrutura comum.
+
+  A falha lista uma linha por violação, no formato `MOD-0X <descrição>: <Origem> → <Destino>`. A tabela
+  completa está no [contrato das regras](../specs/017-modulos-fundacao/contracts/regras-fronteira.md).
+- **Exceções conhecidas** (`tests/Bank.ArchitectureTests/Modulos/ExcecoesConhecidas.cs`):
+  - Cada entrada tem regra, origem, destino, motivo e issue no formato `#N`.
+  - A lista começa vazia e só diminui. Nenhum PR acrescenta entradas (constituição, Princípio VII):
+    quem extrai um módulo corrige no próprio PR as violações que aparecerem.
+  - Uma entrada sem violação correspondente quebra o build ("exceção obsoleta"). Remova a entrada no
+    mesmo PR que corrige a violação.
+  - Uma regra com falso positivo é corrigida na própria regra, com um exemplo em `Violacoes/`. A regra
+    nunca é desligada.
 
 ### Usuários, carteiras e autenticação
 

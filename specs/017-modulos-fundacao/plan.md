@@ -129,6 +129,7 @@ src/backend/
     │   ├── Modulos/FronteirasTests.cs           # arquitetura real sem violação fora da lista; lista válida
     │   ├── Modulos/DeteccaoRegrasTests.cs       # exemplos: violações esperadas por regra; mecanismo da lista
     │   ├── Modulos/RegistroModuloTests.cs       # Alfa registrado: serviço resolvido e endpoint mapeado
+    │   ├── Modulos/PontoDeRegistroTests.cs      # Modulo<Nome> é o único tipo público fora dos contratos
     │   ├── LayerDependencyTests.cs              # inalterado nas regras; carrega o kernel
     │   └── IdentificadoresTipadosTests.cs       # IIdentificador do kernel; inclui o assembly do kernel
     ├── Bank.ArchitectureTests.Exemplos/         # Alfa e Beta (conformes), Gama (violador), iscas, host de exemplo

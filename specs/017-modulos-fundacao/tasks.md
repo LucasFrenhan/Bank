@@ -147,11 +147,11 @@ registrados só pelo `RegistroModulos` de exemplo; API e Worker sobem com os `Re
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T032 [P] `docs/desenvolvimento.md`: seção "Módulos e fronteiras" — Shared Kernel (o que entra e o que não entra), formato de módulo e registro (link para `contracts/formato-modulo.md`), regras MOD-01…MOD-07, como ler uma falha, lista de exceções (onde fica, formato, por que nunca recebe entradas, como remover) (FR-020)
-- [ ] T033 Imagem e contrato: `docker compose up -d --build` com API e Worker healthy; `cd src/frontend && npm run api:tipos && git diff --exit-code src/api/schema.d.ts` sem diff (SC-002)
-- [ ] T034 e2e completo (`npx playwright test` em `src/frontend`) contra o Compose recém-construído, mesmo resultado da `main`
-- [ ] T035 Suíte completa do backend final e roteiro do [quickstart.md](quickstart.md) (seções 1–5); contagem = T001 + testes novos
-- [ ] T036 Revisar a spec, o plano e os contratos contra o implementado (Princípio I), conferir os tipos do kernel contra a tabela do research R1 e do data-model (FR-004) e marcar as tarefas concluídas
+- [X] T032 [P] `docs/desenvolvimento.md`: seção "Módulos e fronteiras" — Shared Kernel (o que entra e o que não entra), formato de módulo e registro (link para `contracts/formato-modulo.md`), regras MOD-01…MOD-07, como ler uma falha, lista de exceções (onde fica, formato, por que nunca recebe entradas, como remover) (FR-020)
+- [X] T033 Imagem e contrato: `docker compose up -d --build` com API e Worker healthy; `cd src/frontend && npm run api:tipos && git diff --exit-code src/api/schema.d.ts` sem diff (SC-002)
+- [X] T034 e2e completo (`npx playwright test` em `src/frontend`) contra o Compose recém-construído, mesmo resultado da `main`
+- [X] T035 Suíte completa do backend final e roteiro do [quickstart.md](quickstart.md) (seções 1–5); contagem = T001 + testes novos
+- [X] T036 Revisar a spec, o plano e os contratos contra o implementado (Princípio I), conferir os tipos do kernel contra a tabela do research R1 e do data-model (FR-004) e marcar as tarefas concluídas
 
 ---
 
