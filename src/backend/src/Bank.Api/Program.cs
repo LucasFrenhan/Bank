@@ -1,5 +1,6 @@
 using Bank.Api.Endpoints;
 using Bank.Api.ErrorHandling;
+using Bank.Api.Modulos;
 using Bank.Api.Observability;
 using Bank.Api.OpenApi;
 using Bank.Api.Seguranca;
@@ -19,7 +20,8 @@ builder.Services
     .AddTratamentoDeErros()
     .AddAutenticacaoJwt()
     .AddDocumentacaoApi()
-    .AddHealthEndpoints();
+    .AddHealthEndpoints()
+    .AddModulos(builder.Configuration);
 
 var app = builder.Build();
 
@@ -41,6 +43,7 @@ app.MapCobrancasEndpoints();
 app.MapFaturasEndpoints();
 app.MapRecebiveisEndpoints();
 app.MapTestEndpoints();
+app.MapModulos();
 
 await app.RunAsync();
 

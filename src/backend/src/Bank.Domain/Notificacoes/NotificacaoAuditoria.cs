@@ -1,6 +1,6 @@
 using System.Globalization;
-using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.Domain.Notificacoes;
 

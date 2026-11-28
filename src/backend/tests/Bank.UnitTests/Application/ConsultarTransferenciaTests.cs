@@ -37,7 +37,7 @@ public sealed class ConsultarTransferenciaTests : IDisposable
         _transferenciaId = resultado.Valor.Comprovante.TransferenciaId;
     }
 
-    private Task<Bank.Domain.Comum.Resultado<Comprovante>> Consultar(UsuarioId usuarioId, string? id) =>
+    private Task<Bank.SharedKernel.Resultado<Comprovante>> Consultar(UsuarioId usuarioId, string? id) =>
         _casoDeUso.ExecutarAsync(new ConsultarTransferenciaConsulta(usuarioId, id), CancellationToken.None);
 
     private int Consultas(string resultado) =>

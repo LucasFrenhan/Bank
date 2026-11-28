@@ -1,8 +1,8 @@
-using Bank.Domain.Calendario;
 using Bank.Domain.Carteiras;
 using Bank.Domain.Cobrancas;
-using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
+using Bank.SharedKernel.Calendario;
 
 namespace Bank.Domain.Recebiveis;
 

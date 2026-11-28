@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Shared Kernel, parte pura (constituição v1.3.0, Princípio VIII; specs/017-modulos-fundacao, research R1):
+    conceitos comuns a todos os contextos. Só a BCL: nenhum PackageReference nem ProjectReference.
+  -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Bank.UnitTests" />
+  </ItemGroup>
+</Project>

@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Text.Json;
 using Bank.Domain.Cobrancas;
-using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Infrastructure.Mensageria.Contratos;
+using Bank.SharedKernel;
 
 namespace Bank.Infrastructure.Mensageria;
 

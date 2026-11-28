@@ -1,6 +1,6 @@
-using Bank.Domain.Calendario;
+using Bank.SharedKernel.Calendario;
 
-namespace Bank.UnitTests.Domain;
+namespace Bank.UnitTests.SharedKernel;
 
 /// <summary>Dias úteis bancários (specs/014-cartao-credito-cobrancas, FR-022a; research R12).</summary>
 public class CalendarioBancarioTests

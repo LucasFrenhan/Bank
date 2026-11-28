@@ -1,4 +1,4 @@
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
 using Microsoft.Extensions.Options;
 
 namespace Bank.Application.Usuarios;

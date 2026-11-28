@@ -196,7 +196,7 @@ public class PagamentoFaturaTests(CartoesApiFactory factory) : IClassFixture<Car
         }
 
         await ComprarAsync(client, cartao, pj, valor);
-        var liberacao = Bank.Domain.Calendario.CalendarioBancario.ProximoDiaUtil(new DateOnly(ano, 3, 8));
+        var liberacao = Bank.SharedKernel.Calendario.CalendarioBancario.ProximoDiaUtil(new DateOnly(ano, 3, 8));
         await factory.ProcessarEmAsync(Brasilia(ano, 3, liberacao.Day, 0, 0, 0));
         Assert.Equal("Disponivel", (await FaturaAsync(client, cartao, $"{ano}-03")).GetProperty("situacao").GetString());
         return cartao;

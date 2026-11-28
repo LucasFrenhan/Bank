@@ -1,7 +1,7 @@
 using System.Globalization;
-using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.UnitTests.Domain;
 

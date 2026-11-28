@@ -1,4 +1,4 @@
-namespace Bank.Domain.Comum;
+namespace Bank.SharedKernel;
 
 /// <summary>Natureza de uma falha esperada; define o status HTTP na camada de transporte.</summary>
 public enum TipoErro

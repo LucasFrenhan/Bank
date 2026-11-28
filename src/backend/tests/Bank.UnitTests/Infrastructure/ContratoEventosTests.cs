@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Mensageria;
+using Bank.SharedKernel;
 
 namespace Bank.UnitTests.Infrastructure;
 

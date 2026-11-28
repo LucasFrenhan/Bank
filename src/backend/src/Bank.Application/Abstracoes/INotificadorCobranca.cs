@@ -1,6 +1,6 @@
 using Bank.Domain.Cobrancas;
-using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.Application.Abstracoes;
 

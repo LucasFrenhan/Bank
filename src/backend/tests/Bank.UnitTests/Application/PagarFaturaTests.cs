@@ -1,8 +1,8 @@
-using Bank.Application.Comum;
 using Bank.Application.Faturas;
 using Bank.Domain.Cartoes;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel.Aplicacao;
 
 namespace Bank.UnitTests.Application;
 
@@ -27,7 +27,7 @@ public sealed class PagarFaturaTests : IDisposable
 
     private void Dia(int dia) => _banco.Relogio.Agora = new DateTimeOffset(2026, 12, dia, 12, 0, 0, TimeSpan.Zero);
 
-    private Task<Bank.Domain.Comum.Resultado<DetalheFatura>> PagarAsync(Usuario pf, string competencia = "2026-12", Guid? chave = null) =>
+    private Task<Bank.SharedKernel.Resultado<DetalheFatura>> PagarAsync(Usuario pf, string competencia = "2026-12", Guid? chave = null) =>
         _banco.PagarFatura().ExecutarAsync(new PagarFaturaComando(pf.Id, competencia, (chave ?? Guid.NewGuid()).ToString()), Ct);
 
     [Fact]

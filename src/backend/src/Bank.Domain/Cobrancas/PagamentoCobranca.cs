@@ -1,7 +1,7 @@
 using Bank.Domain.Cartoes;
-using Bank.Domain.Comum;
 using Bank.Domain.Recebiveis;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.Domain.Cobrancas;
 

@@ -1,10 +1,10 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Notificacoes;
 using Bank.Application.Observabilidade;
-using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.UnitTests.Application;
 

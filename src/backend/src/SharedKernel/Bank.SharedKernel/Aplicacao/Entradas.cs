@@ -1,7 +1,6 @@
 using System.Globalization;
-using Bank.Domain.Comum;
 
-namespace Bank.Application.Comum;
+namespace Bank.SharedKernel.Aplicacao;
 
 /// <summary>Página pedida, já validada.</summary>
 public readonly record struct Paginacao(int Numero, int Tamanho)
@@ -86,7 +85,10 @@ public static class Entradas
 /// <summary>Erros comuns de idempotência dos casos de uso da specs/014-cartao-credito-cobrancas.</summary>
 public static class ErrosIdempotencia
 {
+    /// <summary>Código estável do contrato (specs/006-transferencias), comum a todos os comandos idempotentes.</summary>
+    public const string CodigoDivergente = "idempotencia-divergente";
+
     /// <summary>Mesmo código das transferências, com texto genérico.</summary>
     public static readonly Erro Divergente =
-        new(Domain.Transferencias.ErrosTransferencia.IdempotenciaDivergente.Codigo, "Esta chave de idempotência já foi usada com outros dados.", TipoErro.Conflito);
+        new(CodigoDivergente, "Esta chave de idempotência já foi usada com outros dados.", TipoErro.Conflito);
 }

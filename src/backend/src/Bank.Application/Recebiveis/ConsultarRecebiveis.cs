@@ -1,8 +1,8 @@
 using Bank.Application.Abstracoes;
-using Bank.Application.Comum;
-using Bank.Domain.Comum;
 using Bank.Domain.Recebiveis;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
+using Bank.SharedKernel.Aplicacao;
 
 namespace Bank.Application.Recebiveis;
 

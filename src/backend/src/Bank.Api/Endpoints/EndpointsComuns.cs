@@ -1,4 +1,4 @@
-using Bank.Application.Comum;
+using Bank.SharedKernel.Aplicacao;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 

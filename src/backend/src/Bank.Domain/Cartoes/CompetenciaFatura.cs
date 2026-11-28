@@ -1,6 +1,6 @@
 using System.Globalization;
-using Bank.Domain.Calendario;
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
+using Bank.SharedKernel.Calendario;
 
 namespace Bank.Domain.Cartoes;
 

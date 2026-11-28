@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 using Bank.Application.Abstracoes;
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;

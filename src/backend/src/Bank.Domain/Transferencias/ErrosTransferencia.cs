@@ -1,4 +1,5 @@
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
+using Bank.SharedKernel.Aplicacao;
 
 namespace Bank.Domain.Transferencias;
 
@@ -15,7 +16,7 @@ public static class ErrosTransferencia
         new("saldo-insuficiente", "O saldo disponível não cobre o valor da transferência.", TipoErro.RegraDeNegocio);
 
     public static readonly Erro IdempotenciaDivergente =
-        new("idempotencia-divergente", "Esta chave de idempotência já foi usada com outro destinatário ou valor.", TipoErro.Conflito);
+        new(ErrosIdempotencia.CodigoDivergente, "Esta chave de idempotência já foi usada com outro destinatário ou valor.", TipoErro.Conflito);
 
     /// <summary>
     /// Valor acima de um limite de transferência (specs/009-limite-transferencia, FR-011): um único

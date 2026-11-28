@@ -1,4 +1,4 @@
-namespace Bank.Domain.Comum;
+namespace Bank.SharedKernel;
 
 /// <summary>Identificador de um evento de integração (ex.: <c>transferencia.concluida</c>).</summary>
 public readonly record struct EventoId(Guid Valor) : IIdentificador<EventoId>

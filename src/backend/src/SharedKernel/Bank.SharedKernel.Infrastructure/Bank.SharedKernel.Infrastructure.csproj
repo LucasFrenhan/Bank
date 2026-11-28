@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Shared Kernel, infraestrutura comum (specs/017-modulos-fundacao, research R1): só as conversões de
+    persistência dos identificadores tipados. Usada apenas pela Infrastructure (do núcleo antigo e dos módulos).
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\Bank.SharedKernel\Bank.SharedKernel.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+  </ItemGroup>
+</Project>

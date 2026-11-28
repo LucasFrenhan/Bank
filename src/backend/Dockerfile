@@ -9,6 +9,8 @@ WORKDIR /source
 
 # Restore em camada própria para aproveitar o cache
 COPY Directory.Build.props Directory.Packages.props ./
+COPY src/SharedKernel/Bank.SharedKernel/Bank.SharedKernel.csproj src/SharedKernel/Bank.SharedKernel/
+COPY src/SharedKernel/Bank.SharedKernel.Infrastructure/Bank.SharedKernel.Infrastructure.csproj src/SharedKernel/Bank.SharedKernel.Infrastructure/
 COPY src/Bank.Domain/Bank.Domain.csproj src/Bank.Domain/
 COPY src/Bank.Application/Bank.Application.csproj src/Bank.Application/
 COPY src/Bank.Infrastructure/Bank.Infrastructure.csproj src/Bank.Infrastructure/
