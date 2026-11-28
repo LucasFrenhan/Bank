@@ -112,12 +112,12 @@ cada um dos três casos falha com a mensagem certa.
 
 ### Testes da US3
 
-- [ ] T024 [US3] Em `arq/Modulos/DeteccaoRegrasTests.cs`, casos do mecanismo com as violações de `Gama`: lista sem uma violação → "violação nova" (FR-018); lista com entrada a mais → "exceção obsoleta: remova da lista" (FR-019); entrada com `Motivo` vazio ou `Issue` fora do formato `#N` → "exceção incompleta" (SC-005); lista completa e válida → passa
+- [X] T024 [US3] Em `arq/Modulos/DeteccaoRegrasTests.cs`, casos do mecanismo com as violações de `Gama`: lista sem uma violação → "violação nova" (FR-018); lista com entrada a mais → "exceção obsoleta: remova da lista" (FR-019); entrada com `Motivo` vazio ou `Issue` fora do formato `#N` → "exceção incompleta" (SC-005); lista completa e válida → passa
 
 ### Implementação da US3
 
-- [ ] T025 [US3] `arq/Modulos/ExcecoesConhecidas.cs`: `ExcecaoConhecida(Regra, Origem, Destino, Motivo, Issue)`, `ExcecoesConhecidas.Todas = []` com comentário de exemplo de entrada, e `Comparar(violacoes, excecoes)` que devolve novas, obsoletas e incompletas por `(Regra, Origem, Destino)` (contracts/regras-fronteira.md, "Lista de exceções")
-- [ ] T026 [US3] `arq/Modulos/FronteirasTests.cs` passa a usar `Comparar(Avaliar(Real()), ExcecoesConhecidas.Todas)` e falha com as três listas descritas; teste próprio que valida o formato de todas as entradas de `ExcecoesConhecidas.Todas` (FR-016, FR-017)
+- [X] T025 [US3] `arq/Modulos/ExcecoesConhecidas.cs`: `ExcecaoConhecida(Regra, Origem, Destino, Motivo, Issue)`, `ExcecoesConhecidas.Todas = []` com comentário de exemplo de entrada, e `Comparar(violacoes, excecoes)` que devolve novas, obsoletas e incompletas por `(Regra, Origem, Destino)` (contracts/regras-fronteira.md, "Lista de exceções")
+- [X] T026 [US3] `arq/Modulos/FronteirasTests.cs` passa a usar `Comparar(Avaliar(Real()), ExcecoesConhecidas.Todas)` e falha com as três listas descritas; teste próprio que valida o formato de todas as entradas de `ExcecoesConhecidas.Todas` (FR-016, FR-017)
 
 **Checkpoint**: lista de exceções ativa; commit `test(arquitetura): ...`.
 

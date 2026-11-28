@@ -59,6 +59,65 @@ public class DeteccaoRegrasTests
     public void UmaDependencia_RecebeSoARegraMaisEspecifica() =>
         Assert.Single(Encontradas, v => v.Origem == $"{Gama}.Infrastructure.UsaAlfaDbContext");
 
+    // Mecanismo da lista de exceções (US3; FR-018, FR-019, SC-005) sobre as violações dos exemplos.
+
+    private static ExcecaoConhecida Excecao(Violacao v, string motivo = "exemplo", string issue = "#60") =>
+        new(v.Regra, v.Origem, v.Destino, motivo, issue);
+
+    [Fact]
+    public void ListaCompletaEValida_Passa()
+    {
+        var comparacao = ExcecoesConhecidas.Comparar(Encontradas, Esperadas.Select(v => Excecao(v)));
+
+        Assert.True(comparacao.Ok, comparacao.Descrever());
+    }
+
+    [Fact]
+    public void ViolacaoForaDaLista_ENova()
+    {
+        var comparacao = ExcecoesConhecidas.Comparar(Encontradas, Esperadas.Skip(1).Select(v => Excecao(v)));
+
+        Assert.False(comparacao.Ok);
+        Assert.Equal([Esperadas[0]], comparacao.Novas);
+        Assert.Contains("Violações novas", comparacao.Descrever(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ExcecaoSemViolacao_EObsoleta()
+    {
+        var sobra = new ExcecaoConhecida("MOD-03", $"{Alfa}.Application.ConsultarAlfa", "Bank.Domain.Exemplo.TipoDoNucleoAntigo", "corrigida", "#123");
+
+        var comparacao = ExcecoesConhecidas.Comparar(Encontradas, Esperadas.Select(v => Excecao(v)).Append(sobra));
+
+        Assert.False(comparacao.Ok);
+        Assert.Equal([sobra], comparacao.Obsoletas);
+        Assert.Contains("remova de ExcecoesConhecidas", comparacao.Descrever(), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("", "#60")]
+    [InlineData("motivo", "60")]
+    [InlineData("motivo", "#")]
+    [InlineData("motivo", "issue #60")]
+    public void ExcecaoSemMotivoOuIssue_EIncompleta(string motivo, string issue)
+    {
+        var excecoes = Esperadas.Skip(1).Select(v => Excecao(v)).Prepend(Excecao(Esperadas[0], motivo, issue));
+
+        var comparacao = ExcecoesConhecidas.Comparar(Encontradas, excecoes);
+
+        Assert.False(comparacao.Ok);
+        Assert.Single(comparacao.Incompletas);
+        Assert.Contains("Exceções incompletas", comparacao.Descrever(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ExcecaoComRegraInexistente_EIncompleta()
+    {
+        var comparacao = ExcecoesConhecidas.Comparar([], [new ExcecaoConhecida("MOD-99", "A", "B", "motivo", "#60")]);
+
+        Assert.Single(comparacao.Incompletas);
+    }
+
     [Fact]
     public void Descricao_IdentificaRegraOrigemEDestino()
     {
