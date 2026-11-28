@@ -132,14 +132,14 @@ registrados só pelo `RegistroModulos` de exemplo; API e Worker sobem com os `Re
 
 ### Testes da US4
 
-- [ ] T027 [P] [US4] `arq/Modulos/RegistroModuloTests.cs`: (a) `ServiceCollection` + `Bank.Exemplos.Host.RegistroModulos.AddModulos(config)` resolve `IAlfaConsultas`; (b) `WebApplication.CreateBuilder()` + `AddModulos` + `MapModulos` expõe o endpoint de `Alfa` em `EndpointDataSource`, sem servidor de teste; (c) `AddModuloAlfaWorker` registra o serviço hospedado de exemplo
-- [ ] T028 [P] [US4] Em `arq/Modulos/FronteirasTests.cs` e `DeteccaoRegrasTests.cs`, verificar a convenção do ponto de registro: em cada `Bank.Modulos.<Nome>` (fora de `.Contratos`) o único tipo público é `Bank.Modulos.<Nome>.Modulo<Nome>`; nos exemplos, os tipos públicos de `Gama` (que não tem ponto de registro) são apontados e `Alfa`/`Beta` passam (contracts/formato-modulo.md)
+- [X] T027 [P] [US4] `arq/Modulos/RegistroModuloTests.cs`: (a) `ServiceCollection` + `Bank.Exemplos.Host.RegistroModulos.AddModulos(config)` resolve `IAlfaConsultas`; (b) `WebApplication.CreateBuilder()` + `AddModulos` + `MapModulos` expõe o endpoint de `Alfa` em `EndpointDataSource`, sem servidor de teste; (c) `AddModuloAlfaWorker` registra o serviço hospedado de exemplo
+- [X] T028 [P] [US4] Em `arq/Modulos/PontoDeRegistroTests.cs`, verificar a convenção do ponto de registro: em cada `Bank.Modulos.<Nome>` (fora de `.Contratos`) o único tipo público é `Bank.Modulos.<Nome>.Modulo<Nome>`; nos exemplos, os tipos públicos de `Gama` (que não tem ponto de registro) são apontados e `Alfa`/`Beta` passam (contracts/formato-modulo.md)
 
 ### Implementação da US4
 
-- [ ] T029 [US4] `ex/Alfa/ModuloAlfa.cs` (`AddModuloAlfa`, `MapModuloAlfa`, `AddModuloAlfaWorker`, este com um serviço hospedado `internal` de exemplo) e `ex/Host/RegistroModulos.cs` (`Bank.Exemplos.Host`) chamando os métodos de `Alfa`; T027 e T028 verdes
-- [ ] T030 [P] [US4] `api/Modulos/RegistroModulos.cs` com `AddModulos(this IServiceCollection, IConfiguration)` e `MapModulos(this IEndpointRouteBuilder)` vazios e comentados (como incluir um módulo); `api/Program.cs` chama `AddModulos` depois de `AddInfrastructure(...)` e `MapModulos()` depois de `MapRecebiveisEndpoints()`/`MapTestEndpoints()`, sem mudar a ordem existente (FR-006, FR-007)
-- [ ] T031 [P] [US4] `wrk/Modulos/RegistroModulos.cs` com `AddModulos(this IServiceCollection, IConfiguration)` vazio e comentado; `wrk/Program.cs` chama `AddModulos` depois do registro atual (FR-006, FR-007)
+- [X] T029 [US4] `ex/Alfa/ModuloAlfa.cs` (`AddModuloAlfa`, `MapModuloAlfa`, `AddModuloAlfaWorker`, este com um serviço hospedado `internal` de exemplo) e `ex/Host/RegistroModulos.cs` (`Bank.Exemplos.Host`) chamando os métodos de `Alfa`; T027 e T028 verdes
+- [X] T030 [P] [US4] `api/Modulos/RegistroModulos.cs` com `AddModulos(this IServiceCollection, IConfiguration)` e `MapModulos(this IEndpointRouteBuilder)` vazios e comentados (como incluir um módulo); `api/Program.cs` chama `AddModulos` depois de `AddInfrastructure(...)` e `MapModulos()` depois de `MapRecebiveisEndpoints()`/`MapTestEndpoints()`, sem mudar a ordem existente (FR-006, FR-007)
+- [X] T031 [P] [US4] `wrk/Modulos/RegistroModulos.cs` com `AddModulos(this IServiceCollection, IConfiguration)` vazio e comentado; `wrk/Program.cs` chama `AddModulos` depois do registro atual (FR-006, FR-007)
 
 **Checkpoint**: formato e registro prontos; commit `feat(modulos): ...`.
 

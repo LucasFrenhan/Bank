@@ -1,6 +1,7 @@
 using Bank.Application;
 using Bank.Application.Transferencias;
 using Bank.Infrastructure;
+using Bank.Worker.Modulos;
 using Bank.Worker.Observability;
 using Bank.Worker.Saude;
 
@@ -26,7 +27,8 @@ public static class ProgramaWorker
             .AddPersistencia(builder.Configuration)
             .AddMensageria()
             .AddProcessamentoDiario()
-            .AddLimpezaSessoes();
+            .AddLimpezaSessoes()
+            .AddModulos(builder.Configuration);
 
         var app = builder.Build();
 
