@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Módulos de exemplo das regras de fronteira (specs/017-modulos-fundacao, research R5): Alfa e Beta
+    seguem o formato de módulo; Violacoes/ tem um tipo por regra violada e iscas com nomes do núcleo
+    antigo, do Shared Kernel e dos hosts. Referenciado só por Bank.ArchitectureTests e nunca carregado
+    na arquitetura real.
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+  </ItemGroup>
+</Project>

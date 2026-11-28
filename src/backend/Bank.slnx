@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Bank.ArchitectureTests/Bank.ArchitectureTests.csproj" />
+    <Project Path="tests/Bank.ArchitectureTests.Exemplos/Bank.ArchitectureTests.Exemplos.csproj" />
     <Project Path="tests/Bank.IntegrationTests/Bank.IntegrationTests.csproj" />
     <Project Path="tests/Bank.UnitTests/Bank.UnitTests.csproj" />
   </Folder>
