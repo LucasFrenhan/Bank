@@ -1,6 +1,6 @@
 using System.Globalization;
 using Bank.Application.Cartoes;
-using Bank.Application.Comum;
+using Bank.SharedKernel.Aplicacao;
 
 namespace Bank.UnitTests.Application;
 

@@ -1,9 +1,9 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Transferencias;
 using Bank.Domain.Carteiras;
-using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.UnitTests.Application;
 

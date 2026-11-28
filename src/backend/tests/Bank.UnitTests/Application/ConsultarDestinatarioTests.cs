@@ -1,8 +1,8 @@
 using Bank.Application.Observabilidade;
 using Bank.Application.Transferencias;
-using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.UnitTests.Application;
 

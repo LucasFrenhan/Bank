@@ -1,5 +1,5 @@
 using System.Globalization;
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
 
 namespace Bank.Domain.Cartoes;
 

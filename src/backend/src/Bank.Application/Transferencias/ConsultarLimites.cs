@@ -1,7 +1,7 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Observabilidade;
-using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 using Microsoft.Extensions.Options;
 
 namespace Bank.Application.Transferencias;

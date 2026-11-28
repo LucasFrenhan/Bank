@@ -1,8 +1,8 @@
-using Bank.Domain.Cartoes;
 using Bank.Domain.Carteiras;
-using Bank.Domain.Comum;
+using Bank.Domain.Cartoes;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.Domain.Cobrancas;
 

@@ -1,8 +1,8 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Usuarios;
 using Bank.Domain.Bancos;
-using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 

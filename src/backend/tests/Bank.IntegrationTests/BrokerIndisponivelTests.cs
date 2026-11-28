@@ -1,5 +1,5 @@
 using System.Net;
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 using static Bank.IntegrationTests.ApiTransferencias;

@@ -15,7 +15,11 @@ Mapeamento de namespaces: `Bank.Domain.Comum` → `Bank.SharedKernel`;
 `Bank.Domain.Calendario` → `Bank.SharedKernel.Calendario`; `Bank.Application.Comum` →
 `Bank.SharedKernel.Aplicacao`; `Bank.Infrastructure.Persistencia.IdentificadorConverter` →
 `Bank.SharedKernel.Infrastructure.Persistencia`. Os arquivos são movidos com `git mv` (histórico
-preservado) e os nomes dos tipos não mudam.
+preservado) e os nomes dos tipos não mudam. `ErrosIdempotencia` referenciava
+`ErrosTransferencia.IdempotenciaDivergente.Codigo` (dependência de contexto); o código passa a ser a constante
+`ErrosIdempotencia.CodigoDivergente` (`"idempotencia-divergente"`, mesmo valor) no kernel, usada também por
+`ErrosTransferencia`. Os testes do kernel acompanham os tipos (`CalendarioBancarioTests` em
+`Bank.UnitTests/SharedKernel/`).
 
 `Bank.Domain` passa a referenciar `Bank.SharedKernel`; `Bank.Infrastructure` passa a referenciar
 também `Bank.SharedKernel.Infrastructure`. As demais referências chegam transitivamente.

@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 
-namespace Bank.Domain.Calendario;
+namespace Bank.SharedKernel.Calendario;
 
 /// <summary>
 /// Dias úteis bancários (specs/014-cartao-credito-cobrancas, FR-022a; research R12): segunda a sexta,

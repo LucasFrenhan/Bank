@@ -1,4 +1,4 @@
-namespace Bank.Domain.Comum;
+namespace Bank.SharedKernel;
 
 /// <summary>
 /// Identificador tipado sobre um <see cref="Guid"/> (issue #43): impede trocar, por exemplo, um

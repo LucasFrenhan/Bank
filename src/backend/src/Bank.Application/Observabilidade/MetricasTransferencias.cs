@@ -1,6 +1,6 @@
 using System.Diagnostics.Metrics;
-using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 
 namespace Bank.Application.Observabilidade;
 

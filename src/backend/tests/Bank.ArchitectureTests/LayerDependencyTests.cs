@@ -21,7 +21,9 @@ public class LayerDependencyTests
             typeof(Bank.Application.DependencyInjection).Assembly,
             typeof(Bank.Infrastructure.DependencyInjection).Assembly,
             typeof(HealthEndpoints).Assembly,
-            typeof(Bank.Worker.WorkerAssemblyMarker).Assembly)
+            typeof(Bank.Worker.WorkerAssemblyMarker).Assembly,
+            typeof(Bank.SharedKernel.Dinheiro).Assembly,
+            typeof(Bank.SharedKernel.Infrastructure.Persistencia.IdentificadorConverter<>).Assembly)
         .Build();
 
     private const string AspNetCore = @"^Microsoft\.AspNetCore(\..*)?$";

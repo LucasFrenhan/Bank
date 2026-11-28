@@ -1,6 +1,6 @@
 using Bank.Application.Abstracoes;
-using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
+using Bank.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bank.Infrastructure.Persistencia;

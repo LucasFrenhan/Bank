@@ -1,9 +1,9 @@
 using System.Collections.Concurrent;
 using Bank.Application.Abstracoes;
-using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Persistencia;
+using Bank.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;

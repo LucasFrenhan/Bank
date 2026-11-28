@@ -1,5 +1,5 @@
-using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
+using Bank.SharedKernel;
 
 namespace Bank.Application.Abstracoes;
 

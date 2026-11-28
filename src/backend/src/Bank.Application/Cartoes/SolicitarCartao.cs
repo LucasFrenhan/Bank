@@ -1,10 +1,10 @@
 using Bank.Application.Abstracoes;
-using Bank.Application.Comum;
 using Bank.Application.Observabilidade;
 using Bank.Application.Transferencias;
 using Bank.Domain.Cartoes;
-using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
+using Bank.SharedKernel.Aplicacao;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

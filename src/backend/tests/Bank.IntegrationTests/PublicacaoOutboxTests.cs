@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Net;
-using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using static Bank.IntegrationTests.ApiTransferencias;
 

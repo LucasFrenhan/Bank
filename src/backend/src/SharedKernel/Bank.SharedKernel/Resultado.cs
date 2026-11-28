@@ -1,4 +1,4 @@
-namespace Bank.Domain.Comum;
+namespace Bank.SharedKernel;
 
 /// <summary>
 /// Resultado tipado de uma operação: sucesso ou lista de erros esperados. Exceções ficam

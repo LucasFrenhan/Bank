@@ -1,6 +1,6 @@
 using Bank.Api.ErrorHandling;
-using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
+using Bank.SharedKernel;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Bank.UnitTests.ErrorHandling;

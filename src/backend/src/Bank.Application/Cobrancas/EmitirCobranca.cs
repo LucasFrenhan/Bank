@@ -1,10 +1,10 @@
 using Bank.Application.Abstracoes;
-using Bank.Application.Comum;
 using Bank.Application.Observabilidade;
 using Bank.Domain.Cobrancas;
-using Bank.Domain.Comum;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel;
+using Bank.SharedKernel.Aplicacao;
 using Microsoft.Extensions.Logging;
 
 namespace Bank.Application.Cobrancas;

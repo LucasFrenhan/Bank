@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using Bank.Application.Abstracoes;
-using Bank.Application.Comum;
 using Bank.Application.Observabilidade;
 using Bank.Application.Transferencias;
-using Bank.Domain.Calendario;
 using Bank.Domain.Cartoes;
 using Bank.Domain.Recebiveis;
 using Bank.Domain.Transferencias;
+using Bank.SharedKernel.Aplicacao;
+using Bank.SharedKernel.Calendario;
 using Microsoft.Extensions.Logging;
 
 namespace Bank.Application.Processamento;

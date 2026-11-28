@@ -2,9 +2,9 @@ using System.Globalization;
 using System.Text.Json;
 using Bank.Application.Abstracoes;
 using Bank.Domain.Cobrancas;
-using Bank.Domain.Comum;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Mensageria.Contratos;
+using Bank.SharedKernel;
 using RabbitMQ.Client;
 
 namespace Bank.Infrastructure.Mensageria;

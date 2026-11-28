@@ -1,4 +1,4 @@
-namespace Bank.Domain.Comum;
+namespace Bank.SharedKernel;
 
 /// <summary>Regras de valores monetários (constituição, Princípio IV).</summary>
 public static class Dinheiro

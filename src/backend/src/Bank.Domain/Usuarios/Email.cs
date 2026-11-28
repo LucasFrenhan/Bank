@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
 
 namespace Bank.Domain.Usuarios;
 

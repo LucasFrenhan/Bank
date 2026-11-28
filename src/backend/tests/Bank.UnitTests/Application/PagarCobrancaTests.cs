@@ -1,9 +1,9 @@
 using Bank.Application.Abstracoes;
 using Bank.Application.Cobrancas;
-using Bank.Application.Comum;
 using Bank.Domain.Cartoes;
 using Bank.Domain.Cobrancas;
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
+using Bank.SharedKernel.Aplicacao;
 
 namespace Bank.UnitTests.Application;
 

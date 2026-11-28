@@ -6,6 +6,10 @@
     <Project Path="src/Bank.Infrastructure/Bank.Infrastructure.csproj" />
     <Project Path="src/Bank.Worker/Bank.Worker.csproj" />
   </Folder>
+  <Folder Name="/src/SharedKernel/">
+    <Project Path="src/SharedKernel/Bank.SharedKernel/Bank.SharedKernel.csproj" />
+    <Project Path="src/SharedKernel/Bank.SharedKernel.Infrastructure/Bank.SharedKernel.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Bank.ArchitectureTests/Bank.ArchitectureTests.csproj" />
     <Project Path="tests/Bank.IntegrationTests/Bank.IntegrationTests.csproj" />

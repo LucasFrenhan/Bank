@@ -1,5 +1,5 @@
 using System.Net;
-using Bank.Domain.Calendario;
+using Bank.SharedKernel.Calendario;
 using Microsoft.EntityFrameworkCore;
 using static Bank.IntegrationTests.ApiCartoes;
 using static Bank.IntegrationTests.ApiTransferencias;

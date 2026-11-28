@@ -1,8 +1,8 @@
 using System.Reflection;
 using Bank.Application;
 using Bank.Domain;
-using Bank.Domain.Comum;
 using Bank.Infrastructure.Persistencia;
+using Bank.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bank.ArchitectureTests;
@@ -19,7 +19,9 @@ public class IdentificadoresTipadosTests
     private const BindingFlags Propriedades = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
     private const BindingFlags MembrosPublicos = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly;
 
+    // Identificadores do Domain e do Shared Kernel (EventoId; specs/017-modulos-fundacao, R1).
     private static readonly Type[] Identificadores = typeof(DomainAssemblyMarker).Assembly.GetTypes()
+        .Concat(typeof(IIdentificador<>).Assembly.GetTypes())
         .Where(ImplementaIdentificador)
         .ToArray();
 

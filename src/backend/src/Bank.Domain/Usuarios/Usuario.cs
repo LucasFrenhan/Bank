@@ -1,6 +1,6 @@
 using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
-using Bank.Domain.Comum;
+using Bank.SharedKernel;
 
 namespace Bank.Domain.Usuarios;
 

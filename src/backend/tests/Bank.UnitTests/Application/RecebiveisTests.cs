@@ -1,8 +1,8 @@
-using Bank.Application.Comum;
 using Bank.Application.Recebiveis;
 using Bank.Domain.Recebiveis;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
+using Bank.SharedKernel.Aplicacao;
 
 namespace Bank.UnitTests.Application;
 
@@ -22,7 +22,7 @@ public sealed class RecebiveisTests : IDisposable
         return (pj, _banco.Comprar(cartao, pj, valor).Recebivel);
     }
 
-    private Task<Bank.Domain.Comum.Resultado<Bank.Application.Abstracoes.DadosRecebivel>> AnteciparAsync(Usuario pj, RecebivelId id, Guid? chave = null) =>
+    private Task<Bank.SharedKernel.Resultado<Bank.Application.Abstracoes.DadosRecebivel>> AnteciparAsync(Usuario pj, RecebivelId id, Guid? chave = null) =>
         _banco.AnteciparRecebivel().ExecutarAsync(new AnteciparRecebivelComando(pj.Id, id.ToString(), (chave ?? Guid.NewGuid()).ToString()), Ct);
 
     [Fact]

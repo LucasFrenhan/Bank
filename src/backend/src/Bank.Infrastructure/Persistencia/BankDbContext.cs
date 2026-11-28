@@ -2,13 +2,14 @@ using Bank.Domain.Bancos;
 using Bank.Domain.Carteiras;
 using Bank.Domain.Cartoes;
 using Bank.Domain.Cobrancas;
-using Bank.Domain.Comum;
 using Bank.Domain.Notificacoes;
 using Bank.Domain.Recebiveis;
 using Bank.Domain.Sessoes;
 using Bank.Domain.Transferencias;
 using Bank.Domain.Usuarios;
 using Bank.Infrastructure.Mensageria;
+using Bank.SharedKernel;
+using Bank.SharedKernel.Infrastructure.Persistencia;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bank.Infrastructure.Persistencia;
